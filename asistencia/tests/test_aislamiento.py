@@ -4,8 +4,12 @@ Cada docente ve y modifica solo sus grupos. Un grupo ajeno responde 404, no
 403, en toda vista que reciba un `grupo_id` o un `sesion_id`.
 """
 
+from datetime import date
+
 from django.test import TestCase
 from django.urls import reverse
+
+from asistencia.models import Alumno, Inscripcion
 
 from .utils import PASSWORD, crear_administrador, crear_docente, crear_grupo
 
@@ -15,6 +19,7 @@ VISTAS_DE_GRUPO = [
     ('grupo_editar', ['get', 'post']),
     ('grupo_eliminar', ['get', 'post']),
     ('alumnos_importar', ['get', 'post']),
+    ('alumno_agregar', ['get', 'post']),
 ]
 
 # Vistas que no reciben un recurso y son solo para docentes.
@@ -52,6 +57,20 @@ class AislamientoPorDocenteTests(TestCase):
 
         self.grupo.refresh_from_db()
         self.assertEqual(self.grupo.clave, 'ADM-101')
+
+    def test_no_se_da_de_baja_a_un_alumno_de_un_grupo_ajeno(self):
+        alumno = Alumno.objects.create(matricula='1200001', nombre='Ana García')
+        Inscripcion.objects.create(grupo=self.grupo, alumno=alumno, fecha_alta=date(2026, 10, 12))
+        propio = crear_grupo(self.intruso, clave='PROPIO-1')
+        self.entrar_como('intruso@asistencia.test')
+
+        # Por el grupo ajeno, y también usando un grupo propio con el alumno ajeno.
+        for grupo in (self.grupo, propio):
+            for metodo in ('get', 'post'):
+                with self.subTest(grupo=grupo.clave, metodo=metodo):
+                    url = reverse('alumno_baja', args=[grupo.pk, alumno.pk])
+                    self.assertEqual(getattr(self.client, metodo)(url).status_code, 404)
+        self.assertEqual(self.grupo.inscripciones.count(), 1)
 
     def test_el_dueno_si_entra_a_sus_vistas(self):
         self.entrar_como('docente@asistencia.test')
