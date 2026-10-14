@@ -1,0 +1,13 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Página no encontrada · Control de asistencia{% endblock %}
+
+{% block contenido %}
+{# Mismo texto para "no existe" y "es de otro docente": no revela cuál de los dos es (RNF-04). #}
+<div class="text-center py-5">
+  <p class="display-4 fw-bold text-secondary mb-2">404</p>
+  <h1 class="h4">No encontramos esa página</h1>
+  <p class="text-secondary">La dirección no existe o no tienes acceso a ella.</p>
+  <a class="btn btn-primary" href="{% url 'inicio' %}">Ir al inicio</a>
+</div>
+{% endblock %}
