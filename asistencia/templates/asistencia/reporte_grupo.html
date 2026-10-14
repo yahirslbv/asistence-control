@@ -1,0 +1,114 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Reporte · {{ grupo.clave }} · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'reportes' %}?periodo={{ grupo.periodo|urlencode }}">Reportes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Reporte</li>
+  </ol>
+</nav>
+
+<div class="mb-3">
+  <h1 class="h3 mb-1">{{ tabla.titulo }}</h1>
+  <p class="text-secondary mb-0">{{ tabla.subtitulo }}</p>
+</div>
+
+<div class="row g-2 mb-3 text-center">
+  <div class="col-6 col-md">
+    <div class="card shadow-sm h-100"><div class="card-body py-2">
+      <div class="small text-secondary">Porcentaje del grupo</div>
+      <div class="fs-4 fw-semibold">{{ reporte.porcentaje_texto }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card shadow-sm h-100"><div class="card-body py-2">
+      <div class="small text-secondary">Alumnos</div>
+      <div class="fs-4 fw-semibold">{{ reporte.filas|length }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card shadow-sm h-100"><div class="card-body py-2">
+      <div class="small text-secondary">Sesiones realizadas</div>
+      <div class="fs-4 fw-semibold">{{ reporte.sesiones_realizadas }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card shadow-sm h-100 {% if reporte.alumnos_bajo_el_minimo %}border-danger{% endif %}"><div class="card-body py-2">
+      <div class="small text-secondary">Bajo el mínimo ({{ reporte.minimo }} %)</div>
+      <div class="fs-4 fw-semibold {% if reporte.alumnos_bajo_el_minimo %}text-danger{% endif %}">{{ reporte.alumnos_bajo_el_minimo }}</div>
+    </div></div>
+  </div>
+</div>
+
+{% if reporte.aviso %}
+  <div class="alert alert-warning" role="alert" id="aviso-pendientes">
+    {{ reporte.aviso }}
+    <a class="alert-link" href="{% url 'sesiones' grupo.pk %}">Ver las sesiones</a>
+  </div>
+{% endif %}
+
+{% if reporte.filas %}
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0" id="tabla-reporte">
+        <thead>
+          <tr>
+            <th class="d-none d-md-table-cell">Matrícula</th>
+            <th>Nombre</th>
+            <th class="d-none d-sm-table-cell text-end">Registros</th>
+            <th class="d-none d-md-table-cell text-end">Presentes</th>
+            <th class="d-none d-md-table-cell text-end">Retardos</th>
+            <th class="d-none d-md-table-cell text-end">Ausentes</th>
+            <th class="d-none d-md-table-cell text-end">Justificados</th>
+            <th class="d-none d-sm-table-cell text-end">Asistencias</th>
+            <th class="text-end">Porcentaje</th>
+            <th>Situación</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in reporte.filas %}
+            <tr {% if fila.bajo_el_minimo %}class="table-danger"{% endif %}>
+              <td class="d-none d-md-table-cell">{{ fila.alumno.matricula }}</td>
+              <td><a href="{% url 'reporte_alumno' grupo.pk fila.alumno.pk %}">{{ fila.alumno.nombre }}</a></td>
+              <td class="d-none d-sm-table-cell text-end">{{ fila.registros }}</td>
+              <td class="d-none d-md-table-cell text-end">{{ fila.presentes }}</td>
+              <td class="d-none d-md-table-cell text-end">{{ fila.retardos }}</td>
+              <td class="d-none d-md-table-cell text-end">{{ fila.ausentes }}</td>
+              <td class="d-none d-md-table-cell text-end">{{ fila.justificados }}</td>
+              <td class="d-none d-sm-table-cell text-end">{{ fila.asistencias }}</td>
+              <td class="text-end {% if fila.bajo_el_minimo %}fw-bold{% endif %}">{{ fila.porcentaje_texto }}</td>
+              <td>{% if fila.bajo_el_minimo %}<span class="badge text-bg-danger">{{ fila.situacion }}</span>{% elif fila.registros %}<span class="text-success">{{ fila.situacion }}</span>{% else %}{{ fila.situacion }}{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="table-group-divider fw-semibold">
+          <tr>
+            <td class="d-none d-md-table-cell"></td>
+            <td>Grupo (ponderado)</td>
+            <td class="d-none d-sm-table-cell text-end">{{ reporte.registros }}</td>
+            <td class="d-none d-md-table-cell text-end">{{ reporte.presentes }}</td>
+            <td class="d-none d-md-table-cell text-end">{{ reporte.retardos }}</td>
+            <td class="d-none d-md-table-cell text-end">{{ reporte.ausentes }}</td>
+            <td class="d-none d-md-table-cell text-end">{{ reporte.justificados }}</td>
+            <td class="d-none d-sm-table-cell text-end">{{ reporte.asistencias }}</td>
+            <td class="text-end">{{ reporte.porcentaje_texto }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <ul class="small text-secondary mt-3 ps-3">
+    {% for nota in tabla.notas %}<li>{{ nota }}</li>{% endfor %}
+  </ul>
+{% else %}
+  <div class="alert alert-info" role="alert">
+    El grupo no tiene alumnos inscritos.
+    <a href="{% url 'grupo_detalle' grupo.pk %}">Agrégalos desde el grupo.</a>
+  </div>
+{% endif %}
+{% endblock %}

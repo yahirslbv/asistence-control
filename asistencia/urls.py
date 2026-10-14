@@ -29,4 +29,9 @@ urlpatterns = [
     # Pase de lista (RF-08, RF-09, RF-11)
     path('pase-de-lista/', views.PaseDeListaInicioView.as_view(), name='pase_de_lista_inicio'),
     path('sesiones/<int:sesion_id>/asistencia/', views.PaseDeListaView.as_view(), name='pase_de_lista'),
+
+    # Reportes (RF-13, RF-14)
+    path('reportes/', views.ReportesInicioView.as_view(), name='reportes'),
+    path('grupos/<int:grupo_id>/reporte/', views.ReporteGrupoView.as_view(), name='reporte_grupo'),
+    path('grupos/<int:grupo_id>/reporte/alumnos/<int:alumno_id>/', views.ReporteAlumnoView.as_view(), name='reporte_alumno'),
 ]

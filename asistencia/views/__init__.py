@@ -4,6 +4,7 @@ from .grupos import (
     BajaAlumnoView, GrupoCrearView, GrupoDetalleView, GrupoEditarView,
     GrupoEliminarView, GrupoListView, ImportarAlumnosView, InscribirAlumnoView,
 )
+from .reportes import ReporteAlumnoView, ReporteGrupoView, ReportesInicioView
 from .sesiones import (
     GenerarSesionesView, SesionCancelarView, SesionEditarView, SesionListView,
 )
@@ -16,4 +17,5 @@ __all__ = [
     'GenerarSesionesView', 'SesionCancelarView', 'SesionEditarView',
     'SesionListView',
     'PaseDeListaInicioView', 'PaseDeListaView',
+    'ReporteAlumnoView', 'ReporteGrupoView', 'ReportesInicioView',
 ]

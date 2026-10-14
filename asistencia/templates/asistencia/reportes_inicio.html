@@ -1,0 +1,68 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Reportes · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Reportes</h1>
+
+{% if not periodos %}
+  <div class="alert alert-info" role="alert">
+    Todavía no tienes grupos. Crea uno desde <a href="{% url 'grupos' %}">Grupos</a> para ver sus reportes.
+  </div>
+{% else %}
+  <form method="get" class="card card-body shadow-sm mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-8 col-sm-4 col-md-3">
+        <label class="form-label mb-1" for="periodo">Periodo</label>
+        <select class="form-select" id="periodo" name="periodo">
+          {% for p in periodos %}
+            <option value="{{ p }}" {% if p == periodo %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-4 col-sm-auto">
+        <button type="submit" class="btn btn-outline-primary w-100">Ver</button>
+      </div>
+    </div>
+  </form>
+
+  <p class="text-secondary">
+    Mínimo de asistencia: <strong>{{ minimo }} %</strong>. Solo cuentan las sesiones realizadas y los alumnos inscritos actualmente.
+  </p>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0" id="tabla-periodo">
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th class="d-none d-sm-table-cell">Materia</th>
+            <th class="text-end">Alumnos</th>
+            <th class="text-end">Porcentaje del grupo</th>
+            <th class="text-end">Bajo el mínimo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for resumen in reporte.resumenes %}
+            <tr>
+              <td class="fw-semibold">{{ resumen.grupo.clave }}</td>
+              <td class="d-none d-sm-table-cell">{{ resumen.grupo.materia }}</td>
+              <td class="text-end">{{ resumen.alumnos }}</td>
+              <td class="text-end">{{ resumen.porcentaje_texto }}</td>
+              <td class="text-end">
+                {% if resumen.alumnos_bajo_el_minimo %}
+                  <span class="badge text-bg-danger">{{ resumen.alumnos_bajo_el_minimo }}</span>
+                {% else %}0{% endif %}
+              </td>
+              <td class="text-end">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'reporte_grupo' resumen.grupo.pk %}">Reporte</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

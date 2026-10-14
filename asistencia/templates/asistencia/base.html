@@ -27,10 +27,9 @@
         {% if user.rol == user.Rol.ADMINISTRADOR %}
           <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Usuarios</a></li>
         {% else %}
-          {# Reportes se habilita al terminar la fase G. #}
           <li class="nav-item"><a class="nav-link" href="{% url 'grupos' %}">Grupos</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'pase_de_lista_inicio' %}">Pase de lista</a></li>
-          <li class="nav-item"><span class="nav-link disabled">Reportes</span></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'reportes' %}">Reportes</a></li>
         {% endif %}
       </ul>
       <form method="post" action="{% url 'logout' %}" class="d-flex align-items-center gap-2">
