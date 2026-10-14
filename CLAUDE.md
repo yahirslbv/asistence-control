@@ -155,7 +155,7 @@ Reglas de integridad ya definidas:
 Decisiones de implementación que puedes tomar sin preguntar:
 - **CSV (RF-04):** columnas `matricula,nombre,correo` (correo opcional), leído con `utf-8-sig`. Crea o reutiliza el alumno por matrícula y crea la inscripción. Informa los errores por fila sin abortar todo el archivo.
 - **Generar sesiones (RF-06):** `Grupo` no guarda horario. Usa un formulario con días de la semana, hora de inicio y fin, y fechas de inicio y fin del periodo, y crea las `Sesion` con `bulk_create(ignore_conflicts=True)`.
-- **Aviso de sesión sin registrar (RF-10):** sesiones pasadas en estado `programada`, o con menos registros que alumnos inscritos, se muestran como alerta en la página de grupos.
+- **Aviso de sesión sin registrar (RF-10):** una sesión pasada (fecha anterior a hoy, o de hoy con la hora de fin ya transcurrida, en America/Tijuana) es pendiente si está `programada` sin registros, o `realizada` con inscritos actuales, con `fecha_alta` igual o anterior a la fecha de la sesión, sin registro en ella. Las canceladas no cuentan. Se muestran como alerta en la página de grupos y en la del grupo, con una sola consulta por página.
 - **Alta de usuarios (RF-16):** si falta tiempo, cubrirla primero con el admin de Django.
 
 ## 11. Plan por fases (sigue el cronograma y el Trello)
@@ -196,11 +196,18 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 
 - [x] D · Entorno y autenticación
 - [x] E · Grupos y sesiones
-- [ ] F · Asistencia
+- [x] F · Asistencia (RF-08 a RF-11; RF-12, el justificante, queda pendiente de aprobación)
 - [ ] G · Reportes
 - [ ] I · Manuales
 - [ ] H · Integración y pruebas
 - [ ] J · Despliegue y entrega
+
+### Decisiones abiertas
+
+- **Efecto de las bajas en los reportes (fase G).** Dar de baja a un alumno quita su inscripción y conserva sus registros pasados (`Alumno` no tiene `is_active` en el Apéndice A). Esos registros siguen apareciendo en las sesiones donde ya existen. Falta decidir si cuentan en el porcentaje del grupo y del periodo (RF-13) y si el alumno dado de baja sale en el reporte del grupo.
+- **RF-16 e `is_staff`.** Un usuario creado desde el admin con rol administrador no recibe `is_staff` ni permisos por sí solo, y `createsuperuser` crea usuarios con rol docente. Hoy el administrador de demo se prepara en `seed_demo`.
+- **Pase de lista en sesiones futuras.** El CLAUDE.md no lo restringe y hoy se permite. Propuesta: solo sesiones con fecha igual o anterior a hoy. Razón: una sesión realizada no vuelve a programada, así que un toque equivocado en una sesión futura la deja realizada con registros falsos, y la corrección cambia estados pero no la deshace.
+- **RF-12 (justificante).** Pendiente de aprobación. La corrección ya bloquea con un mensaje el cambio de un registro que tenga justificante, para no chocar con el `CHECK` de la base de datos.
 
 ## 13. Comandos
 
