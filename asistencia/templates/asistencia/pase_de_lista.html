@@ -88,11 +88,12 @@
       </div>
     {% endfor %}
 
+    {# En el teléfono la barra fija solo lleva «Guardar»: «Volver» la haría el doble de alta. #}
     <div class="sticky-bottom bg-body-tertiary border-top py-2 mt-3 d-grid d-sm-flex gap-2">
       <button type="submit" class="btn btn-primary btn-lg" id="guardar">
         {% if modo == 'captura' %}Guardar pase de lista{% else %}Guardar correcciones{% endif %}
       </button>
-      <a class="btn btn-outline-secondary btn-lg" href="{% url 'sesiones' grupo.pk %}">Volver</a>
+      <a class="btn btn-outline-secondary btn-lg d-none d-sm-inline-block" href="{% url 'sesiones' grupo.pk %}">Volver</a>
     </div>
   </form>
 
