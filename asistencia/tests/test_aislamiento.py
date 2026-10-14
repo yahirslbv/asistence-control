@@ -20,6 +20,8 @@ VISTAS_DE_GRUPO = [
     ('grupo_eliminar', ['get', 'post']),
     ('alumnos_importar', ['get', 'post']),
     ('alumno_agregar', ['get', 'post']),
+    ('sesiones', ['get']),
+    ('sesiones_generar', ['get', 'post']),
 ]
 
 # Vistas que no reciben un recurso y son solo para docentes.
