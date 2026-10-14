@@ -106,7 +106,7 @@ control_asistencia/
 | RNF-04 | Cada usuario ve y modifica solo sus grupos | Mixin que filtra por `docente=request.user`; responder 404 (no 403) ante un grupo ajeno, en toda vista que reciba un `grupo_id` o `sesion_id` |
 | RNF-05 | Integridad referencial y unicidad por alumno y sesión | Constraints del Apéndice A |
 | RNF-06 | Toda corrección registra autor y fecha | Disparador de la base de datos (sección 9.3) |
-| RNF-07 | Consultas en menos de 3 s con grupos de hasta 50 alumnos | Agregaciones con el ORM, `select_related`, e índices en `Meta.indexes` (`sesion(grupo, fecha)`, `asistencia(alumno)`, `inscripcion(alumno)`, `bitacora_cambio(asistencia)`) |
+| RNF-07 | Consultas en menos de 3 s con grupos de hasta 50 alumnos | Agregaciones con el ORM, `select_related` e índices. En `Meta.indexes` van `asistencia(alumno)`, `inscripcion(alumno)` y `bitacora_cambio(asistencia)`: cada uno es el único índice sobre esa clave foránea (MySQL no deja quitarlo, y sin él crearía uno equivalente sin nombre), así que no duplican nada. `sesion(grupo, fecha)` **no** se declara: es prefijo de `uq_sesion_grupo_fecha_hora` y MySQL ya lo usa. Comprobado con `SHOW INDEX` en MySQL 8.0 |
 | RNF-08 | Respaldo diario de la base de datos | Comando que ejecuta `mysqldump`, programado con cron. Se hace en la fase J |
 | RNF-09 | Código versionado y documentación de instalación | Git + README con pasos de instalación |
 
