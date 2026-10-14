@@ -55,7 +55,7 @@ class InscribirAlumnoTests(TestCase):
 
         respuesta = self.client.post(self.url, self.datos(), follow=True)
 
-        self.assertContains(respuesta, 'ya estaba inscrito en este grupo')
+        self.assertContains(respuesta, 'ya forma parte de este grupo')
         self.assertEqual(Inscripcion.objects.count(), 1)
 
     def test_los_datos_obligatorios_se_validan(self):

@@ -137,14 +137,14 @@ class InscribirAlumnoView(GrupoDelDocenteMixin, FormView):
 
         if not resultado.inscripcion_nueva:
             messages.warning(
-                self.request, f'{alumno.nombre} ya estaba inscrito en este grupo.')
+                self.request, f'{alumno.nombre} ya forma parte de este grupo.')
         elif resultado.alumno_nuevo:
             messages.success(
-                self.request, f'{alumno.nombre} se inscribió en {self.grupo.clave}.')
+                self.request, f'{alumno.nombre} se agregó a {self.grupo.clave}.')
         else:
             messages.success(
                 self.request,
-                f'{alumno.nombre} ya estaba en el padrón y se inscribió en '
+                f'{alumno.nombre} ya estaba en el padrón y se agregó a '
                 f'{self.grupo.clave}.')
         return redirect('grupo_detalle', grupo_id=self.grupo.pk)
 

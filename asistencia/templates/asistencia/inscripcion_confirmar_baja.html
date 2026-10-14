@@ -8,7 +8,7 @@
     <h1 class="h3 mb-3">Dar de baja a {{ alumno.nombre }}</h1>
 
     <div class="alert alert-warning" role="alert">
-      <p class="mb-2"><strong>{{ alumno.matricula }} · {{ alumno.nombre }}</strong> dejará de estar inscrito en el grupo <strong>{{ grupo.clave }}</strong> y ya no aparecerá en sus listas.</p>
+      <p class="mb-2"><strong>{{ alumno.matricula }} · {{ alumno.nombre }}</strong> se quitará del grupo <strong>{{ grupo.clave }}</strong> y ya no aparecerá en sus listas.</p>
       <p class="mb-0">
         {% if registros %}
           Sus {{ registros }} registro{{ registros|pluralize }} de asistencia en este grupo se conservan.
