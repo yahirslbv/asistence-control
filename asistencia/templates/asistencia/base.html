@@ -26,8 +26,8 @@
         {% if user.rol == user.Rol.ADMINISTRADOR %}
           <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Usuarios</a></li>
         {% else %}
-          {# Las opciones del docente se habilitan al terminar las fases E, F y G. #}
-          <li class="nav-item"><span class="nav-link disabled">Grupos</span></li>
+          {# Pase de lista y Reportes se habilitan al terminar las fases F y G. #}
+          <li class="nav-item"><a class="nav-link" href="{% url 'grupos' %}">Grupos</a></li>
           <li class="nav-item"><span class="nav-link disabled">Pase de lista</span></li>
           <li class="nav-item"><span class="nav-link disabled">Reportes</span></li>
         {% endif %}

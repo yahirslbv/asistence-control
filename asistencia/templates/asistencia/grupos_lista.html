@@ -1,0 +1,47 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Grupos · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Mis grupos</h1>
+  <a class="btn btn-primary" href="{% url 'grupo_crear' %}">Nuevo grupo</a>
+</div>
+
+{% if grupos %}
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Clave</th>
+            <th>Materia</th>
+            <th>Periodo</th>
+            <th class="text-end">Alumnos</th>
+            <th class="text-end">Sesiones</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for grupo in grupos %}
+            <tr>
+              <td class="fw-semibold">{{ grupo.clave }}</td>
+              <td>{{ grupo.materia }}</td>
+              <td>{{ grupo.periodo }}</td>
+              <td class="text-end">{{ grupo.num_alumnos }}</td>
+              <td class="text-end">{{ grupo.num_sesiones }}</td>
+              <td class="text-end">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'grupo_detalle' grupo.pk %}">Abrir</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-info mb-0" role="alert">
+    Todavía no tienes grupos. Crea el primero con «Nuevo grupo».
+  </div>
+{% endif %}
+{% endblock %}

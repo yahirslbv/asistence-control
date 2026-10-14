@@ -7,4 +7,11 @@ urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('login/', views.IniciarSesionView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+
+    # Grupos (RF-03)
+    path('grupos/', views.GrupoListView.as_view(), name='grupos'),
+    path('grupos/nuevo/', views.GrupoCrearView.as_view(), name='grupo_crear'),
+    path('grupos/<int:grupo_id>/', views.GrupoDetalleView.as_view(), name='grupo_detalle'),
+    path('grupos/<int:grupo_id>/editar/', views.GrupoEditarView.as_view(), name='grupo_editar'),
+    path('grupos/<int:grupo_id>/eliminar/', views.GrupoEliminarView.as_view(), name='grupo_eliminar'),
 ]

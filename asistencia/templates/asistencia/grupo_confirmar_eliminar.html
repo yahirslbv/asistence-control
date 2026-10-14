@@ -1,0 +1,28 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Eliminar grupo · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Eliminar el grupo {{ grupo.clave }}</h1>
+
+    <div class="alert alert-danger" role="alert">
+      <p class="fw-semibold mb-2">Esta acción no se puede deshacer.</p>
+      <p class="mb-2">Al eliminar el grupo <strong>{{ grupo.clave }} · {{ grupo.materia }}</strong> ({{ grupo.periodo }}) se borra también todo su historial:</p>
+      <ul class="mb-0">
+        <li>{{ impacto.sesiones }} sesión{{ impacto.sesiones|pluralize:"es" }}</li>
+        <li>{{ impacto.inscripciones }} inscripción{{ impacto.inscripciones|pluralize:"es" }} de alumnos</li>
+        <li>{{ impacto.asistencias }} registro{{ impacto.asistencias|pluralize }} de asistencia</li>
+        <li>{{ impacto.cambios }} corrección{{ impacto.cambios|pluralize:"es" }} de la bitácora</li>
+      </ul>
+    </div>
+
+    <form method="post" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Sí, eliminar el grupo y su historial</button>
+      <a class="btn btn-outline-secondary" href="{% url 'grupo_detalle' grupo.pk %}">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

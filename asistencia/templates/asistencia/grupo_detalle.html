@@ -1,0 +1,47 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}{{ grupo.clave }} · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ grupo.clave }}</li>
+  </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-1">{{ grupo.clave }} · {{ grupo.materia }}</h1>
+    <p class="text-secondary mb-0">Periodo {{ grupo.periodo }}</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-primary" href="{% url 'grupo_editar' grupo.pk %}">Editar</a>
+    <a class="btn btn-outline-danger" href="{% url 'grupo_eliminar' grupo.pk %}">Eliminar grupo</a>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header">Alumnos inscritos ({{ inscripciones|length }})</div>
+  {% if inscripciones %}
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr><th>Matrícula</th><th>Nombre</th><th>Correo</th></tr>
+        </thead>
+        <tbody>
+          {% for inscripcion in inscripciones %}
+            <tr>
+              <td>{{ inscripcion.alumno.matricula }}</td>
+              <td>{{ inscripcion.alumno.nombre }}</td>
+              <td>{{ inscripcion.alumno.correo|default:"—" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card-body text-secondary">Este grupo todavía no tiene alumnos.</div>
+  {% endif %}
+</div>
+{% endblock %}
