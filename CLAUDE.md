@@ -195,7 +195,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 ## 12. Estado (actualizar al terminar cada fase)
 
 - [x] D · Entorno y autenticación
-- [ ] E · Grupos y sesiones
+- [x] E · Grupos y sesiones
 - [ ] F · Asistencia
 - [ ] G · Reportes
 - [ ] I · Manuales
