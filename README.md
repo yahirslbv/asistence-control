@@ -119,6 +119,9 @@ asistencia/    única app del proyecto
   models.py        siete modelos y sus restricciones
   migrations/      0001 (esquema) y 0002 (disparador de la bitácora)
   backends.py      inicio de sesión con correo
+  permissions.py   mixins: cada docente ve solo sus grupos (404 ante uno ajeno)
+  forms.py         formularios
+  services/        lógica de negocio: importar CSV, inscripciones, sesiones
   views/           vistas por módulo
   templates/       plantillas con Bootstrap 5
   management/      comando seed_demo
