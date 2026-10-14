@@ -14,6 +14,7 @@ VISTAS_DE_GRUPO = [
     ('grupo_detalle', ['get']),
     ('grupo_editar', ['get', 'post']),
     ('grupo_eliminar', ['get', 'post']),
+    ('alumnos_importar', ['get', 'post']),
 ]
 
 # Vistas que no reciben un recurso y son solo para docentes.
