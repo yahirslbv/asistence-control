@@ -1,0 +1,25 @@
+# Entorno y secretos
+.venv/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Base de datos, archivos subidos y respaldos
+*.sqlite3
+media/
+respaldos/
+*.sql
+
+# Archivos estáticos recolectados
+staticfiles/
+
+# Editores y sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Configuración local de herramientas
+.claude/
