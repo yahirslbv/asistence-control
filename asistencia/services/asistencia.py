@@ -18,6 +18,7 @@ from dataclasses import dataclass
 
 from django.db import IntegrityError, transaction
 from django.db.models import Q
+from django.utils import timezone
 
 from ..models import Alumno, Asistencia, BitacoraCambio, Sesion
 
@@ -30,6 +31,10 @@ class ErrorDePaseDeLista(Exception):
 
 class SesionNoAdmiteRegistros(ErrorDePaseDeLista):
     """La sesión está cancelada."""
+
+
+class SesionFutura(ErrorDePaseDeLista):
+    """La sesión es de una fecha posterior a hoy: aún no se puede tomar lista."""
 
 
 class ConflictoDeSesion(ErrorDePaseDeLista):
@@ -207,10 +212,20 @@ def _bloquear(sesion_id):
     return Sesion.objects.select_for_update(of=('self',)).get(pk=sesion_id)
 
 
+def sesion_es_futura(sesion):
+    """True si la fecha de la sesión es posterior a hoy (hora de Tijuana). Una
+    sesión de hoy ya admite pase de lista, aunque todavía no empiece."""
+    return sesion.fecha > timezone.localdate()
+
+
 def _asegurar_admite_registros(sesion):
     if sesion.estado == Sesion.Estado.CANCELADA:
         raise SesionNoAdmiteRegistros(
             'La sesión está cancelada y no admite registros de asistencia.')
+    if sesion_es_futura(sesion):
+        raise SesionFutura(
+            'No se puede tomar lista de una sesión futura: el pase de lista de '
+            f'esta sesión se habilita el {sesion.fecha:%d/%m/%Y}.')
 
 
 def _estados_validos(filas, enviados):

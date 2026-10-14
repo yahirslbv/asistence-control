@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views.generic import FormView, TemplateView, UpdateView
 
@@ -35,6 +36,7 @@ class SesionListView(GrupoDelDocenteMixin, TemplateView):
             sesiones=calendario_de_sesiones(self.grupo, desde, hasta),
             desde=desde,
             hasta=hasta,
+            hoy=timezone.localdate(),   # el pase de lista se ofrece hasta la fecha de hoy
         )
         return contexto
 

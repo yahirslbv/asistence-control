@@ -11,6 +11,7 @@ from ..permissions import SesionDelDocenteMixin, SoloDocenteMixin
 from ..services.asistencia import (
     ConflictoDeSesion, DatosInvalidos, ErrorDePaseDeLista, corregir_pase_de_lista,
     historial_de_cambios, lista_de_la_sesion, registrar_pase_de_lista,
+    sesion_es_futura,
 )
 from ..services.pendientes import sesiones_pendientes
 
@@ -67,8 +68,12 @@ class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
         contexto = super().get_context_data(**kwargs)
         sesion = self.sesion
         contexto.update(
-            sesion=sesion, grupo=self.grupo, estados=ESTADOS_EN_PANTALLA, modo=None)
+            sesion=sesion, grupo=self.grupo, estados=ESTADOS_EN_PANTALLA, modo=None,
+            futura=False)
         if sesion.estado == Sesion.Estado.CANCELADA:
+            return contexto
+        if sesion_es_futura(sesion):
+            contexto['futura'] = True   # solo mensaje, sin formulario
             return contexto
 
         filas = lista_de_la_sesion(sesion)

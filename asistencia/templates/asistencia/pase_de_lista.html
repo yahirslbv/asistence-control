@@ -41,6 +41,12 @@
   </div>
   <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver a las sesiones</a>
 
+{% elif futura %}
+  <div class="alert alert-info" role="alert">
+    Esta sesión es del {{ sesion.fecha|date:"l d/m/Y" }}. El pase de lista se habilita ese día; todavía no se puede tomar lista.
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver a las sesiones</a>
+
 {% elif not filas %}
   <div class="alert alert-info" role="alert">
     El grupo no tiene alumnos inscritos para tomar lista.
