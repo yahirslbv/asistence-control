@@ -11,9 +11,15 @@
   </ol>
 </nav>
 
-<div class="mb-3">
-  <h1 class="h3 mb-1">{{ tabla.titulo }}</h1>
-  <p class="text-secondary mb-0">{{ tabla.subtitulo }}</p>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-1">{{ tabla.titulo }}</h1>
+    <p class="text-secondary mb-0">{{ tabla.subtitulo }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-primary btn-sm" id="descargar-pdf" href="{% url 'reporte_alumno_exportar' grupo.pk alumno.pk 'pdf' %}">Descargar PDF</a>
+    <a class="btn btn-outline-success btn-sm" id="descargar-excel" href="{% url 'reporte_alumno_exportar' grupo.pk alumno.pk 'xlsx' %}">Descargar Excel</a>
+  </div>
 </div>
 
 <div class="row g-2 mb-3 text-center">

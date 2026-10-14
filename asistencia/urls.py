@@ -34,4 +34,8 @@ urlpatterns = [
     path('reportes/', views.ReportesInicioView.as_view(), name='reportes'),
     path('grupos/<int:grupo_id>/reporte/', views.ReporteGrupoView.as_view(), name='reporte_grupo'),
     path('grupos/<int:grupo_id>/reporte/alumnos/<int:alumno_id>/', views.ReporteAlumnoView.as_view(), name='reporte_alumno'),
+
+    # Exportación de los reportes a PDF y Excel (RF-15)
+    path('grupos/<int:grupo_id>/reporte/exportar/<slug:formato>/', views.ExportarReporteGrupoView.as_view(), name='reporte_grupo_exportar'),
+    path('grupos/<int:grupo_id>/reporte/alumnos/<int:alumno_id>/exportar/<slug:formato>/', views.ExportarReporteAlumnoView.as_view(), name='reporte_alumno_exportar'),
 ]
