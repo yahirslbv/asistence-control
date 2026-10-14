@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from datetime import date, datetime, time
+from html.parser import HTMLParser
 from unittest import mock
 from zoneinfo import ZoneInfo
 
@@ -88,6 +89,61 @@ def inscribir_alumnos(grupo, cantidad, primera_matricula=1200000,
         Inscripcion.objects.create(grupo=grupo, alumno=alumno, fecha_alta=fecha_alta)
         alumnos.append(alumno)
     return alumnos
+
+
+class _ExtractorDeTabla(HTMLParser):
+    """Saca el texto de las celdas de la tabla con cierto id, por sección."""
+
+    def __init__(self, id_tabla):
+        super().__init__(convert_charrefs=True)
+        self.id_tabla = id_tabla
+        self.dentro = False
+        self.seccion = None
+        self.secciones = {'thead': [], 'tbody': [], 'tfoot': []}
+        self.fila = None
+        self.celda = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table' and dict(attrs).get('id') == self.id_tabla:
+            self.dentro = True
+        elif self.dentro and tag in self.secciones:
+            self.seccion = tag
+        elif self.dentro and tag == 'tr':
+            self.fila = []
+        elif self.dentro and tag in ('td', 'th'):
+            self.celda = []
+
+    def handle_endtag(self, tag):
+        if not self.dentro:
+            return
+        if tag == 'table':
+            self.dentro = False
+        elif tag in self.secciones:
+            self.seccion = None
+        elif tag == 'tr' and self.fila is not None:
+            self.secciones[self.seccion].append(self.fila)
+            self.fila = None
+        elif tag in ('td', 'th') and self.celda is not None:
+            self.fila.append(' '.join(''.join(self.celda).split()))
+            self.celda = None
+
+    def handle_data(self, data):
+        if self.celda is not None:
+            self.celda.append(data)
+
+
+def celdas_de_la_tabla(html, id_tabla='tabla-reporte'):
+    """{'encabezado': [...], 'filas': [[...]], 'pie': [[...]]} con el texto de
+    cada celda de la tabla `id_tabla` tal como se ve en la pantalla."""
+    if isinstance(html, bytes):
+        html = html.decode('utf-8')
+    extractor = _ExtractorDeTabla(id_tabla)
+    extractor.feed(html)
+    return {
+        'encabezado': extractor.secciones['thead'][0] if extractor.secciones['thead'] else [],
+        'filas': extractor.secciones['tbody'],
+        'pie': extractor.secciones['tfoot'],
+    }
 
 
 def datos_del_pase(modo, estados):

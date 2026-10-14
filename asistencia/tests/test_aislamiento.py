@@ -25,6 +25,7 @@ VISTAS_DE_GRUPO = [
     ('alumno_agregar', ['get', 'post']),
     ('sesiones', ['get']),
     ('sesiones_generar', ['get', 'post']),
+    ('reporte_grupo', ['get']),
 ]
 
 # Vistas que reciben un sesion_id: (nombre de la URL, métodos a probar).
@@ -35,7 +36,7 @@ VISTAS_DE_SESION = [
 ]
 
 # Vistas que no reciben un recurso y son solo para docentes.
-VISTAS_SIN_RECURSO = ['grupos', 'grupo_crear', 'pase_de_lista_inicio']
+VISTAS_SIN_RECURSO = ['grupos', 'grupo_crear', 'pase_de_lista_inicio', 'reportes']
 
 
 class AislamientoPorDocenteTests(TestCase):
