@@ -12,6 +12,7 @@ from ..services.asistencia import (
     ConflictoDeSesion, DatosInvalidos, ErrorDePaseDeLista, corregir_pase_de_lista,
     historial_de_cambios, lista_de_la_sesion, registrar_pase_de_lista,
 )
+from ..services.pendientes import sesiones_pendientes
 
 MODO_CAPTURA = 'captura'
 MODO_CORRECCION = 'correccion'
@@ -118,16 +119,29 @@ class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
 
 
 class PaseDeListaInicioView(SoloDocenteMixin, TemplateView):
-    """Punto de entrada del menú «Pase de lista»: las sesiones de hoy."""
+    """Punto de entrada del menú «Pase de lista»: las sesiones de hoy y las
+    pendientes de días anteriores (RF-10)."""
 
     template_name = 'asistencia/pase_de_lista_inicio.html'
 
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
-        contexto['hoy'] = timezone.localdate()
-        contexto['sesiones_de_hoy'] = (
-            Sesion.objects.filter(grupo__docente=self.request.user, fecha=contexto['hoy'])
+        hoy = timezone.localdate()
+        todas = sesiones_pendientes(self.request.user)
+        ids_pendientes = {sesion.pk for sesion in todas}
+
+        de_hoy = list(
+            Sesion.objects.filter(grupo__docente=self.request.user, fecha=hoy)
             .select_related('grupo')
             .order_by('hora_inicio', 'grupo__clave')
+        )
+        for sesion in de_hoy:
+            sesion.pendiente = sesion.pk in ids_pendientes   # hoy y ya terminó
+
+        contexto.update(
+            hoy=hoy,
+            sesiones_de_hoy=de_hoy,
+            # Las de hoy ya salen arriba; aquí van solo las de días anteriores.
+            pendientes=[s for s in todas if s.fecha != hoy],
         )
         return contexto

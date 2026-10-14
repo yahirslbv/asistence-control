@@ -8,6 +8,8 @@
   <a class="btn btn-primary" href="{% url 'grupo_crear' %}">Nuevo grupo</a>
 </div>
 
+{% include 'asistencia/_pendientes.html' %}
+
 {% if grupos %}
   <div class="card shadow-sm">
     <div class="table-responsive">

@@ -17,9 +17,11 @@
           </div>
           <div class="d-flex align-items-center gap-2">
             {% if sesion.estado == 'programada' %}
+              {% if sesion.pendiente %}<span class="badge text-bg-warning">Sin pase de lista</span>{% endif %}
               <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}">Pase de lista</a>
             {% elif sesion.estado == 'realizada' %}
-              <span class="badge text-bg-success">Realizada</span>
+              {% if sesion.pendiente %}<span class="badge text-bg-warning">Incompleta</span>
+              {% else %}<span class="badge text-bg-success">Realizada</span>{% endif %}
               <a class="btn btn-outline-primary" href="{% url 'pase_de_lista' sesion.pk %}">Ver asistencia</a>
             {% else %}
               <span class="badge text-bg-secondary">Cancelada</span>
@@ -31,5 +33,29 @@
   </div>
 {% else %}
   <div class="alert alert-info" role="alert">No tienes sesiones programadas para hoy.</div>
+{% endif %}
+
+<h2 class="h5">Pendientes de días anteriores</h2>
+{% if pendientes %}
+  <div class="card shadow-sm">
+    <ul class="list-group list-group-flush">
+      {% for sesion in pendientes %}
+        <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <div class="fw-semibold">{{ sesion.grupo.clave }} · {{ sesion.fecha|date:"l d/m/Y"|capfirst }}</div>
+            <div class="small text-secondary">
+              {{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }} ·
+              {% if sesion.estado == 'programada' %}sin pase de lista{% else %}pase de lista incompleto{% endif %}
+            </div>
+          </div>
+          <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}">
+            {% if sesion.estado == 'programada' %}Pase de lista{% else %}Completar{% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% else %}
+  <div class="alert alert-success mb-0" role="alert">No tienes sesiones pendientes de días anteriores.</div>
 {% endif %}
 {% endblock %}

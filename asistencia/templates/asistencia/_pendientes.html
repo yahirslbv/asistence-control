@@ -1,0 +1,24 @@
+{% comment %}
+Alerta de RF-10: sesiones pasadas sin pase de lista o con el pase incompleto.
+Recibe `pendientes`, la lista que arma services/pendientes.py (de la más antigua a la más reciente).
+{% endcomment %}
+{% if pendientes %}
+  <div class="alert alert-warning" role="alert" id="pendientes">
+    <div class="fw-semibold mb-1">
+      {{ pendientes|length }} {% if pendientes|length == 1 %}sesión necesita{% else %}sesiones necesitan{% endif %} atención
+    </div>
+    <ul class="mb-0 ps-3">
+      {% for sesion in pendientes|slice:":10" %}
+        <li>
+          <a class="alert-link" href="{% url 'pase_de_lista' sesion.pk %}">{{ sesion.grupo.clave }} · {{ sesion.fecha|date:"l d/m/Y"|capfirst }}, {{ sesion.hora_inicio|time:"H:i" }}</a>
+          — {% if sesion.estado == 'programada' %}sin pase de lista{% else %}pase de lista incompleto{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if pendientes|length > 10 %}
+      <div class="mt-1">
+        Y {{ pendientes|length|add:"-10" }} más. <a class="alert-link" href="{% url 'pase_de_lista_inicio' %}">Ver todas</a>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

@@ -16,6 +16,7 @@ from ..services.importar_alumnos import ErrorDeArchivo, importar_alumnos
 from ..services.inscripciones import (
     dar_de_baja, inscribir_alumno, registros_que_se_conservan,
 )
+from ..services.pendientes import sesiones_pendientes
 
 MENSAJE_GRUPO_DUPLICADO = 'Ya existe un grupo con esa clave en ese periodo.'
 
@@ -47,6 +48,11 @@ class GrupoListView(SoloDocenteMixin, ListView):
                 num_sesiones=Count('sesiones', distinct=True),
             )
         )
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto['pendientes'] = sesiones_pendientes(self.request.user)   # RF-10
+        return contexto
 
 
 class GrupoCrearView(SoloDocenteMixin, GuardarGrupoMixin, CreateView):
@@ -90,6 +96,7 @@ class GrupoDetalleView(GrupoDelDocenteMixin, DetailView):
         contexto['inscripciones'] = (
             self.grupo.inscripciones.select_related('alumno').order_by('alumno__nombre')
         )
+        contexto['pendientes'] = sesiones_pendientes(self.request.user, grupo=self.grupo)  # RF-10
         return contexto
 
 
