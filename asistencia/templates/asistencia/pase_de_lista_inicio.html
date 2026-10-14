@@ -1,0 +1,35 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Pase de lista · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Pase de lista</h1>
+
+<h2 class="h5">Sesiones de hoy · {{ hoy|date:"l d/m/Y"|capfirst }}</h2>
+{% if sesiones_de_hoy %}
+  <div class="card shadow-sm mb-4">
+    <ul class="list-group list-group-flush">
+      {% for sesion in sesiones_de_hoy %}
+        <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <div class="fw-semibold">{{ sesion.grupo.clave }} · {{ sesion.grupo.materia }}</div>
+            <div class="small text-secondary">{{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }}</div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            {% if sesion.estado == 'programada' %}
+              <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}">Pase de lista</a>
+            {% elif sesion.estado == 'realizada' %}
+              <span class="badge text-bg-success">Realizada</span>
+              <a class="btn btn-outline-primary" href="{% url 'pase_de_lista' sesion.pk %}">Ver asistencia</a>
+            {% else %}
+              <span class="badge text-bg-secondary">Cancelada</span>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% else %}
+  <div class="alert alert-info" role="alert">No tienes sesiones programadas para hoy.</div>
+{% endif %}
+{% endblock %}

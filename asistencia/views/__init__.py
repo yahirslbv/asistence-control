@@ -1,4 +1,5 @@
 from .auth import IniciarSesionView, inicio
+from .asistencia import PaseDeListaInicioView, PaseDeListaView
 from .grupos import (
     BajaAlumnoView, GrupoCrearView, GrupoDetalleView, GrupoEditarView,
     GrupoEliminarView, GrupoListView, ImportarAlumnosView, InscribirAlumnoView,
@@ -14,4 +15,5 @@ __all__ = [
     'InscribirAlumnoView',
     'GenerarSesionesView', 'SesionCancelarView', 'SesionEditarView',
     'SesionListView',
+    'PaseDeListaInicioView', 'PaseDeListaView',
 ]

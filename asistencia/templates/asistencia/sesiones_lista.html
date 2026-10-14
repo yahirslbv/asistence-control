@@ -57,8 +57,11 @@
                 </td>
                 <td class="text-end text-nowrap">
                   {% if sesion.estado == 'programada' %}
+                    <a class="btn btn-primary btn-sm" href="{% url 'pase_de_lista' sesion.pk %}">Pase de lista</a>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'sesion_editar' sesion.pk %}">Editar</a>
                     <a class="btn btn-outline-danger btn-sm" href="{% url 'sesion_cancelar' sesion.pk %}">Cancelar</a>
+                  {% elif sesion.estado == 'realizada' %}
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'pase_de_lista' sesion.pk %}">Ver asistencia</a>
                   {% endif %}
                 </td>
               </tr>

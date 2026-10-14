@@ -1,0 +1,135 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Pase de lista · {{ grupo.clave }} · Control de asistencia{% endblock %}
+
+{% block cabecera %}
+<style>
+  /* Cuatro botones de estado en una fila, también en 375 px de ancho. */
+  .estados { display: grid; grid-template-columns: repeat(4, 1fr); gap: .25rem; }
+  .estado-btn {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 48px; padding: .5rem .1rem;
+    font-size: .75rem; line-height: 1.1; text-align: center;
+  }
+  @media (min-width: 576px) { .estado-btn { min-height: 52px; font-size: 1rem; } }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'sesiones' grupo.pk %}">Sesiones</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Pase de lista</li>
+  </ol>
+</nav>
+
+<div class="mb-3">
+  <h1 class="h3 mb-1">Pase de lista · {{ grupo.clave }}</h1>
+  <p class="text-secondary mb-0">
+    {{ sesion.fecha|date:"l d/m/Y"|capfirst }} · {{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }}
+    {% if sesion.estado == 'programada' %}<span class="badge text-bg-primary ms-1">Programada</span>
+    {% elif sesion.estado == 'realizada' %}<span class="badge text-bg-success ms-1">Realizada</span>
+    {% else %}<span class="badge text-bg-secondary ms-1">Cancelada</span>{% endif %}
+  </p>
+</div>
+
+{% if sesion.estado == 'cancelada' %}
+  <div class="alert alert-warning" role="alert">
+    Esta sesión está cancelada y no admite registros de asistencia.
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver a las sesiones</a>
+
+{% elif not filas %}
+  <div class="alert alert-info" role="alert">
+    El grupo no tiene alumnos inscritos para tomar lista.
+    <a href="{% url 'grupo_detalle' grupo.pk %}">Agrégalos desde el grupo.</a>
+  </div>
+
+{% else %}
+  {% if modo == 'captura' %}
+    <p class="text-secondary">
+      Todos empiezan en «Presente». Cambia solo a quienes no lo estuvieron y guarda.
+    </p>
+  {% else %}
+    <p class="text-secondary">
+      Esta sesión ya tiene el pase de lista guardado. Corrige lo que haga falta: solo se guardan los cambios.
+      {% if sin_registrar %}
+        <strong class="text-danger">{{ sin_registrar }} alumno{{ sin_registrar|pluralize }} sin registrar.</strong>
+        Elige su estado para registrarlo{{ sin_registrar|pluralize }}.
+      {% endif %}
+    </p>
+  {% endif %}
+
+  <form method="post" id="pase-de-lista">
+    {% csrf_token %}
+    <input type="hidden" name="modo" value="{{ modo }}">
+
+    {% for fila in filas %}
+      <div class="card shadow-sm mb-2">
+        <div class="card-body p-2 p-sm-3">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div>
+              <div class="fw-semibold">{{ fila.alumno.nombre }}</div>
+              <div class="small text-secondary">{{ fila.alumno.matricula }}</div>
+            </div>
+            {% if not fila.estado %}<span class="badge text-bg-danger">Sin registrar</span>{% endif %}
+          </div>
+          <div class="estados" role="radiogroup" aria-label="Estado de {{ fila.alumno.nombre }}">
+            {% for valor, etiqueta, color in estados %}
+              <input type="radio" class="btn-check" autocomplete="off"
+                     name="estado_{{ fila.alumno.pk }}" id="a{{ fila.alumno.pk }}-{{ valor }}"
+                     value="{{ valor }}" {% if fila.estado == valor %}checked{% endif %}>
+              <label class="btn btn-outline-{{ color }} estado-btn" for="a{{ fila.alumno.pk }}-{{ valor }}">{{ etiqueta }}</label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="sticky-bottom bg-body-tertiary border-top py-2 mt-3 d-grid d-sm-flex gap-2">
+      <button type="submit" class="btn btn-primary btn-lg" id="guardar">
+        {% if modo == 'captura' %}Guardar pase de lista{% else %}Guardar correcciones{% endif %}
+      </button>
+      <a class="btn btn-outline-secondary btn-lg" href="{% url 'sesiones' grupo.pk %}">Volver</a>
+    </div>
+  </form>
+
+  {% if modo == 'correccion' %}
+    <h2 class="h5 mt-4">Historial de correcciones</h2>
+    <div class="card shadow-sm">
+      {% if historial %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Fecha</th><th>Alumno</th><th>Cambio</th><th>Quién</th></tr></thead>
+            <tbody>
+              {% for cambio in historial %}
+                <tr>
+                  <td class="text-nowrap">{{ cambio.fecha_cambio|date:"d/m/Y H:i" }}</td>
+                  <td>{{ cambio.asistencia.alumno.nombre }}</td>
+                  <td class="text-nowrap">{{ cambio.get_valor_anterior_display }} → {{ cambio.get_valor_nuevo_display }}</td>
+                  <td>{{ cambio.usuario.get_full_name|default:cambio.usuario.email }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body text-secondary">Todavía no hay correcciones en esta sesión.</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <script>
+    // Evita el doble clic en «Guardar». Si el envío se repite igual, el servidor
+    // no duplica nada: esto solo ahorra el aviso.
+    (function () {
+      var formulario = document.getElementById('pase-de-lista');
+      var boton = document.getElementById('guardar');
+      formulario.addEventListener('submit', function () { boton.disabled = true; });
+      window.addEventListener('pageshow', function () { boton.disabled = false; });
+    })();
+  </script>
+{% endif %}
+{% endblock %}

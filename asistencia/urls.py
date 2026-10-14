@@ -25,4 +25,8 @@ urlpatterns = [
     path('grupos/<int:grupo_id>/sesiones/generar/', views.GenerarSesionesView.as_view(), name='sesiones_generar'),
     path('sesiones/<int:sesion_id>/editar/', views.SesionEditarView.as_view(), name='sesion_editar'),
     path('sesiones/<int:sesion_id>/cancelar/', views.SesionCancelarView.as_view(), name='sesion_cancelar'),
+
+    # Pase de lista (RF-08, RF-09, RF-11)
+    path('pase-de-lista/', views.PaseDeListaInicioView.as_view(), name='pase_de_lista_inicio'),
+    path('sesiones/<int:sesion_id>/asistencia/', views.PaseDeListaView.as_view(), name='pase_de_lista'),
 ]
