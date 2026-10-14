@@ -24,13 +24,16 @@
 <div class="card shadow-sm">
   <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
     <span>Alumnos inscritos ({{ inscripciones|length }})</span>
-    <a class="btn btn-primary btn-sm" href="{% url 'alumnos_importar' grupo.pk %}">Cargar lista (CSV)</a>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'alumno_agregar' grupo.pk %}">Agregar alumno</a>
+      <a class="btn btn-primary btn-sm" href="{% url 'alumnos_importar' grupo.pk %}">Cargar lista (CSV)</a>
+    </div>
   </div>
   {% if inscripciones %}
     <div class="table-responsive">
       <table class="table table-sm align-middle mb-0">
         <thead>
-          <tr><th>Matrícula</th><th>Nombre</th><th>Correo</th></tr>
+          <tr><th>Matrícula</th><th>Nombre</th><th>Correo</th><th></th></tr>
         </thead>
         <tbody>
           {% for inscripcion in inscripciones %}
@@ -38,6 +41,9 @@
               <td>{{ inscripcion.alumno.matricula }}</td>
               <td>{{ inscripcion.alumno.nombre }}</td>
               <td>{{ inscripcion.alumno.correo|default:"—" }}</td>
+              <td class="text-end">
+                <a class="btn btn-outline-danger btn-sm" href="{% url 'alumno_baja' grupo.pk inscripcion.alumno_id %}">Dar de baja</a>
+              </td>
             </tr>
           {% endfor %}
         </tbody>

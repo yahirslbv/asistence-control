@@ -1,0 +1,29 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Dar de baja · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Dar de baja a {{ alumno.nombre }}</h1>
+
+    <div class="alert alert-warning" role="alert">
+      <p class="mb-2"><strong>{{ alumno.matricula }} · {{ alumno.nombre }}</strong> dejará de estar inscrito en el grupo <strong>{{ grupo.clave }}</strong> y ya no aparecerá en sus listas.</p>
+      <p class="mb-0">
+        {% if registros %}
+          Sus {{ registros }} registro{{ registros|pluralize }} de asistencia en este grupo se conservan.
+        {% else %}
+          No tiene registros de asistencia en este grupo.
+        {% endif %}
+        El alumno sigue en el padrón y puede inscribirse de nuevo.
+      </p>
+    </div>
+
+    <form method="post" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-warning">Sí, dar de baja</button>
+      <a class="btn btn-outline-secondary" href="{% url 'grupo_detalle' grupo.pk %}">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,16 +1,21 @@
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.db.models import Count
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
-    CreateView, DeleteView, DetailView, FormView, ListView, UpdateView,
+    CreateView, DeleteView, DetailView, FormView, ListView, TemplateView,
+    UpdateView,
 )
 
-from ..forms import GrupoForm, ImportarAlumnosForm
-from ..models import Grupo
+from ..forms import GrupoForm, ImportarAlumnosForm, InscribirAlumnoForm
+from ..models import Grupo, Inscripcion
 from ..permissions import GrupoDelDocenteMixin, SoloDocenteMixin
 from ..services.grupos import impacto_de_eliminar
 from ..services.importar_alumnos import ErrorDeArchivo, importar_alumnos
+from ..services.inscripciones import (
+    dar_de_baja, inscribir_alumno, registros_que_se_conservan,
+)
 
 MENSAJE_GRUPO_DUPLICADO = 'Ya existe un grupo con esa clave en ese periodo.'
 
@@ -111,6 +116,65 @@ class ImportarAlumnosView(GrupoDelDocenteMixin, FormView):
             return self.form_invalid(form)
         return self.render_to_response(
             self.get_context_data(form=self.form_class(), resultado=resultado))
+
+
+class InscribirAlumnoView(GrupoDelDocenteMixin, FormView):
+    """Inscripción individual de un alumno (RF-05)."""
+
+    form_class = InscribirAlumnoForm
+    template_name = 'asistencia/grupo_inscribir.html'
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto['grupo'] = self.grupo
+        return contexto
+
+    def form_valid(self, form):
+        datos = form.cleaned_data
+        resultado = inscribir_alumno(
+            self.grupo, datos['matricula'], datos['nombre'], datos['correo'])
+        alumno = resultado.alumno
+
+        if not resultado.inscripcion_nueva:
+            messages.warning(
+                self.request, f'{alumno.nombre} ya estaba inscrito en este grupo.')
+        elif resultado.alumno_nuevo:
+            messages.success(
+                self.request, f'{alumno.nombre} se inscribió en {self.grupo.clave}.')
+        else:
+            messages.success(
+                self.request,
+                f'{alumno.nombre} ya estaba en el padrón y se inscribió en '
+                f'{self.grupo.clave}.')
+        return redirect('grupo_detalle', grupo_id=self.grupo.pk)
+
+
+class BajaAlumnoView(GrupoDelDocenteMixin, TemplateView):
+    """Baja individual de un alumno del grupo (RF-05), con confirmación."""
+
+    template_name = 'asistencia/inscripcion_confirmar_baja.html'
+
+    def cargar_recursos(self, *args, **kwargs):
+        super().cargar_recursos(*args, **kwargs)
+        self.inscripcion = get_object_or_404(
+            Inscripcion.objects.select_related('alumno'),
+            grupo=self.grupo, alumno_id=kwargs['alumno_id'],
+        )
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto.update(
+            grupo=self.grupo,
+            alumno=self.inscripcion.alumno,
+            registros=registros_que_se_conservan(self.inscripcion),
+        )
+        return contexto
+
+    def post(self, request, *args, **kwargs):
+        nombre = self.inscripcion.alumno.nombre
+        dar_de_baja(self.inscripcion)
+        messages.success(request, f'{nombre} se dio de baja del grupo {self.grupo.clave}.')
+        return redirect('grupo_detalle', grupo_id=self.grupo.pk)
 
 
 class GrupoEliminarView(GrupoDelDocenteMixin, DeleteView):

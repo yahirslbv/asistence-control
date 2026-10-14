@@ -1,0 +1,35 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Agregar alumno · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Agregar alumno</li>
+  </ol>
+</nav>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Agregar alumno a {{ grupo.clave }}</h1>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include 'asistencia/_campo.html' with campo=form.matricula %}
+          {% include 'asistencia/_campo.html' with campo=form.nombre %}
+          {% include 'asistencia/_campo.html' with campo=form.correo %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Inscribir</button>
+            <a class="btn btn-outline-secondary" href="{% url 'grupo_detalle' grupo.pk %}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

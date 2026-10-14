@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 from django.utils import timezone
 
-from ..models import Alumno, Inscripcion
+from ..models import Alumno, Asistencia, Inscripcion
 
 
 class ResultadoInscripcion(NamedTuple):
@@ -29,3 +29,19 @@ def inscribir_alumno(grupo, matricula, nombre, correo=None):
         defaults={'fecha_alta': timezone.localdate()},
     )
     return ResultadoInscripcion(alumno, alumno_nuevo, inscripcion_nueva)
+
+
+def registros_que_se_conservan(inscripcion):
+    """Registros de asistencia del alumno en las sesiones de este grupo."""
+    return Asistencia.objects.filter(
+        alumno=inscripcion.alumno, sesion__grupo=inscripcion.grupo).count()
+
+
+def dar_de_baja(inscripcion):
+    """Quita al alumno del grupo (RF-05).
+
+    Solo se borra la inscripción: el alumno sigue en el padrón y sus registros
+    de asistencia pasados se conservan como evidencia. Dejar de estar
+    inscrito solo lo saca de las listas de las sesiones futuras.
+    """
+    inscripcion.delete()

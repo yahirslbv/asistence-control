@@ -3,7 +3,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
 from .models import Grupo
-from .services.importar_alumnos import TAMANO_MAXIMO_BYTES
+from .services.importar_alumnos import (
+    LONGITUD_CORREO, LONGITUD_MATRICULA, LONGITUD_NOMBRE, TAMANO_MAXIMO_BYTES,
+)
 
 
 class EstiloBootstrapMixin:
@@ -48,6 +50,20 @@ class GrupoForm(EstiloBootstrapMixin, forms.ModelForm):
                 'unique_together': 'Ya existe un grupo con esa clave en ese periodo.',
             },
         }
+
+
+class InscribirAlumnoForm(EstiloBootstrapMixin, forms.Form):
+    """Inscripción individual de un alumno en un grupo (RF-05)."""
+
+    matricula = forms.CharField(label='Matrícula', max_length=LONGITUD_MATRICULA)
+    nombre = forms.CharField(
+        label='Nombre completo', max_length=LONGITUD_NOMBRE,
+        help_text='Si la matrícula ya existe, se conserva el nombre registrado.',
+    )
+    correo = forms.EmailField(label='Correo', max_length=LONGITUD_CORREO, required=False)
+
+    def clean_nombre(self):
+        return ' '.join(self.cleaned_data['nombre'].split())
 
 
 class ImportarAlumnosForm(EstiloBootstrapMixin, forms.Form):
