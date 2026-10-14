@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
 from .models import Grupo
+from .services.importar_alumnos import TAMANO_MAXIMO_BYTES
 
 
 class EstiloBootstrapMixin:
@@ -47,3 +48,21 @@ class GrupoForm(EstiloBootstrapMixin, forms.ModelForm):
                 'unique_together': 'Ya existe un grupo con esa clave en ese periodo.',
             },
         }
+
+
+class ImportarAlumnosForm(EstiloBootstrapMixin, forms.Form):
+    """Archivo CSV con la lista de alumnos de un grupo (RF-04)."""
+
+    archivo = forms.FileField(
+        label='Archivo CSV',
+        widget=forms.ClearableFileInput(attrs={'accept': '.csv,text/csv'}),
+    )
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data['archivo']
+        if not archivo.name.lower().endswith('.csv'):
+            raise forms.ValidationError('El archivo debe tener extensión .csv.')
+        if archivo.size > TAMANO_MAXIMO_BYTES:
+            raise forms.ValidationError(
+                f'El archivo pesa más de {TAMANO_MAXIMO_BYTES // (1024 * 1024)} MB.')
+        return archivo

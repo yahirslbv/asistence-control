@@ -2,12 +2,15 @@ from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.db.models import Count
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, FormView, ListView, UpdateView,
+)
 
-from ..forms import GrupoForm
+from ..forms import GrupoForm, ImportarAlumnosForm
 from ..models import Grupo
 from ..permissions import GrupoDelDocenteMixin, SoloDocenteMixin
 from ..services.grupos import impacto_de_eliminar
+from ..services.importar_alumnos import ErrorDeArchivo, importar_alumnos
 
 MENSAJE_GRUPO_DUPLICADO = 'Ya existe un grupo con esa clave en ese periodo.'
 
@@ -83,6 +86,31 @@ class GrupoDetalleView(GrupoDelDocenteMixin, DetailView):
             self.grupo.inscripciones.select_related('alumno').order_by('alumno__nombre')
         )
         return contexto
+
+
+class ImportarAlumnosView(GrupoDelDocenteMixin, FormView):
+    """Carga de la lista de alumnos desde un CSV (RF-04).
+
+    Tras importar muestra el resumen en la misma página, con los errores por
+    fila. Repetir el envío es inofensivo: la importación es idempotente.
+    """
+
+    form_class = ImportarAlumnosForm
+    template_name = 'asistencia/grupo_importar.html'
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto['grupo'] = self.grupo
+        return contexto
+
+    def form_valid(self, form):
+        try:
+            resultado = importar_alumnos(self.grupo, form.cleaned_data['archivo'])
+        except ErrorDeArchivo as error:
+            form.add_error('archivo', str(error))
+            return self.form_invalid(form)
+        return self.render_to_response(
+            self.get_context_data(form=self.form_class(), resultado=resultado))
 
 
 class GrupoEliminarView(GrupoDelDocenteMixin, DeleteView):

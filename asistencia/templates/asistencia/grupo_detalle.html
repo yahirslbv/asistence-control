@@ -22,7 +22,10 @@
 </div>
 
 <div class="card shadow-sm">
-  <div class="card-header">Alumnos inscritos ({{ inscripciones|length }})</div>
+  <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <span>Alumnos inscritos ({{ inscripciones|length }})</span>
+    <a class="btn btn-primary btn-sm" href="{% url 'alumnos_importar' grupo.pk %}">Cargar lista (CSV)</a>
+  </div>
   {% if inscripciones %}
     <div class="table-responsive">
       <table class="table table-sm align-middle mb-0">

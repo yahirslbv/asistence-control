@@ -1,0 +1,80 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Cargar lista · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Cargar lista</li>
+  </ol>
+</nav>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-6">
+    <h1 class="h3 mb-3">Cargar lista de alumnos</h1>
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include 'asistencia/_campo.html' with campo=form.archivo %}
+          <button type="submit" class="btn btn-primary">Cargar lista</button>
+          <a class="btn btn-outline-secondary" href="{% url 'grupo_detalle' grupo.pk %}">Volver al grupo</a>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Formato del archivo</div>
+      <div class="card-body small">
+        <p>Un archivo <strong>.csv</strong> en UTF-8, separado por comas y con este encabezado. El correo es opcional.</p>
+        <pre class="bg-body-secondary rounded p-2 mb-2">matricula,nombre,correo
+1200001,Ana García López,ana@ejemplo.mx
+1200002,Luis Martínez Ruiz,</pre>
+        <ul class="mb-0">
+          <li>Si la matrícula ya existe, se reutiliza el alumno y solo se inscribe en este grupo.</li>
+          <li>Las filas con errores se informan aparte; el resto se carga.</li>
+          <li>En Excel: «Guardar como» → «CSV UTF-8 (delimitado por comas)».</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  {% if resultado %}
+    <div class="col-12 col-lg-6">
+      <h2 class="h4 mb-3">Resultado</h2>
+      <div class="card shadow-sm">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between"><span>Filas leídas</span><strong>{{ resultado.filas }}</strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Alumnos inscritos en el grupo</span><strong>{{ resultado.inscritos }}</strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>De ellos, nuevos en el padrón</span><strong>{{ resultado.alumnos_nuevos }}</strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Ya estaban inscritos</span><strong>{{ resultado.ya_inscritos }}</strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Filas con error</span><strong class="{% if resultado.errores %}text-danger{% endif %}">{{ resultado.errores|length }}</strong></li>
+        </ul>
+      </div>
+
+      {% if resultado.errores %}
+        <div class="card shadow-sm mt-3 border-danger">
+          <div class="card-header text-danger">Filas que no se cargaron</div>
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead><tr><th>Línea</th><th>Matrícula</th><th>Motivo</th></tr></thead>
+              <tbody>
+                {% for error in resultado.errores %}
+                  <tr>
+                    <td>{{ error.linea }}</td>
+                    <td>{{ error.matricula|default:"—" }}</td>
+                    <td>{{ error.motivo }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
