@@ -114,8 +114,11 @@ def _escribir(hoja, fila, columna, valor, fuente=None, relleno=None):
 
 
 def _titulo_de_hoja(titulo):
-    """Excel limita el nombre de la hoja a 31 caracteres y prohíbe []:*?/\\ ."""
-    limpio = re.sub(r'[\[\]:*?/\\]', ' ', titulo).strip()[:31].strip()
+    """Nombre de la hoja: lo que identifica al reporte (lo que va después del «·»
+    del título, por ejemplo la clave del grupo). Excel limita el nombre a 31
+    caracteres y prohíbe []:*?/\\ ."""
+    identificador = titulo.split('·', 1)[-1]
+    limpio = re.sub(r'[\[\]:*?/\\]', ' ', identificador).strip()[:31].strip()
     return limpio or 'Reporte'
 
 

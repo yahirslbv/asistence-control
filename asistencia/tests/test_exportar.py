@@ -216,7 +216,9 @@ class DescargaDelExcelTests(EscenarioFijo):
             respuesta['Content-Disposition'],
             'attachment; filename="reporte_ADM-101_2026-2.xlsx"')
         self.assertTrue(contenido.startswith(b'PK'))
-        self.assertEqual(hoja_de(contenido)['A1'].value, 'Reporte de asistencia · ADM-101')
+        hoja = hoja_de(contenido)
+        self.assertEqual(hoja['A1'].value, 'Reporte de asistencia · ADM-101')
+        self.assertEqual(hoja.title, 'ADM-101')    # no «Reporte de asistencia · ADM-» cortado
 
     def test_las_celdas_coinciden_con_las_de_la_pantalla(self):
         pantalla = celdas_de_la_tabla(
