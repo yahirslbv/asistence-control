@@ -69,6 +69,8 @@ class EditarSesionTests(TestCase):
         self.assertContains(respuesta, 'value="2026-10-19"')
         self.assertContains(respuesta, 'value="08:00"')
         self.assertContains(respuesta, 'value="10:00"')
+        self.assertContains(respuesta, 'Hora de inicio')
+        self.assertContains(respuesta, 'Hora de fin')
 
     def test_editar_cambia_la_fecha_y_el_horario(self):
         respuesta = self.client.post(self.url, self.datos(), follow=True)

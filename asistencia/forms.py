@@ -111,6 +111,11 @@ class SesionForm(EstiloBootstrapMixin, forms.ModelForm):
     class Meta:
         model = Sesion
         fields = ['fecha', 'hora_inicio', 'hora_fin']
+        labels = {
+            'fecha': 'Fecha',
+            'hora_inicio': 'Hora de inicio',
+            'hora_fin': 'Hora de fin',
+        }
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'hora_inicio': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
