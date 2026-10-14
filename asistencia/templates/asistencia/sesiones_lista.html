@@ -48,7 +48,7 @@
           <tbody>
             {% for sesion in mes.list %}
               <tr>
-                <td>{{ sesion.fecha|date:"D d/m/Y" }}</td>
+                <td>{{ sesion.fecha|date:"l d/m/Y"|capfirst }}</td>
                 <td>{{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }}</td>
                 <td>
                   {% if sesion.estado == 'programada' %}<span class="badge text-bg-primary">Programada</span>

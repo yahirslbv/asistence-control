@@ -245,6 +245,15 @@ class CalendarioVistaTests(TestCase):
         self.assertContains(respuesta, '08:00 – 10:00')
         self.assertEqual(len(respuesta.context['sesiones']), 3)
 
+    def test_muestra_el_nombre_completo_del_dia(self):
+        Sesion.objects.create(grupo=self.grupo, fecha=date(2026, 10, 21),
+                              hora_inicio=time(8, 0), hora_fin=time(10, 0))
+
+        respuesta = self.client.get(self.url)
+
+        self.assertContains(respuesta, 'Lunes 19/10/2026')
+        self.assertContains(respuesta, 'Miércoles 21/10/2026')
+
     def test_filtra_por_fechas(self):
         respuesta = self.client.get(self.url, {'desde': '2026-10-20', 'hasta': '2026-10-31'})
 
