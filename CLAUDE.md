@@ -8,7 +8,7 @@ Léelo completo antes de escribir código. Este archivo es la fuente de verdad d
 - **Problema:** el pase de lista en papel produce registros duplicados, listas perdidas y correcciones que no dejan rastro.
 - **Solución:** aplicación web en Django que sustituye las listas en papel. Módulos: autenticación y usuarios, grupos, sesiones, asistencia y reportes.
 - **Usuarios:** docente y administrador.
-- **Fecha límite de entrega: viernes 27/11/2026.** Hoy es 13/10/2026 (semana 3 de 9) y **todavía no hay código**. La documentación ya existe: requisitos, EDT, modelo entidad-relación, prototipo de pantallas y cronograma.
+- **Fecha límite de entrega: viernes 27/11/2026.** El código ya existe: las fases D, E, F y G están terminadas (ver la sección 12). La documentación previa incluye requisitos, EDT, modelo entidad-relación, prototipo de pantallas y cronograma.
 - **Tablero Trello:** https://trello.com/b/1CRpoq6E/control-de-asistencia-cronograma (una tarjeta por actividad, A–J).
 
 ## 2. Stack
@@ -197,17 +197,28 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] D · Entorno y autenticación
 - [x] E · Grupos y sesiones
 - [x] F · Asistencia (RF-08 a RF-11; RF-12, el justificante, queda pendiente de aprobación)
-- [ ] G · Reportes
+- [x] G · Reportes (RF-13, RF-14 y RF-15: reportes por periodo, grupo y alumno, exportables a PDF y Excel)
 - [ ] I · Manuales
 - [ ] H · Integración y pruebas
 - [ ] J · Despliegue y entrega
 
+### Decisiones tomadas
+
+- **Bajas y reportes (fase G).** Dar de baja a un alumno quita su inscripción y conserva sus registros (`Alumno` no tiene `is_active` en el Apéndice A). Los reportes solo incluyen a los alumnos con inscripción actual: los registros de uno dado de baja no entran al porcentaje del grupo ni salen en la tabla, y su reporte individual responde 404. Siguen visibles en las sesiones donde existen. Si vuelve a inscribirse, vuelve a contar.
+- **Porcentajes.** Se calculan con enteros y `Decimal`, nunca con `float`. Se muestran con un decimal **truncado**, no redondeado (1999 de 2500 se ve 79.9 %, no 80.0 %). La marca de «bajo el mínimo» se decide con enteros: `asistencias × 100 < mínimo × registros`, estrictamente menor.
+- **Sin registros.** Un alumno sin registros muestra «Sin registros», no 0 %, y no se marca como bajo el mínimo.
+- **Porcentaje del grupo.** Es el ponderado: asistencias totales entre registros totales de los inscritos actuales, no el promedio de los porcentajes.
+- **Reporte por periodo.** La pantalla «Reportes» muestra, para el periodo elegido (por defecto el más reciente, ordenados como texto AAAA-N), los grupos del docente con su porcentaje y cuántos alumnos están bajo el mínimo. No hay un porcentaje consolidado de un alumno entre varios grupos.
+- **Pendientes.** Si el grupo tiene sesiones pendientes (RF-10), el reporte avisa que el porcentaje no las incluye por completo.
+- **Exportaciones.** PDF (reportlab, fuente Helvetica) y Excel (openpyxl) salen de la misma tabla que la pantalla. En el Excel ningún texto se convierte en fórmula (los nombres vienen de un CSV). En el PDF un carácter que la fuente no dibuja (por ejemplo «ł» o el japonés) sale como «?» y el PDF lo avisa; el Excel conserva el texto completo.
+- **Pase de lista en sesiones futuras.** Solo se permite si la fecha de la sesión es hoy o anterior (fecha de Tijuana). Una sesión futura muestra un mensaje y ningún formulario; un envío contra ella se rechaza sin crear registros.
+
 ### Decisiones abiertas
 
-- **Efecto de las bajas en los reportes (fase G).** Dar de baja a un alumno quita su inscripción y conserva sus registros pasados (`Alumno` no tiene `is_active` en el Apéndice A). Esos registros siguen apareciendo en las sesiones donde ya existen. Falta decidir si cuentan en el porcentaje del grupo y del periodo (RF-13) y si el alumno dado de baja sale en el reporte del grupo.
+- **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
 - **RF-16 e `is_staff`.** Un usuario creado desde el admin con rol administrador no recibe `is_staff` ni permisos por sí solo, y `createsuperuser` crea usuarios con rol docente. Hoy el administrador de demo se prepara en `seed_demo`.
-- **Pase de lista en sesiones futuras.** El CLAUDE.md no lo restringe y hoy se permite. Propuesta: solo sesiones con fecha igual o anterior a hoy. Razón: una sesión realizada no vuelve a programada, así que un toque equivocado en una sesión futura la deja realizada con registros falsos, y la corrección cambia estados pero no la deshace.
 - **RF-12 (justificante).** Pendiente de aprobación. La corrección ya bloquea con un mensaje el cambio de un registro que tenga justificante, para no chocar con el `CHECK` de la base de datos.
+- **Hosting (actividad J).** Sin definir.
 
 ## 13. Comandos
 
