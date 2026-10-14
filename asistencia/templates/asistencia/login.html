@@ -1,0 +1,44 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Iniciar sesión · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-4 text-center">Control de asistencia</h1>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-4">
+            <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+
+          <input type="hidden" name="next" value="{{ next }}">
+          <button type="submit" class="btn btn-primary btn-lg w-100">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Bootstrap necesita la clase form-control en los campos que genera Django.
+  document.querySelectorAll('input[name="username"], input[name="password"]')
+    .forEach(function (campo) { campo.classList.add('form-control', 'form-control-lg'); });
+</script>
+{% endblock %}

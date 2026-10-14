@@ -1,0 +1,8 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Inicio · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<h1 class="h3">Bienvenido, {{ user.get_full_name|default:user.email }}</h1>
+<p class="text-secondary mb-0">Rol: {{ user.get_rol_display }}</p>
+{% endblock %}
