@@ -121,7 +121,8 @@ asistencia/    única app del proyecto
   backends.py      inicio de sesión con correo
   permissions.py   mixins: cada docente ve solo sus grupos (404 ante uno ajeno)
   forms.py         formularios
-  services/        lógica de negocio: importar CSV, inscripciones, sesiones
+  services/        lógica de negocio: importar CSV, inscripciones, sesiones,
+                   pase de lista y correcciones, sesiones pendientes
   views/           vistas por módulo
   templates/       plantillas con Bootstrap 5
   management/      comando seed_demo
