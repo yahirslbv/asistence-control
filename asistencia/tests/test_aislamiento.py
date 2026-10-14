@@ -4,12 +4,12 @@ Cada docente ve y modifica solo sus grupos. Un grupo ajeno responde 404, no
 403, en toda vista que reciba un `grupo_id` o un `sesion_id`.
 """
 
-from datetime import date
+from datetime import date, time
 
 from django.test import TestCase
 from django.urls import reverse
 
-from asistencia.models import Alumno, Inscripcion
+from asistencia.models import Alumno, Inscripcion, Sesion
 
 from .utils import PASSWORD, crear_administrador, crear_docente, crear_grupo
 
@@ -73,6 +73,20 @@ class AislamientoPorDocenteTests(TestCase):
                     url = reverse('alumno_baja', args=[grupo.pk, alumno.pk])
                     self.assertEqual(getattr(self.client, metodo)(url).status_code, 404)
         self.assertEqual(self.grupo.inscripciones.count(), 1)
+
+    def test_una_sesion_ajena_responde_404(self):
+        sesion = Sesion.objects.create(
+            grupo=self.grupo, fecha=date(2026, 10, 19),
+            hora_inicio=time(8, 0), hora_fin=time(10, 0))
+        self.entrar_como('intruso@asistencia.test')
+
+        for nombre in ('sesion_editar', 'sesion_cancelar'):
+            for metodo in ('get', 'post'):
+                with self.subTest(vista=nombre, metodo=metodo):
+                    url = reverse(nombre, args=[sesion.pk])
+                    self.assertEqual(getattr(self.client, metodo)(url).status_code, 404)
+        sesion.refresh_from_db()
+        self.assertEqual(sesion.estado, Sesion.Estado.PROGRAMADA)
 
     def test_el_dueno_si_entra_a_sus_vistas(self):
         self.entrar_como('docente@asistencia.test')
