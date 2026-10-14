@@ -1,6 +1,7 @@
 """Pruebas de la corrección del pase de lista y de la bitácora (RF-11, RNF-06)."""
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from django.db import connection
 from django.test import TestCase
@@ -14,8 +15,8 @@ from asistencia.services.asistencia import (
 )
 
 from .utils import (
-    PASSWORD, crear_docente, crear_grupo, crear_sesion, datos_del_pase,
-    inscribir_alumnos,
+    PASSWORD, RelojFijoMixin, crear_docente, crear_grupo, crear_sesion,
+    datos_del_pase, inscribir_alumnos,
 )
 
 PRESENTE = Asistencia.Estado.PRESENTE
@@ -26,7 +27,7 @@ JUSTIFICADO = Asistencia.Estado.JUSTIFICADO
 ESTADOS_INICIALES = [PRESENTE, PRESENTE, AUSENTE, RETARDO, PRESENTE]
 
 
-class CorreccionBase(TestCase):
+class CorreccionBase(RelojFijoMixin, TestCase):
     """Una sesión realizada con cinco registros que capturó otro usuario, para
     que se note quién queda como autor de cada corrección."""
 
@@ -76,14 +77,16 @@ class BitacoraDeCorreccionesTests(CorreccionBase):
         self.assertEqual(self.registro(2).registrado_por, self.docente)
 
     def test_la_fecha_de_la_correccion_es_la_de_ahora(self):
-        antes = timezone.now() - timedelta(seconds=5)
+        # Reloj real: el disparador escribe el NOW() de MySQL, que no se parchea.
+        ahora_real = lambda: datetime.now(ZoneInfo('UTC'))   # noqa: E731
+        antes = ahora_real() - timedelta(seconds=5)
 
         self.corregir(self.estados(a0=AUSENTE))
 
         cambio = BitacoraCambio.objects.get()
         # El disparador escribe NOW() en UTC y Django lo lee como UTC: sin desfase de zona.
         self.assertGreaterEqual(cambio.fecha_cambio, antes)
-        self.assertLess(cambio.fecha_cambio, timezone.now() + timedelta(seconds=5))
+        self.assertLess(cambio.fecha_cambio, ahora_real() + timedelta(seconds=5))
 
     def test_una_correccion_sin_cambios_no_genera_bitacora_ni_toca_registrado_por(self):
         respuesta = self.corregir(self.estados(), follow=True)
@@ -145,7 +148,9 @@ class BitacoraVisibleTests(CorreccionBase):
         self.assertContains(respuesta, 'Ausente → Retardo')
         self.assertContains(respuesta, self.alumnos[0].nombre)
         self.assertContains(respuesta, self.docente.email)   # sin nombre, se muestra el correo
-        self.assertContains(respuesta, timezone.localtime().strftime('%d/%m/%Y'))
+        # La fecha mostrada es la del cambio (hora de la base de datos), en hora local.
+        fecha_del_cambio = timezone.localtime(historial[0].fecha_cambio)
+        self.assertContains(respuesta, fecha_del_cambio.strftime('%d/%m/%Y %H:%M'))
 
     def test_la_primera_captura_no_muestra_historial(self):
         sesion = crear_sesion(self.grupo, fecha=date(2026, 10, 20))
@@ -263,7 +268,7 @@ class ValidacionDeLaCorreccionTests(CorreccionBase):
             {a.pk: self.registro(i).estado for i, a in enumerate(self.alumnos)}, self.estados())
 
     def test_una_correccion_sobre_una_sesion_sin_pase_de_lista_se_rechaza(self):
-        sesion = crear_sesion(self.grupo, fecha=date(2026, 10, 22))
+        sesion = crear_sesion(self.grupo, fecha=date(2026, 10, 18))   # pasada: admite pase
 
         respuesta = self.client.post(
             reverse('pase_de_lista', args=[sesion.pk]),
@@ -339,7 +344,7 @@ class JustificanteEnLaCorreccionTests(CorreccionBase):
         self.assertEqual(self.registro(2).estado, AUSENTE)
 
 
-class ConsultasDeLaCorreccionTests(TestCase):
+class ConsultasDeLaCorreccionTests(RelojFijoMixin, TestCase):
     """El número de consultas no depende de cuántos alumnos ni cuántos cambios."""
 
     def setUp(self):

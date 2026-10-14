@@ -1,8 +1,6 @@
 """Pruebas de la alerta de sesiones sin registrar o incompletas (RF-10)."""
 
-from contextlib import contextmanager
 from datetime import date, datetime, time
-from unittest import mock
 from zoneinfo import ZoneInfo
 
 from django.db import connection
@@ -15,29 +13,12 @@ from asistencia.models import Asistencia, Inscripcion, Sesion
 from asistencia.services.pendientes import sesiones_pendientes
 
 from .utils import (
-    PASSWORD, crear_docente, crear_grupo, crear_sesion, datos_del_pase,
-    inscribir_alumnos,
+    AHORA, HOY, PASSWORD, crear_docente, crear_grupo, crear_sesion,
+    datos_del_pase, hora_fija, inscribir_alumnos,
 )
 
-TIJUANA = ZoneInfo('America/Tijuana')
 REALIZADA = Sesion.Estado.REALIZADA
 CANCELADA = Sesion.Estado.CANCELADA
-
-
-def momento(fecha, hora):
-    """Un instante, con zona, a esa fecha y hora de Tijuana."""
-    return datetime.combine(fecha, hora, tzinfo=TIJUANA)
-
-
-# «Ahora» de las pruebas: martes 20/10/2026 a las 18:00, hora de Tijuana.
-AHORA = momento(date(2026, 10, 20), time(18, 0))
-HOY = AHORA.date()
-
-
-@contextmanager
-def hora_fija(instante=AHORA):
-    with mock.patch('django.utils.timezone.now', return_value=instante):
-        yield
 
 
 def registrar(sesion, alumnos, usuario, estado=Asistencia.Estado.PRESENTE):

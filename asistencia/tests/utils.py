@@ -1,10 +1,53 @@
 """Ayudas comunes para las pruebas."""
 
-from datetime import date, time
+from contextlib import contextmanager
+from datetime import date, datetime, time
+from unittest import mock
+from zoneinfo import ZoneInfo
 
 from asistencia.models import Alumno, Grupo, Inscripcion, Sesion, Usuario
 
 PASSWORD = 'clave-de-prueba-123'
+
+TIJUANA = ZoneInfo('America/Tijuana')
+
+
+def momento(fecha, hora):
+    """Un instante, con zona, a esa fecha y hora de Tijuana."""
+    return datetime.combine(fecha, hora, tzinfo=TIJUANA)
+
+
+# «Ahora» de las pruebas que dependen de la fecha: martes 20/10/2026, 18:00 en Tijuana.
+AHORA = momento(date(2026, 10, 20), time(18, 0))
+HOY = AHORA.date()
+
+
+@contextmanager
+def hora_fija(instante=AHORA):
+    """Fija «ahora» (timezone.now) mientras dura el bloque."""
+    with mock.patch('django.utils.timezone.now', return_value=instante):
+        yield
+
+
+class RelojFijoMixin:
+    """Fija «ahora» en AHORA durante toda la clase, incluido `setUpTestData`.
+
+    El pase de lista solo se permite hasta hoy, y estas pruebas usan sesiones
+    con fechas fijas: sin esto dependerían del día en que se corran. Va antes
+    de TestCase en la lista de clases base.
+
+    Solo se parchea `django.utils.timezone.now`: la hora que escribe el
+    disparador de la bitácora (`NOW()` de MySQL) sigue siendo la real.
+    """
+
+    instante = AHORA
+
+    @classmethod
+    def setUpClass(cls):
+        reloj = mock.patch('django.utils.timezone.now', return_value=cls.instante)
+        reloj.start()
+        cls.addClassCleanup(reloj.stop)
+        super().setUpClass()
 
 
 def crear_docente(correo='docente@asistencia.test', username='docente'):

@@ -15,8 +15,8 @@ from asistencia.services.asistencia import (
 )
 
 from .utils import (
-    PASSWORD, crear_docente, crear_grupo, crear_sesion, datos_del_pase,
-    inscribir_alumnos,
+    PASSWORD, RelojFijoMixin, crear_docente, crear_grupo, crear_sesion,
+    datos_del_pase, inscribir_alumnos,
 )
 
 PRESENTE = Asistencia.Estado.PRESENTE
@@ -29,7 +29,7 @@ def mensajes(respuesta):
     return [str(m) for m in get_messages(respuesta.wsgi_request)]
 
 
-class PrimeraCapturaTests(TestCase):
+class PrimeraCapturaTests(RelojFijoMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -226,7 +226,7 @@ class PrimeraCapturaTests(TestCase):
         self.assertFalse(Asistencia.objects.exists())
 
 
-class SesionSinAlumnosONoAdmiteRegistrosTests(TestCase):
+class SesionSinAlumnosONoAdmiteRegistrosTests(RelojFijoMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -275,7 +275,7 @@ class SesionSinAlumnosONoAdmiteRegistrosTests(TestCase):
         self.assertEqual(sesion.estado, Sesion.Estado.PROGRAMADA)
 
 
-class ConsultasDelPaseDeListaTests(TestCase):
+class ConsultasDelPaseDeListaTests(RelojFijoMixin, TestCase):
     """RNF-01 y RNF-07: el número de consultas no crece con el de alumnos."""
 
     def setUp(self):
@@ -321,7 +321,7 @@ class ConsultasDelPaseDeListaTests(TestCase):
         self.assertLessEqual(n_grande, 16)
 
 
-class EnviosSimultaneosTests(TransactionTestCase):
+class EnviosSimultaneosTests(RelojFijoMixin, TransactionTestCase):
     """Dos envíos al mismo tiempo, en hilos con su propia conexión a MySQL."""
 
     def setUp(self):
