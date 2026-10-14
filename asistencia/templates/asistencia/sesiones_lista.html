@@ -43,7 +43,7 @@
       <div class="table-responsive">
         <table class="table table-sm align-middle mb-0">
           <thead>
-            <tr><th>Fecha</th><th>Horario</th><th>Estado</th></tr>
+            <tr><th>Fecha</th><th>Horario</th><th>Estado</th><th></th></tr>
           </thead>
           <tbody>
             {% for sesion in mes.list %}
@@ -54,6 +54,12 @@
                   {% if sesion.estado == 'programada' %}<span class="badge text-bg-primary">Programada</span>
                   {% elif sesion.estado == 'realizada' %}<span class="badge text-bg-success">Realizada</span>
                   {% else %}<span class="badge text-bg-secondary">Cancelada</span>{% endif %}
+                </td>
+                <td class="text-end text-nowrap">
+                  {% if sesion.estado == 'programada' %}
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'sesion_editar' sesion.pk %}">Editar</a>
+                    <a class="btn btn-outline-danger btn-sm" href="{% url 'sesion_cancelar' sesion.pk %}">Cancelar</a>
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}

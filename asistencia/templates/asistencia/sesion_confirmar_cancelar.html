@@ -1,0 +1,26 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Cancelar sesión · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Cancelar sesión</h1>
+
+    <div class="alert alert-warning" role="alert">
+      <p class="mb-2">
+        Se cancelará la sesión de <strong>{{ grupo.clave }}</strong> del
+        <strong>{{ sesion.fecha|date:"l d/m/Y" }}</strong>, de
+        {{ sesion.hora_inicio|time:"H:i" }} a {{ sesion.hora_fin|time:"H:i" }}.
+      </p>
+      <p class="mb-0">La sesión se conserva en el calendario como cancelada y ya no admitirá pase de lista.</p>
+    </div>
+
+    <form method="post" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-warning">Sí, cancelar la sesión</button>
+      <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

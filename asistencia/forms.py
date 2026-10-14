@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
-from .models import Grupo
+from .models import Grupo, Sesion
 from .services.generar_sesiones import (
     DIAS_SEMANA, MAX_DIAS_PERIODO, fechas_de_clase,
 )
@@ -102,6 +102,36 @@ class GenerarSesionesForm(EstiloBootstrapMixin, forms.Form):
                     True for _ in fechas_de_clase(datos['dias'], desde, hasta)):
                 self.add_error(
                     None, 'Ninguna fecha del periodo cae en los días elegidos.')
+        return datos
+
+
+class SesionForm(EstiloBootstrapMixin, forms.ModelForm):
+    """Edición de la fecha y el horario de una sesión programada (RF-07)."""
+
+    class Meta:
+        model = Sesion
+        fields = ['fecha', 'hora_inicio', 'hora_fin']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
+            'hora_fin': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
+        }
+
+    def clean(self):
+        datos = super().clean()
+        fecha, inicio, fin = (datos.get(c) for c in ('fecha', 'hora_inicio', 'hora_fin'))
+        if inicio and fin and fin <= inicio:
+            self.add_error('hora_fin', 'La hora de fin debe ser posterior a la de inicio.')
+        elif fecha and inicio:
+            repetida = (
+                Sesion.objects.filter(
+                    grupo_id=self.instance.grupo_id, fecha=fecha, hora_inicio=inicio)
+                .exclude(pk=self.instance.pk)
+                .exists()
+            )
+            if repetida:
+                self.add_error(
+                    None, 'Este grupo ya tiene una sesión en esa fecha y hora de inicio.')
         return datos
 
 
