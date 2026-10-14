@@ -1,0 +1,5 @@
+Django>=5.2,<5.3
+mysqlclient
+python-dotenv
+openpyxl
+reportlab

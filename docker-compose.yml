@@ -1,0 +1,33 @@
+# MySQL 8 para desarrollo. Los datos viven en un volumen de Docker, fuera del
+# repositorio. Lee DB_NAME, DB_PASSWORD y DB_PORT del archivo .env.
+#
+#   docker compose up -d      # levantar
+#   docker compose down       # apagar (los datos se conservan)
+#   docker compose down -v    # apagar y borrar los datos
+services:
+  db:
+    image: mysql:8.0
+    container_name: control_asistencia_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en el archivo .env}
+      MYSQL_DATABASE: ${DB_NAME:-control_asistencia}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+00:00
+      # Permite crear el disparador de la bitácora (error 1419) con el registro
+      # binario activo. Solo para desarrollo.
+      - --log-bin-trust-function-creators=1
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql_data:
