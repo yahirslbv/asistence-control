@@ -1,0 +1,72 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Sesiones de {{ grupo.clave }} · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Sesiones</li>
+  </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Sesiones de {{ grupo.clave }}</h1>
+  <a class="btn btn-primary" href="{% url 'sesiones_generar' grupo.pk %}">Generar sesiones</a>
+</div>
+
+<form method="get" class="card card-body shadow-sm mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-sm-4">
+      <label class="form-label mb-1" for="desde">Desde</label>
+      <input type="date" class="form-control" id="desde" name="desde" value="{{ desde|date:'Y-m-d' }}">
+    </div>
+    <div class="col-12 col-sm-4">
+      <label class="form-label mb-1" for="hasta">Hasta</label>
+      <input type="date" class="form-control" id="hasta" name="hasta" value="{{ hasta|date:'Y-m-d' }}">
+    </div>
+    <div class="col-12 col-sm-4 d-flex gap-2">
+      <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+      {% if desde or hasta %}
+        <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Quitar filtro</a>
+      {% endif %}
+    </div>
+  </div>
+</form>
+
+{% if sesiones %}
+  {% regroup sesiones by fecha|date:"F Y" as meses %}
+  {% for mes in meses %}
+    <div class="card shadow-sm mb-3">
+      <div class="card-header fw-semibold">{{ mes.grouper|capfirst }}</div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr><th>Fecha</th><th>Horario</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            {% for sesion in mes.list %}
+              <tr>
+                <td>{{ sesion.fecha|date:"D d/m/Y" }}</td>
+                <td>{{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }}</td>
+                <td>
+                  {% if sesion.estado == 'programada' %}<span class="badge text-bg-primary">Programada</span>
+                  {% elif sesion.estado == 'realizada' %}<span class="badge text-bg-success">Realizada</span>
+                  {% else %}<span class="badge text-bg-secondary">Cancelada</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+{% elif desde or hasta %}
+  <div class="alert alert-info" role="alert">No hay sesiones entre esas fechas.</div>
+{% else %}
+  <div class="alert alert-info" role="alert">
+    Este grupo todavía no tiene sesiones. Créalas con «Generar sesiones».
+  </div>
+{% endif %}
+{% endblock %}

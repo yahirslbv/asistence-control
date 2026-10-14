@@ -3,6 +3,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
 from .models import Grupo
+from .services.generar_sesiones import (
+    DIAS_SEMANA, MAX_DIAS_PERIODO, fechas_de_clase,
+)
 from .services.importar_alumnos import (
     LONGITUD_CORREO, LONGITUD_MATRICULA, LONGITUD_NOMBRE, TAMANO_MAXIMO_BYTES,
 )
@@ -50,6 +53,56 @@ class GrupoForm(EstiloBootstrapMixin, forms.ModelForm):
                 'unique_together': 'Ya existe un grupo con esa clave en ese periodo.',
             },
         }
+
+
+class GenerarSesionesForm(EstiloBootstrapMixin, forms.Form):
+    """Horario y periodo para generar las sesiones de un grupo (RF-06)."""
+
+    dias = forms.MultipleChoiceField(
+        label='Días de clase',
+        choices=[(str(numero), nombre) for numero, nombre in DIAS_SEMANA],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        error_messages={'required': 'Elige al menos un día de la semana.'},
+    )
+    hora_inicio = forms.TimeField(
+        label='Hora de inicio',
+        widget=forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
+    )
+    hora_fin = forms.TimeField(
+        label='Hora de fin',
+        widget=forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
+    )
+    fecha_inicio = forms.DateField(
+        label='Primer día del periodo',
+        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+    )
+    fecha_fin = forms.DateField(
+        label='Último día del periodo',
+        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+    )
+
+    def clean_dias(self):
+        return [int(dia) for dia in self.cleaned_data['dias']]
+
+    def clean(self):
+        datos = super().clean()
+        inicio, fin = datos.get('hora_inicio'), datos.get('hora_fin')
+        if inicio and fin and fin <= inicio:
+            self.add_error('hora_fin', 'La hora de fin debe ser posterior a la de inicio.')
+
+        desde, hasta = datos.get('fecha_inicio'), datos.get('fecha_fin')
+        if desde and hasta:
+            if hasta < desde:
+                self.add_error(
+                    'fecha_fin', 'El último día no puede ser anterior al primero.')
+            elif (hasta - desde).days > MAX_DIAS_PERIODO:
+                self.add_error(
+                    'fecha_fin', f'El periodo no puede pasar de {MAX_DIAS_PERIODO} días.')
+            elif datos.get('dias') and not any(
+                    True for _ in fechas_de_clase(datos['dias'], desde, hasta)):
+                self.add_error(
+                    None, 'Ninguna fecha del periodo cae en los días elegidos.')
+        return datos
 
 
 class InscribirAlumnoForm(EstiloBootstrapMixin, forms.Form):

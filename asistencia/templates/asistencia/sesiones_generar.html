@@ -1,0 +1,61 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Generar sesiones · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'sesiones' grupo.pk %}">Sesiones</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Generar</li>
+  </ol>
+</nav>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-9 col-lg-7">
+    <h1 class="h3 mb-1">Generar sesiones de {{ grupo.clave }}</h1>
+    <p class="text-secondary">
+      Se crea una sesión por cada día elegido entre las dos fechas, ambas incluidas.
+      Las que ya existan a esa fecha y hora no se duplican. Si el grupo tiene clases a
+      horas distintas, repite el proceso con cada horario.
+    </p>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <div class="form-label">{{ form.dias.label }}</div>
+            {% for casilla in form.dias %}
+              <div class="form-check form-check-inline">
+                {{ casilla.tag }}
+                <label class="form-check-label" for="{{ casilla.id_for_label }}">{{ casilla.choice_label }}</label>
+              </div>
+            {% endfor %}
+            {% for error in form.dias.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+
+          <div class="row">
+            <div class="col-12 col-sm-6">{% include 'asistencia/_campo.html' with campo=form.hora_inicio %}</div>
+            <div class="col-12 col-sm-6">{% include 'asistencia/_campo.html' with campo=form.hora_fin %}</div>
+            <div class="col-12 col-sm-6">{% include 'asistencia/_campo.html' with campo=form.fecha_inicio %}</div>
+            <div class="col-12 col-sm-6">{% include 'asistencia/_campo.html' with campo=form.fecha_fin %}</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Generar sesiones</button>
+            <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

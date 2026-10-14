@@ -19,4 +19,8 @@ urlpatterns = [
     path('grupos/<int:grupo_id>/alumnos/importar/', views.ImportarAlumnosView.as_view(), name='alumnos_importar'),
     path('grupos/<int:grupo_id>/alumnos/agregar/', views.InscribirAlumnoView.as_view(), name='alumno_agregar'),
     path('grupos/<int:grupo_id>/alumnos/<int:alumno_id>/baja/', views.BajaAlumnoView.as_view(), name='alumno_baja'),
+
+    # Sesiones del grupo (RF-06)
+    path('grupos/<int:grupo_id>/sesiones/', views.SesionListView.as_view(), name='sesiones'),
+    path('grupos/<int:grupo_id>/sesiones/generar/', views.GenerarSesionesView.as_view(), name='sesiones_generar'),
 ]
