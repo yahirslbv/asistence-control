@@ -17,8 +17,8 @@
     <p class="text-secondary mb-0">{{ tabla.subtitulo }}</p>
   </div>
   <div class="d-flex gap-2">
-    <a class="btn btn-outline-primary btn-sm" id="descargar-pdf" href="{% url 'reporte_grupo_exportar' grupo.pk 'pdf' %}">Descargar PDF</a>
-    <a class="btn btn-outline-success btn-sm" id="descargar-excel" href="{% url 'reporte_grupo_exportar' grupo.pk 'xlsx' %}">Descargar Excel</a>
+    <a class="btn btn-outline-primary" id="descargar-pdf" href="{% url 'reporte_grupo_exportar' grupo.pk 'pdf' %}">Descargar PDF</a>
+    <a class="btn btn-outline-success" id="descargar-excel" href="{% url 'reporte_grupo_exportar' grupo.pk 'xlsx' %}">Descargar Excel</a>
   </div>
 </div>
 

@@ -37,8 +37,8 @@
           <tr>
             <th>Grupo</th>
             <th class="d-none d-sm-table-cell">Materia</th>
-            <th class="text-end">Alumnos</th>
-            <th class="text-end">Porcentaje del grupo</th>
+            <th class="d-none d-sm-table-cell text-end">Alumnos</th>
+            <th class="text-end">% del grupo</th>
             <th class="text-end">Bajo el mínimo</th>
             <th></th>
           </tr>
@@ -48,7 +48,7 @@
             <tr>
               <td class="fw-semibold">{{ resumen.grupo.clave }}</td>
               <td class="d-none d-sm-table-cell">{{ resumen.grupo.materia }}</td>
-              <td class="text-end">{{ resumen.alumnos }}</td>
+              <td class="d-none d-sm-table-cell text-end">{{ resumen.alumnos }}</td>
               <td class="text-end">{{ resumen.porcentaje_texto }}</td>
               <td class="text-end">
                 {% if resumen.alumnos_bajo_el_minimo %}
