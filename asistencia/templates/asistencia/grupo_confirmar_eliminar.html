@@ -11,10 +11,11 @@
       <p class="fw-semibold mb-2">Esta acción no se puede deshacer.</p>
       <p class="mb-2">Al eliminar el grupo <strong>{{ grupo.clave }} · {{ grupo.materia }}</strong> ({{ grupo.periodo }}) se borra también todo su historial:</p>
       <ul class="mb-0">
-        <li>{{ impacto.sesiones }} sesión{{ impacto.sesiones|pluralize:"es" }}</li>
-        <li>{{ impacto.inscripciones }} inscripción{{ impacto.inscripciones|pluralize:"es" }} de alumnos</li>
+        {# pluralize no quita el acento (sesión -> sesiones), así que se escribe cada forma #}
+        <li>{{ impacto.sesiones }} {% if impacto.sesiones == 1 %}sesión{% else %}sesiones{% endif %}</li>
+        <li>{{ impacto.inscripciones }} {% if impacto.inscripciones == 1 %}inscripción de un alumno{% else %}inscripciones de alumnos{% endif %}</li>
         <li>{{ impacto.asistencias }} registro{{ impacto.asistencias|pluralize }} de asistencia</li>
-        <li>{{ impacto.cambios }} corrección{{ impacto.cambios|pluralize:"es" }} de la bitácora</li>
+        <li>{{ impacto.cambios }} {% if impacto.cambios == 1 %}corrección{% else %}correcciones{% endif %} de la bitácora</li>
       </ul>
     </div>
 

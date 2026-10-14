@@ -147,6 +147,31 @@ class EliminarGrupoTests(TestCase):
         )
         self.assertTrue(Grupo.objects.filter(pk=self.grupo.pk).exists())
 
+    def test_la_confirmacion_usa_el_singular_cuando_hay_uno(self):
+        respuesta = self.client.get(reverse('grupo_eliminar', args=[self.grupo.pk]))
+
+        self.assertContains(respuesta, '1 sesión<')
+        self.assertContains(respuesta, '1 inscripción de un alumno')
+        self.assertContains(respuesta, '1 registro de asistencia')
+        self.assertContains(respuesta, '1 corrección de la bitácora')
+
+    def test_la_confirmacion_escribe_bien_los_plurales_con_acento(self):
+        grupo = crear_grupo(self.docente, clave='PLURAL-1')
+        for dia in (19, 20):
+            Sesion.objects.create(grupo=grupo, fecha=date(2026, 10, dia),
+                                  hora_inicio=time(8, 0), hora_fin=time(10, 0))
+        for matricula in ('1200010', '1200011'):
+            alumno = Alumno.objects.create(matricula=matricula, nombre=f'Alumno {matricula}')
+            Inscripcion.objects.create(grupo=grupo, alumno=alumno, fecha_alta=date(2026, 10, 12))
+
+        respuesta = self.client.get(reverse('grupo_eliminar', args=[grupo.pk]))
+
+        self.assertContains(respuesta, '2 sesiones<')
+        self.assertContains(respuesta, '2 inscripciones de alumnos')
+        self.assertContains(respuesta, '0 registros de asistencia')
+        self.assertContains(respuesta, '0 correcciones de la bitácora')
+        self.assertNotContains(respuesta, 'ónes')
+
     def test_confirmar_borra_el_grupo_y_su_historial_pero_no_al_alumno(self):
         respuesta = self.client.post(reverse('grupo_eliminar', args=[self.grupo.pk]))
 
