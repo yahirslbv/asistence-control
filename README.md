@@ -90,8 +90,36 @@ La contraseña de demostración está en `PASSWORD_DEMO`, dentro de
 `asistencia/management/commands/seed_demo.py`. Se cambia con la variable de
 entorno `SEED_PASSWORD` antes de ejecutar el comando.
 
-`createsuperuser` crea el usuario con rol **docente**. Si lo usas para tener un
-administrador, cambia su rol a Administrador desde el admin de Django.
+### Alta de usuarios y roles (RF-16)
+
+El administrador da de alta a los usuarios desde el admin de Django
+(<http://127.0.0.1:8000/admin/>, sección **Usuarios**), con nombre, apellido,
+correo, rol, usuario y contraseña. Un administrador solo ve esa sección.
+
+- **El rol manda sobre el acceso.** Al guardar, el sistema ajusta `is_staff` y los
+  permisos según el rol: un administrador puede entrar al admin y gestionar
+  usuarios (y nada más); un docente no entra al admin. No hace falta marcar nada
+  más ni asignar permisos a mano.
+- **Los usuarios no se borran, se desactivan** con la casilla «Activo». Un usuario
+  desactivado ya no puede iniciar sesión.
+- **No se puede desactivar** ni quitar el rol al **último administrador activo**, ni
+  desactivarse a uno mismo.
+
+`createsuperuser` crea el usuario con rol **docente** (y como superusuario sí entra
+al admin). Para que sea también administrador de la aplicación, entra al admin con
+ese usuario, abre su ficha y cambia el rol a Administrador.
+
+## Justificantes y la carpeta `media/`
+
+Los justificantes (RF-12) se adjuntan desde la pantalla de corrección de una
+sesión, solo a registros marcados como justificado. Se aceptan PDF, JPG y PNG de
+hasta 5 MB.
+
+Se guardan en `media/justificantes/` con un nombre aleatorio y **no están en Git**
+(`media/` está en `.gitignore`). Al hacer respaldos, copia esa carpeta además de la
+base de datos: sin ella, los registros conservarían el vínculo pero no el archivo.
+Los archivos no tienen una URL pública: solo se descargan desde la aplicación, por
+el docente dueño del grupo.
 
 ## Pruebas
 
@@ -120,10 +148,12 @@ asistencia/    única app del proyecto
   migrations/      0001 (esquema) y 0002 (disparador de la bitácora)
   backends.py      inicio de sesión con correo
   permissions.py   mixins: cada docente ve solo sus grupos (404 ante uno ajeno)
+  admin.py         alta de usuarios con rol (RF-16)
   forms.py         formularios
   services/        lógica de negocio: importar CSV, inscripciones, sesiones,
-                   pase de lista y correcciones, sesiones pendientes,
-                   reportes y exportación a PDF y Excel
+                   pase de lista y correcciones, justificantes, sesiones
+                   pendientes, usuarios y roles, reportes y exportación a PDF
+                   y Excel
   views/           vistas por módulo
   templates/       plantillas con Bootstrap 5
   management/      comando seed_demo
