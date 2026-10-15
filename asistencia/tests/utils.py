@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 from django.test import override_settings
 
 from asistencia.models import Alumno, Grupo, Inscripcion, Sesion, Usuario
+from asistencia.services.usuarios import sincronizar_permisos
 
 PASSWORD = 'clave-de-prueba-123'
 
@@ -64,10 +65,14 @@ def crear_docente(correo='docente@asistencia.test', username='docente'):
 
 
 def crear_administrador(correo='admin@asistencia.test', username='admin'):
-    return Usuario.objects.create_user(
+    """Un administrador como lo deja el admin de Django: is_staff y los permisos
+    de gestionar usuarios (y solo esos)."""
+    administrador = Usuario.objects.create_user(
         username=username, email=correo, password=PASSWORD,
         rol=Usuario.Rol.ADMINISTRADOR, is_staff=True,
     )
+    sincronizar_permisos(administrador)
+    return administrador
 
 
 def crear_grupo(docente, clave='ADM-101', materia='Administración de Proyectos',
