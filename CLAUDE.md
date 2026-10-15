@@ -57,6 +57,8 @@ control_asistencia/
 │   ├── static/
 │   ├── management/commands/seed_demo.py
 │   └── tests/
+├── docs/
+│   └── informe_pruebas.md   # informe de la fase H
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
@@ -200,7 +202,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] G · Reportes (RF-13, RF-14 y RF-15: reportes por periodo, grupo y alumno, exportables a PDF y Excel)
 - [x] RF-16 · Alta de usuarios con rol, desde el admin de Django (cerrado después de la fase G)
 - [ ] I · Manuales
-- [ ] H · Integración y pruebas
+- [x] H · Integración y pruebas (informe en `docs/informe_pruebas.md`; RNF-01 sin cronometrar con personas)
 - [ ] J · Despliegue y entrega
 
 ### Decisiones tomadas
@@ -224,9 +226,15 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Bajas de usuarios.** No hay borrado de usuarios en el admin (ni la acción masiva): se desactivan con «Activo» (regla 9.5). No se puede desactivar ni quitar el rol al último administrador activo, ni desactivarse a uno mismo; la comprobación bloquea las filas de los administradores activos para que dos cambios simultáneos no la burlen.
 - **`createsuperuser` y `seed_demo`.** `createsuperuser` sigue creando usuarios con rol docente; para tener un administrador de la aplicación se le cambia el rol desde el admin (README). `seed_demo` prepara el administrador de demo con las mismas reglas.
 
+- **Pruebas de integración (fase H).** `test_flujos.py` encadena las pantallas por sus URL y formularios reales, con reloj fijo y cifras calculadas a mano. `test_matriz_de_acceso.py` toma las rutas de `urls.py`: una ruta nueva que no se clasifique rompe la primera prueba, a propósito, y obliga a decidir quién puede entrar. `test_rendimiento.py` protege contra un N+1 en las pantallas que no tenían prueba de conteo.
+- **RNF-07 medido.** Con 6 grupos de 50 alumnos y 48 sesiones (14 400 registros) en MySQL, el peor caso fue 570 ms (importar un CSV de 50 alumnos) contra el límite de 3 s; las demás vistas quedaron por debajo de 280 ms en su peor repetición. Método y tabla completos en `docs/informe_pruebas.md`.
+- **RNF-01 no se cronometra aquí.** Se mide el costo de interacción (5 excepciones = 5 toques y un envío; botones de 48 px; guardar siempre visible), no un tiempo humano. Verificarlo requiere probar con docentes.
+- **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): H-01 botones secundarios `btn-sm` de unos 31 px en el teléfono; H-02 no hay página 500 propia; H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
+
 ### Decisiones abiertas
 
 - **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
+- **Hallazgos H-01 a H-03.** Decidir si se corrigen antes de la entrega (el informe propone cómo) o se dejan como mejoras.
 - **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
 - **Hosting (actividad J).** Sin definir.
 
