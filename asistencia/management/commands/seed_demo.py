@@ -11,11 +11,11 @@ import os
 from datetime import date
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from asistencia.models import Alumno, Grupo, Inscripcion
+from asistencia.services.usuarios import aplicar_rol, sincronizar_permisos
 
 # Contraseña de las cuentas de demostración. Se puede cambiar con la variable
 # de entorno SEED_PASSWORD.
@@ -45,11 +45,10 @@ class Command(BaseCommand):
         password = os.environ.get('SEED_PASSWORD', PASSWORD_DEMO)
         Usuario = get_user_model()
 
-        administrador = self._usuario(
+        self._usuario(
             Usuario, 'admin@asistencia.test', 'Administrador', 'Demo',
             Usuario.Rol.ADMINISTRADOR, password,
         )
-        self._permisos_de_administrador(administrador)
         docente1 = self._usuario(
             Usuario, 'docente1@asistencia.test', 'Elena', 'Ruiz',
             Usuario.Rol.DOCENTE, password,
@@ -97,22 +96,15 @@ class Command(BaseCommand):
                 'last_name': apellido,
                 'rol': rol,
                 'is_active': True,
-                # El administrador entra al admin de Django para dar de alta usuarios.
-                'is_staff': rol == Usuario.Rol.ADMINISTRADOR,
             },
         )
         usuario.set_password(password)
-        usuario.save(update_fields=['password'])
+        # Las mismas reglas que el admin: el rol manda sobre is_staff y los
+        # permisos (el administrador solo gestiona usuarios).
+        aplicar_rol(usuario)
+        usuario.save()
+        sincronizar_permisos(usuario)
         return usuario
-
-    def _permisos_de_administrador(self, administrador):
-        """El administrador solo gestiona usuarios (supuesto 5 del CLAUDE.md)."""
-        permisos = Permission.objects.filter(
-            content_type__app_label='asistencia',
-            content_type__model='usuario',
-            codename__in=['add_usuario', 'change_usuario', 'view_usuario'],
-        )
-        administrador.user_permissions.set(permisos)
 
     def _alumno(self, indice):
         nombre = NOMBRES[indice % len(NOMBRES)]
