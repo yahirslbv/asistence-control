@@ -143,7 +143,7 @@ Reglas de integridad ya definidas:
 4. **Sesión realizada.** Al guardar el pase de lista, la sesión pasa a `realizada`. Una sesión `cancelada` no admite registros.
 5. **Bajas lógicas.** Usuarios y alumnos se desactivan (`is_active=False`), no se borran. Eliminar un grupo borra en cascada sus sesiones, asistencias y bitácora, así que la interfaz debe pedir confirmación explícita.
 6. **Aislamiento por docente (RNF-04).** Ver RNF-04. Es la regla de seguridad principal; agrega una prueba que intente entrar a un grupo de otro docente.
-7. **Justificante** (sugerencia, no está en los requisitos): aceptar PDF, JPG o PNG de hasta 5 MB y guardarlos en `media/justificantes/`.
+7. **Justificante (RF-12).** Solo un registro `justificado` admite justificante, uno por registro. Se aceptan PDF, JPG y PNG de hasta 5 MB (5 MB exactos se aceptan) y se guardan en `media/justificantes/` con nombre aleatorio. Un archivo se acepta solo si su extensión **y** su contenido (firma del archivo) coinciden. Se sirve únicamente a través de la vista, nunca por una URL pública de `media/`. Detalle en «Decisiones tomadas».
 
 ## 10. Pantallas (prototipo de baja fidelidad)
 
@@ -156,7 +156,7 @@ Decisiones de implementación que puedes tomar sin preguntar:
 - **CSV (RF-04):** columnas `matricula,nombre,correo` (correo opcional), leído con `utf-8-sig`. Crea o reutiliza el alumno por matrícula y crea la inscripción. Informa los errores por fila sin abortar todo el archivo.
 - **Generar sesiones (RF-06):** `Grupo` no guarda horario. Usa un formulario con días de la semana, hora de inicio y fin, y fechas de inicio y fin del periodo, y crea las `Sesion` con `bulk_create(ignore_conflicts=True)`.
 - **Aviso de sesión sin registrar (RF-10):** una sesión pasada (fecha anterior a hoy, o de hoy con la hora de fin ya transcurrida, en America/Tijuana) es pendiente si está `programada` sin registros, o `realizada` con inscritos actuales, con `fecha_alta` igual o anterior a la fecha de la sesión, sin registro en ella. Las canceladas no cuentan. Se muestran como alerta en la página de grupos y en la del grupo, con una sola consulta por página.
-- **Alta de usuarios (RF-16):** si falta tiempo, cubrirla primero con el admin de Django.
+- **Alta de usuarios (RF-16):** se cubre con el admin de Django, sin pantallas propias. Detalle en «Decisiones tomadas».
 
 ## 11. Plan por fases (sigue el cronograma y el Trello)
 
@@ -196,8 +196,9 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 
 - [x] D · Entorno y autenticación
 - [x] E · Grupos y sesiones
-- [x] F · Asistencia (RF-08 a RF-11; RF-12, el justificante, queda pendiente de aprobación)
+- [x] F · Asistencia (RF-08 a RF-12; el justificante, RF-12, se adjunta desde la pantalla de corrección)
 - [x] G · Reportes (RF-13, RF-14 y RF-15: reportes por periodo, grupo y alumno, exportables a PDF y Excel)
+- [x] RF-16 · Alta de usuarios con rol, desde el admin de Django (cerrado después de la fase G)
 - [ ] I · Manuales
 - [ ] H · Integración y pruebas
 - [ ] J · Despliegue y entrega
@@ -213,11 +214,20 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Exportaciones.** PDF (reportlab, fuente Helvetica) y Excel (openpyxl) salen de la misma tabla que la pantalla. En el Excel ningún texto se convierte en fórmula (los nombres vienen de un CSV). En el PDF un carácter que la fuente no dibuja (por ejemplo «ł» o el japonés) sale como «?» y el PDF lo avisa; el Excel conserva el texto completo.
 - **Pase de lista en sesiones futuras.** Solo se permite si la fecha de la sesión es hoy o anterior (fecha de Tijuana). Una sesión futura muestra un mensaje y ningún formulario; un envío contra ella se rechaza sin crear registros.
 
+- **Justificante (RF-12).** Se adjunta desde la pantalla de corrección de la sesión, después de guardar el pase de lista; el enlace aparece solo en los registros `justificado`. Es un archivo por registro: reemplazarlo borra el anterior (cuando la transacción ya se confirmó) y quitarlo pide confirmación, deja el campo en `NULL` y borra el archivo.
+- **Validación del justificante.** Se exige extensión PDF, JPG, JPEG o PNG **y** que la firma del contenido (`%PDF-`, `FF D8 FF`, `89 50 4E 47 0D 0A 1A 0A`) corresponda al mismo tipo; un `.html` renombrado a `.pdf` se rechaza. Vacío o de más de 5 MB se rechaza. No se usa Pillow para validar.
+- **Almacenamiento y descarga del justificante.** El archivo se guarda como `<uuid4 hex>.<ext>`; el nombre original se descarta. Solo se descarga por la vista (adjunto, `justificante_<matrícula>_<AAAA-MM-DD>.<ext>`, tipo según la firma, `Cache-Control: private, no-store`) y solo para el docente dueño del grupo; no hay URL pública de `media/`. Adjuntar o quitar solo toca el campo `justificante`: no cambia el estado, `registrado_por` ni la bitácora.
+- **Justificante y corrección.** Un registro con justificante solo admite el estado `justificado`: para cambiarlo hay que quitar primero el justificante (la pantalla lo avisa), así no se choca con el `CHECK` de la base de datos.
+- **Justificante y eliminación de grupo.** La confirmación de eliminar un grupo cuenta los justificantes adjuntos y avisa que los archivos también se borran; se borran una vez confirmada la eliminación.
+- **Alta de usuarios (RF-16).** Solo en el admin de Django, donde el administrador ve únicamente «Usuarios». El alta pide nombre, apellido, correo, rol, usuario y contraseña.
+- **El rol manda sobre el acceso al admin.** Al guardar un usuario, `is_staff` y los permisos se ajustan al rol (`services/usuarios.py`): administrador con `is_staff` y solo ver/agregar/modificar usuario; docente sin `is_staff` y sin esos permisos. El admin no deja editar `is_staff`, superusuario, grupos ni permisos sueltos, para que nadie se dé más acceso. Quien gestiona usuarios no puede modificar a un superusuario. Un docente no entra al admin y un administrador no ve los grupos (403).
+- **Bajas de usuarios.** No hay borrado de usuarios en el admin (ni la acción masiva): se desactivan con «Activo» (regla 9.5). No se puede desactivar ni quitar el rol al último administrador activo, ni desactivarse a uno mismo; la comprobación bloquea las filas de los administradores activos para que dos cambios simultáneos no la burlen.
+- **`createsuperuser` y `seed_demo`.** `createsuperuser` sigue creando usuarios con rol docente; para tener un administrador de la aplicación se le cambia el rol desde el admin (README). `seed_demo` prepara el administrador de demo con las mismas reglas.
+
 ### Decisiones abiertas
 
 - **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
-- **RF-16 e `is_staff`.** Un usuario creado desde el admin con rol administrador no recibe `is_staff` ni permisos por sí solo, y `createsuperuser` crea usuarios con rol docente. Hoy el administrador de demo se prepara en `seed_demo`.
-- **RF-12 (justificante).** Pendiente de aprobación. La corrección ya bloquea con un mensaje el cambio de un registro que tenga justificante, para no chocar con el `CHECK` de la base de datos.
+- **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
 - **Hosting (actividad J).** Sin definir.
 
 ## 13. Comandos
