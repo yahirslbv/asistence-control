@@ -128,7 +128,11 @@ python manage.py test
 ```
 
 El usuario de MySQL necesita permiso para crear la base `test_control_asistencia`
-(`root` en el contenedor ya lo tiene).
+(`root` en el contenedor ya lo tiene). La suite completa (406 pruebas) tardó unos siete minutos en la última corrida.
+
+Los resultados de las pruebas de la fase H (flujos de extremo a extremo, matriz de
+acceso, mediciones del RNF-07, revisión responsiva y hallazgos) están en
+[docs/informe_pruebas.md](docs/informe_pruebas.md).
 
 ## Supuestos sin confirmar
 
@@ -158,4 +162,5 @@ asistencia/    única app del proyecto
   templates/       plantillas con Bootstrap 5
   management/      comando seed_demo
   tests/           pruebas
+docs/          informe de pruebas (fase H)
 ```
