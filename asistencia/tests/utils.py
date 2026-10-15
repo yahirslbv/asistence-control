@@ -1,10 +1,15 @@
 """Ayudas comunes para las pruebas."""
 
+import shutil
+import tempfile
 from contextlib import contextmanager
 from datetime import date, datetime, time
 from html.parser import HTMLParser
+from pathlib import Path
 from unittest import mock
 from zoneinfo import ZoneInfo
+
+from django.test import override_settings
 
 from asistencia.models import Alumno, Grupo, Inscripcion, Sesion, Usuario
 
@@ -89,6 +94,27 @@ def inscribir_alumnos(grupo, cantidad, primera_matricula=1200000,
         Inscripcion.objects.create(grupo=grupo, alumno=alumno, fecha_alta=fecha_alta)
         alumnos.append(alumno)
     return alumnos
+
+
+class MediaTemporalMixin:
+    """Los archivos subidos en las pruebas van a una carpeta temporal, nunca a
+    media/ del proyecto. La carpeta se borra al terminar la clase."""
+
+    @classmethod
+    def setUpClass(cls):
+        carpeta = tempfile.mkdtemp(prefix='justificantes_prueba_')
+        cls.addClassCleanup(shutil.rmtree, carpeta, True)
+        cls.media_temporal = Path(carpeta)
+        cls.enterClassContext(override_settings(MEDIA_ROOT=carpeta))
+        super().setUpClass()
+
+    def vaciar_justificantes(self):
+        shutil.rmtree(self.media_temporal / 'justificantes', ignore_errors=True)
+
+    def archivos_de_justificantes(self):
+        """Nombres de los archivos que hay hoy en media/justificantes/."""
+        carpeta = self.media_temporal / 'justificantes'
+        return sorted(p.name for p in carpeta.glob('*')) if carpeta.exists() else []
 
 
 class _ExtractorDeTabla(HTMLParser):

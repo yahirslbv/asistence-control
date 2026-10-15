@@ -143,7 +143,8 @@ class EliminarGrupoTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual(
             respuesta.context['impacto'],
-            {'sesiones': 1, 'inscripciones': 1, 'asistencias': 1, 'cambios': 1},
+            {'sesiones': 1, 'inscripciones': 1, 'asistencias': 1, 'cambios': 1,
+             'justificantes': 0},
         )
         self.assertTrue(Grupo.objects.filter(pk=self.grupo.pk).exists())
 
