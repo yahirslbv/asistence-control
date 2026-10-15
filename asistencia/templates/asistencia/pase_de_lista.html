@@ -90,6 +90,19 @@
               <label class="btn btn-outline-{{ color }} estado-btn" for="a{{ fila.alumno.pk }}-{{ valor }}">{{ etiqueta }}</label>
             {% endfor %}
           </div>
+          {# Justificante (RF-12): solo en registros ya guardados como «justificado». #}
+          {% if fila.registro and fila.estado == 'justificado' %}
+            <div class="small mt-2">
+              {% if fila.registro.justificante %}
+                <span class="text-success">Justificante adjunto</span> ·
+                <a href="{% url 'justificante_archivo' sesion.pk fila.alumno.pk %}">Ver</a> ·
+                <a href="{% url 'justificante' sesion.pk fila.alumno.pk %}">Reemplazar</a> ·
+                <a class="text-danger" href="{% url 'justificante_quitar' sesion.pk fila.alumno.pk %}">Quitar</a>
+              {% else %}
+                <a href="{% url 'justificante' sesion.pk fila.alumno.pk %}">Adjuntar justificante</a>
+              {% endif %}
+            </div>
+          {% endif %}
         </div>
       </div>
     {% endfor %}

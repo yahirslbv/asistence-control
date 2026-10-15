@@ -1,0 +1,62 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Justificante · {{ alumno.nombre }} · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'grupos' %}">Grupos</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'grupo_detalle' grupo.pk %}">{{ grupo.clave }}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'pase_de_lista' sesion.pk %}">Pase de lista</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Justificante</li>
+  </ol>
+</nav>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-9 col-lg-7">
+    <h1 class="h3 mb-1">Justificante de {{ alumno.nombre }}</h1>
+    <p class="text-secondary">
+      {{ alumno.matricula }} · {{ grupo.clave }} · {{ sesion.fecha|date:"l d/m/Y"|capfirst }} ·
+      Estado: <strong>{{ registro.get_estado_display }}</strong>
+    </p>
+
+    {% if not admite %}
+      <div class="alert alert-warning" role="alert">
+        Solo un registro <strong>justificado</strong> admite justificante. Cambia el estado desde el pase de lista de la sesión.
+      </div>
+      <a class="btn btn-outline-secondary" href="{% url 'pase_de_lista' sesion.pk %}">Volver a la sesión</a>
+    {% else %}
+      {% if tiene %}
+        <div class="card shadow-sm mb-3">
+          <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <div class="fw-semibold">Justificante adjunto</div>
+              <div class="small text-secondary">
+                {{ tipo }}{% if tamano is not None %} · {{ tamano|filesizeformat }}{% else %} · archivo no disponible{% endif %}
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <a class="btn btn-outline-primary" href="{% url 'justificante_archivo' sesion.pk alumno.pk %}">Ver</a>
+              <a class="btn btn-outline-danger" href="{% url 'justificante_quitar' sesion.pk alumno.pk %}">Quitar</a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="card shadow-sm">
+        <div class="card-header">{% if tiene %}Reemplazar el justificante{% else %}Adjuntar un justificante{% endif %}</div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% include 'asistencia/_campo.html' with campo=form.archivo %}
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">{% if tiene %}Reemplazar{% else %}Adjuntar{% endif %}</button>
+              <a class="btn btn-outline-secondary" href="{% url 'pase_de_lista' sesion.pk %}">Volver a la sesión</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

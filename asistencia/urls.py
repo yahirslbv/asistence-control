@@ -30,6 +30,11 @@ urlpatterns = [
     path('pase-de-lista/', views.PaseDeListaInicioView.as_view(), name='pase_de_lista_inicio'),
     path('sesiones/<int:sesion_id>/asistencia/', views.PaseDeListaView.as_view(), name='pase_de_lista'),
 
+    # Justificantes (RF-12)
+    path('sesiones/<int:sesion_id>/asistencia/<int:alumno_id>/justificante/', views.JustificanteView.as_view(), name='justificante'),
+    path('sesiones/<int:sesion_id>/asistencia/<int:alumno_id>/justificante/archivo/', views.DescargarJustificanteView.as_view(), name='justificante_archivo'),
+    path('sesiones/<int:sesion_id>/asistencia/<int:alumno_id>/justificante/quitar/', views.QuitarJustificanteView.as_view(), name='justificante_quitar'),
+
     # Reportes (RF-13, RF-14)
     path('reportes/', views.ReportesInicioView.as_view(), name='reportes'),
     path('grupos/<int:grupo_id>/reporte/', views.ReporteGrupoView.as_view(), name='reporte_grupo'),

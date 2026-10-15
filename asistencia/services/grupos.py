@@ -1,6 +1,7 @@
 """Lógica de negocio de los grupos (RF-03)."""
 
 from ..models import Asistencia, BitacoraCambio
+from .justificantes import nombres_de_justificantes
 
 
 def impacto_de_eliminar(grupo):
@@ -15,4 +16,6 @@ def impacto_de_eliminar(grupo):
         'inscripciones': grupo.inscripciones.count(),
         'asistencias': Asistencia.objects.filter(sesion__grupo=grupo).count(),
         'cambios': BitacoraCambio.objects.filter(asistencia__sesion__grupo=grupo).count(),
+        # Archivos de justificante que también se borran del disco (RF-12).
+        'justificantes': len(nombres_de_justificantes(grupo)),
     }

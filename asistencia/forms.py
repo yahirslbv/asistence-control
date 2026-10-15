@@ -9,6 +9,7 @@ from .services.generar_sesiones import (
 from .services.importar_alumnos import (
     LONGITUD_CORREO, LONGITUD_MATRICULA, LONGITUD_NOMBRE, TAMANO_MAXIMO_BYTES,
 )
+from .services.justificantes import ArchivoNoValido, validar_archivo
 
 
 class EstiloBootstrapMixin:
@@ -152,6 +153,24 @@ class InscribirAlumnoForm(EstiloBootstrapMixin, forms.Form):
 
     def clean_nombre(self):
         return ' '.join(self.cleaned_data['nombre'].split())
+
+
+class JustificanteForm(EstiloBootstrapMixin, forms.Form):
+    """Archivo del justificante de un registro (RF-12)."""
+
+    archivo = forms.FileField(
+        label='Archivo del justificante',
+        help_text='PDF, JPG o PNG, de hasta 5 MB.',
+        widget=forms.ClearableFileInput(attrs={'accept': '.pdf,.jpg,.jpeg,.png'}),
+    )
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data['archivo']
+        try:
+            validar_archivo(archivo.name, archivo)
+        except ArchivoNoValido as error:
+            raise forms.ValidationError(str(error))
+        return archivo
 
 
 class ImportarAlumnosForm(EstiloBootstrapMixin, forms.Form):

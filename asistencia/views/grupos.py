@@ -16,6 +16,7 @@ from ..services.importar_alumnos import ErrorDeArchivo, importar_alumnos
 from ..services.inscripciones import (
     dar_de_baja, inscribir_alumno, registros_que_se_conservan,
 )
+from ..services.justificantes import borrar_archivos, nombres_de_justificantes
 from ..services.pendientes import sesiones_pendientes
 
 MENSAJE_GRUPO_DUPLICADO = 'Ya existe un grupo con esa clave en ese periodo.'
@@ -201,6 +202,9 @@ class GrupoEliminarView(GrupoDelDocenteMixin, DeleteView):
 
     def form_valid(self, form):
         clave = self.grupo.clave
+        archivos = nombres_de_justificantes(self.grupo)   # antes de que el borrado los suelte
         respuesta = super().form_valid(form)
+        # Los archivos se borran del disco solo cuando la baja ya está confirmada.
+        transaction.on_commit(lambda: borrar_archivos(archivos))
         messages.success(self.request, f'Grupo {clave} eliminado junto con su historial.')
         return respuesta

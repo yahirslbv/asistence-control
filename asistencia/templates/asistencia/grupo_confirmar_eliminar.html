@@ -16,6 +16,7 @@
         <li>{{ impacto.inscripciones }} {% if impacto.inscripciones == 1 %}inscripción de un alumno{% else %}inscripciones de alumnos{% endif %}</li>
         <li>{{ impacto.asistencias }} registro{{ impacto.asistencias|pluralize }} de asistencia</li>
         <li>{{ impacto.cambios }} {% if impacto.cambios == 1 %}corrección{% else %}correcciones{% endif %} de la bitácora</li>
+        <li>{{ impacto.justificantes }} justificante{{ impacto.justificantes|pluralize }} adjunto{{ impacto.justificantes|pluralize }} (los archivos también se borran del servidor)</li>
       </ul>
     </div>
 

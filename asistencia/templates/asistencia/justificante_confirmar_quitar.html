@@ -1,0 +1,25 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Quitar justificante · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Quitar el justificante de {{ alumno.nombre }}</h1>
+
+    <div class="alert alert-warning" role="alert">
+      <p class="mb-2">
+        Se quitará el justificante de <strong>{{ alumno.matricula }} · {{ alumno.nombre }}</strong>
+        en la sesión del {{ sesion.fecha|date:"d/m/Y" }} y el archivo se borrará del servidor.
+      </p>
+      <p class="mb-0">El registro seguirá como «Justificado». Si el justificante era la evidencia, conserva una copia antes de continuar.</p>
+    </div>
+
+    <form method="post" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-warning">Sí, quitar el justificante</button>
+      <a class="btn btn-outline-secondary" href="{% url 'justificante' sesion.pk alumno.pk %}">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
