@@ -162,5 +162,5 @@ asistencia/    única app del proyecto
   templates/       plantillas con Bootstrap 5
   management/      comando seed_demo
   tests/           pruebas
-docs/          informe de pruebas (fase H)
+docs/          informe de pruebas (fase H) y seguimiento semanal contra el cronograma
 ```

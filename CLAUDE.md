@@ -58,7 +58,8 @@ control_asistencia/
 │   ├── management/commands/seed_demo.py
 │   └── tests/
 ├── docs/
-│   └── informe_pruebas.md   # informe de la fase H
+│   ├── informe_pruebas.md      # informe de la fase H
+│   └── seguimiento_semanal.md  # avance contra el cronograma y el tablero de Trello
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
