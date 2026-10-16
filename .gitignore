@@ -1,6 +1,9 @@
-# Entorno y secretos
+# Entorno y secretos (.env.prod, .env.local, etc.; solo los ejemplos se versionan)
 .venv/
 .env
+.env.*
+!.env.example
+!.env.prod.example
 
 # Python
 __pycache__/
@@ -11,6 +14,7 @@ __pycache__/
 media/
 respaldos/
 *.sql
+*.sql.gz
 
 # Archivos estáticos recolectados
 staticfiles/
