@@ -70,27 +70,31 @@ Lee lo indicado en la sección 2, haz las preguntas de la sección 3 y resume en
 
 ### B2. Configuración de producción y página 500 (H-02)
 En `settings.py`, todo por variables de entorno, sin romper el desarrollo:
-- `DJANGO_DEBUG` apagado por defecto en producción. Con `DEBUG=0`, si falta `DJANGO_SECRET_KEY` o tiene el valor del ejemplo, la aplicación debe negarse a arrancar (`ImproperlyConfigured`), no seguir con una clave débil.
-- `DJANGO_ALLOWED_HOSTS` y `DJANGO_CSRF_TRUSTED_ORIGINS` (con esquema, por ejemplo `https://midominio.com`), como listas separadas por comas.
+- `DJANGO_DEBUG` **ya está apagado por defecto**: no lo cambies. Con `DEBUG=0`, si falta `DJANGO_SECRET_KEY`, está vacía o tiene el valor del ejemplo (`cambia-esto`), la aplicación debe negarse a arrancar (`ImproperlyConfigured`), no seguir con una clave débil. **Ojo con B4:** `collectstatic` durante la construcción de la imagen importa `settings.py` sin variables de entorno, así que esta regla lo aborta si no se le pasa una clave desechable en esa línea. Prueba la regla en un proceso aparte (`subprocess` con `DJANGO_DEBUG=0` y sin clave), no recargando `settings` dentro del proceso de pruebas.
+- `DJANGO_ALLOWED_HOSTS` **ya existe**; agrega `DJANGO_CSRF_TRUSTED_ORIGINS` (con esquema, por ejemplo `https://midominio.com`). Las dos son listas separadas por comas.
 - Variable `DJANGO_HTTPS` (`1` en un servidor con HTTPS, `0` en demo local por HTTP). Con `1`: `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')` porque detrás del proxy Django ve HTTP. HSTS empieza con un valor bajo (`SECURE_HSTS_SECONDS` de 3600) y se sube después; uno largo en un dominio de prueba es difícil de revertir.
-- Conserva `time_zone='+00:00'` en las opciones de conexión.
+- Conserva `time_zone='+00:00'` y `sql_mode` del `init_command` de la conexión.
 - Página 500: `templates/500.html` **independiente**, sin `{% extends %}` ni `{% url %}` ni `request.user`, porque Django la renderiza sin contexto y el error puede venir de la propia base de datos. En español, con un enlace simple al inicio (ruta fija).
 - Prueba de la página 500 con `DEBUG=False`: una vista que lance una excepción y `Client(raise_request_exception=False)`; comprueba el código 500 y el contenido de la plantilla.
 
-Criterio: `python manage.py check --deploy` con las variables de producción no muestra advertencias, o las que queden están anotadas y justificadas en el README. Suite completa en verde.
+Criterio: `python manage.py check --deploy` con las variables de producción no muestra advertencias, o las que queden están anotadas y justificadas en el README. **Línea base medida el 15/10/2026** con `DEBUG=0` y una clave larga, antes de cualquier cambio: 4 advertencias (`W004` HSTS, `W008` redirección SSL, `W012` cookie de sesión, `W016` cookie CSRF). Con `DJANGO_HTTPS=1` deberían desaparecer `W004`, `W012` y `W016`. `W008` (`SECURE_SSL_REDIRECT`) se queda porque la redirección a HTTPS la hace Caddy: anótala y justifícala en el README. Suite completa en verde.
 
 ### B3. Archivos estáticos
-- `STATIC_ROOT`, `whitenoise` en `MIDDLEWARE` justo después de `SecurityMiddleware`, y almacenamiento comprimido con manifiesto.
-- **WhiteNoise sirve solo `static/`. `media/` no debe pasar por WhiteNoise ni por ninguna URL pública.** Comprueba que `config/urls.py` solo sirve `media/` con `DEBUG` y que los justificantes siguen saliendo únicamente por la vista.
-- Si Victo respondió que la demo puede ser sin internet (pregunta 3), copia Bootstrap 5.3.3 (CSS y JS) a `static/` y ajusta la plantilla base para usarlo en lugar del CDN.
+- `STATIC_ROOT`, `whitenoise` en `MIDDLEWARE` justo después de `SecurityMiddleware`, y almacenamiento comprimido con manifiesto en `STORAGES['staticfiles']`.
+- **El manifiesto se activa solo por una variable de entorno (`DJANGO_STATIC_MANIFEST=1`), nunca por defecto.** Comprobado el 15/10/2026: con el manifiesto activo y sin `collectstatic` previo, 7 de 11 pruebas del admin fallan con `Missing staticfiles manifest entry for 'admin/css/base.css'`, porque el ejecutor de pruebas fuerza `DEBUG=False`. Fija la variable con `ENV DJANGO_STATIC_MANIFEST=1` en el `Dockerfile` para que `collectstatic` (al construir) y `gunicorn` (al correr) usen el mismo almacenamiento. En desarrollo y en las pruebas la variable no existe y todo queda como hoy: sin ella, las 11 pruebas pasan; con ella y el manifiesto ya generado, también.
+- **WhiteNoise sirve solo `static/`. `media/` no debe pasar por WhiteNoise ni por ninguna URL pública.** `config/urls.py` hoy **no sirve `media/` ni con `DEBUG`**, así que no hay nada que quitar: no agregues nunca `static(settings.MEDIA_URL, ...)`. La prueba `test_no_hay_url_publica_del_archivo`, de `test_justificantes.py`, ya lo protege; confirma que sigue pasando después de instalar WhiteNoise.
+- Si Victo respondió que la demo puede ser sin internet (pregunta 3), copia Bootstrap 5.3.3 (CSS y JS) a `static/` y ajusta la plantilla base para usarlo en lugar del CDN, con tres precauciones comprobadas el 15/10/2026:
+  1. Copia también los archivos `.map`. Con el manifiesto, si el CSS apunta a un mapa ausente, `collectstatic` falla con `ValueError: The file 'css/bootstrap.min.css.map' could not be found`.
+  2. **Quita el atributo `integrity` de las dos etiquetas** (`<link>` y `<script>`). El manifiesto reescribe dentro del CSS la referencia al `.map`, así que el archivo servido ya no coincide con el hash del CDN y el navegador lo bloquearía.
+  3. Usa `{% static 'vendor/bootstrap/...' %}`; la plantilla ya hace `{% load static %}`.
 
-Criterio: con `DEBUG=0`, `collectstatic` termina sin errores y el CSS del admin y de la base cargan.
+Criterio: con `DEBUG=0` y `DJANGO_STATIC_MANIFEST=1`, `collectstatic` termina sin errores y el CSS del admin y de la base cargan; y la suite completa sigue en verde **sin** esa variable.
 
 ### B4. Imagen de la aplicación
 - `Dockerfile` basado en Python 3.11 slim. `mysqlclient` se compila en Linux: instala las dependencias de compilación necesarias y no las dejes en la imagen final (por ejemplo, en dos etapas).
 - Usuario sin privilegios (no `root`) con permiso de escritura sobre `media/`.
 - `.dockerignore` (`.env*`, `.venv`, `.git`, `media/`, `respaldos/`, `__pycache__`).
-- `collectstatic` durante la construcción de la imagen.
+- `ENV DJANGO_STATIC_MANIFEST=1` (ver B3) y luego `collectstatic` durante la construcción, **con una clave desechable solo en esa línea**: `RUN DJANGO_DEBUG=0 DJANGO_SECRET_KEY=solo-para-construir-la-imagen python manage.py collectstatic --noinput`. Comprobado el 15/10/2026: sin ella, la regla de B2 aborta la construcción con `ImproperlyConfigured`; con ella termina bien. No es un secreto (el contenedor real usa la clave de `.env.prod`) y nunca debe ser el valor del ejemplo.
 - Entrypoint: espera a que la base responda, ejecuta `python manage.py migrate --noinput` y luego `gunicorn config.wsgi` (a `0.0.0.0:8000`, 3 workers, `--timeout 30`, registro de accesos a la salida estándar).
 
 ### B5. `docker-compose.prod.yml` y `.env.prod.example`
