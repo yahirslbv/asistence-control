@@ -131,18 +131,18 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 
 ## 6. Lista de verificación final
 
-1. `docker compose -f docker-compose.prod.yml up -d --build` desde cero: los tres servicios sanos.
+1. `docker compose -f docker-compose.prod.yml up -d --build` desde cero: los tres servicios sanos (el `healthcheck` de `web` en verde, con un `Host` válido). Que `migrate` corra dentro del contenedor prueba a la vez que `mysqlclient` compiló en Linux y que la autenticación contra MySQL 8 funciona (ver la sección 9, «No comprobado»).
 2. Un docente y un administrador inician sesión y ven sus pantallas.
-3. El CSS de Bootstrap y el del admin cargan con `DEBUG=0`.
+3. El CSS de Bootstrap y el del admin cargan con `DEBUG=0` (si se autoaloja Bootstrap, sin el atributo `integrity`).
 4. Pase de lista y una corrección: aparece la fila en la bitácora (el disparador funciona con el usuario de base de datos sin privilegios).
 5. Se sube un justificante, se ejecuta `docker compose ... down` (**sin `-v`**) y `up -d`, y el justificante se sigue descargando por la vista.
 6. Una URL directa a `/media/...` responde 404.
 7. Una excepción provocada muestra la página 500 propia con `DEBUG=0`.
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
-9. El respaldo genera los dos archivos, la restauración de prueba coincide y el disparador existe tras restaurar.
-10. `python manage.py check --deploy` limpio, o con excepciones justificadas.
-11. La suite completa sigue pasando (406 pruebas más las nuevas).
-12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado.
+9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
+10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
+11. La suite completa sigue pasando (406 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
+12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
 ## 7. Lo que no puedes hacer tú (le toca a Victo)
 
@@ -151,9 +151,36 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 - Decidir si el repositorio sigue público. La contraseña de demostración ya está en el historial de Git: cambiarla en el código no la borra, así que ninguna cuenta de demostración debe existir nunca en un entorno real. Además, cada commit lleva el correo del autor.
 - Confirmar con su profesora el mínimo de asistencia (80 % es un supuesto) y si el sistema debe estar en internet.
 - La capacitación a los docentes, el acta de aceptación firmada y la prueba de tiempo del RNF-01 con una persona real.
+- Programar la fase I (manuales de usuario y de administrador): en el cronograma, la actividad J depende de H **e I**, y sin los manuales no se puede firmar el acta. Este documento la deja fuera a propósito.
 
 ## 8. Cierre
 
 - Corre la suite completa y confirma que todo pasa.
-- Actualiza `CLAUDE.md`: en la sección 12, la fase J **no se marca como terminada**; deja anotado qué subtareas técnicas quedaron hechas (despliegue técnico, RNF-08, H-02, contraseña de demostración) y cuáles siguen pendientes (hosting, capacitación, acta). Anota las decisiones abiertas que queden.
+- Actualiza `CLAUDE.md`: la sección 4 (estructura) con los archivos nuevos (`Dockerfile`, `docker-compose.prod.yml`, `.dockerignore`, `.env.prod.example`, `scripts/` y los demás que crees), la sección 13 (comandos de despliegue) y la sección 12: la fase J **no se marca como terminada**; deja anotado qué subtareas técnicas quedaron hechas (despliegue técnico, RNF-08, H-02, contraseña de demostración) y cuáles siguen pendientes (hosting, capacitación, acta). Anota las decisiones abiertas que queden.
+- Si tienes acceso al tablero de Trello, marca en la tarjeta J solo las subtareas técnicas hechas (respaldo diario, contraseña de demostración, página 500) y actualiza `docs/seguimiento_semanal.md`.
 - Resumen corto al terminar: qué quedó, qué falló si algo falló y qué necesitas de Victo.
+
+## 9. Comprobaciones del 15/10/2026
+
+Se hicieron en un MySQL 8.0.46 desechable (eliminado al terminar), con configuraciones de prueba fuera del repositorio y sobre el código tal como estaba. Las cifras y los mensajes de error de este documento salen de aquí.
+
+| Comprobación | Resultado |
+|---|---|
+| `.gitignore` con `.env.*` | 8 nombres que deben ignorarse y 7 que deben versionarse: 15 de 15 correctos; ningún archivo ya versionado quedó afectado |
+| Manifiesto de estáticos y pruebas del admin | Sin la variable: 11 de 11 pruebas pasan. Con manifiesto y sin `collectstatic` previo: 7 de 11 fallan (`Missing staticfiles manifest entry`). Con `collectstatic` previo: 11 de 11 |
+| Bootstrap autoalojado con manifiesto | `collectstatic` falla sin el `.map` (`ValueError`) y pasa con él; el CSS servido trae la referencia al `.map` reescrita |
+| Clave obligatoria frente a `collectstatic` | Sin clave: `ImproperlyConfigured`. Con una clave desechable en esa línea: termina bien |
+| `ALLOWED_HOSTS` de producción frente a un `healthcheck` | `Host: 127.0.0.1` y `localhost` dan 400; el dominio da 200 |
+| `check --deploy` sobre la configuración actual | 4 advertencias: `W004`, `W008`, `W012`, `W016` |
+| Disparador creado por un usuario sin `SUPER` | Funciona con `--log-bin-trust-function-creators=1` y escribe en la bitácora; sin la bandera, error 1419 |
+| `mysqldump` con el usuario de la aplicación | Error de privilegio `PROCESS` en la salida de errores, código de salida 0 y archivo completo que incluye el disparador; con `--no-tablespaces` no hay error |
+| Restauración | Como `root`: mismas filas y un disparador. El usuario de la aplicación no puede crear la base temporal (error 1044) |
+| Usuario `DEFINER` ausente | `UPDATE` de `estado` y de `justificante`: ambos fallan con el error 1449 |
+| `MYSQL_USER` y `MYSQL_PASSWORD` | Solo se aplican al primer arranque del volumen; la contraseña nueva no entra y la original sí |
+| `docker compose exec` sin `-T` y sin terminal | Funcionó en Compose v5.5.1 |
+| `test_no_hay_url_publica_del_archivo` | Pasa hoy |
+
+**No comprobado** (verifícalo al llegar al bloque correspondiente y repórtalo):
+- Que `mysqlclient` compile en una imagen `python:3.11-slim` de Debian y conecte a MySQL 8 con su método de autenticación por defecto (`caching_sha2_password`). El equipo de desarrollo es Windows y usa una rueda ya compilada. Se verifica en B4/B5 con `migrate` dentro del contenedor.
+- La configuración concreta de Caddy, el comportamiento de `gunicorn` y el stack de producción completo: todavía no existen.
+- Que `W004`, `W012` y `W016` desaparezcan con `DJANGO_HTTPS=1`: se espera por cómo se definen, pero no se midió.
