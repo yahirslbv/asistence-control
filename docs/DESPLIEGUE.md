@@ -4,6 +4,8 @@ Léelo junto con `CLAUDE.md`, que sigue siendo la fuente de verdad. Aquí se des
 
 Fecha límite de entrega del proyecto: viernes 27/11/2026. La fase J es la única pendiente de la ruta crítica.
 
+**Revisión del 15/10/2026.** Este documento se contrastó con el código y con pruebas desechables (sección 9). Las correcciones están en el historial de Git de este archivo: el primer commit es el texto original.
+
 ## 1. Alcance
 
 **Dentro:**
@@ -25,13 +27,16 @@ Esto sale del README y del seguimiento. **Verifícalo leyendo el código antes d
 
 - Django 5.2, Python 3.11, `mysqlclient`, MySQL 8.0 en Docker. MariaDB no sirve: el disparador de la bitácora (migración 0002) y las restricciones `CHECK` son de MySQL 8.
 - `docker-compose.yml` (desarrollo): contenedor `control_asistencia_db`, volumen `control_asistencia_mysql_data`, puerto configurable con `DB_PORT`, arranca con `--log-bin-trust-function-creators=1`. El contenedor usa UTC y Django abre cada conexión con `time_zone='+00:00'`. **Conserva ambas cosas en producción.**
-- Variables del `.env`: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `ASISTENCIA_MINIMA`. En desarrollo el usuario de la base es `root`.
-- Bootstrap 5.3.3 se carga por CDN.
-- Los justificantes se guardan en `media/justificantes/` con nombre aleatorio y se descargan solo por una vista del docente dueño del grupo (RNF-04). No tienen URL pública.
-- Hoy no hay página 500 propia, y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
+- Variables del `.env`: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` (por defecto `localhost,127.0.0.1`), `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `ASISTENCIA_MINIMA`. En desarrollo el usuario de la base es `root`.
+- `config/settings.py` hoy: `DJANGO_DEBUG` **ya está apagado por defecto** y `DJANGO_ALLOWED_HOSTS` **ya se lee del entorno**. Lo que falta: rechazar una clave débil (el valor por defecto es `cambia-esto`), `CSRF_TRUSTED_ORIGINS`, las opciones de HTTPS, `STATIC_ROOT` y WhiteNoise. La conexión a MySQL ya fija `sql_mode` y `time_zone='+00:00'` en `init_command`: no pierdas ninguna de las dos.
+- Bootstrap 5.3.3 se carga por CDN, con el atributo `integrity` (SRI) en las dos etiquetas (`<link>` y `<script>`) de `base.html`. La plantilla hace `{% load static %}` pero **no usa ninguna etiqueta `{% static %}`** y no existe `asistencia/static/`: hoy lo único que Django sirve como estático es el admin.
+- Los justificantes se guardan en `media/justificantes/` con nombre aleatorio y se descargan solo por una vista del docente dueño del grupo (RNF-04). No tienen URL pública. `config/urls.py` **no sirve `media/` en ningún caso**, ni con `DEBUG`: hay que mantenerlo así, no hay nada que quitar.
+- `.gitignore`: **ya corregido el 15/10/2026** (commit `a094f13`). Antes solo cubría `.env` exacto, y un `.env.prod` se habría subido a un repositorio público. Ahora cubre `.env.*` (menos `.env.example` y `.env.prod.example`) y `*.sql.gz`. Compruébalo con `git check-ignore -v .env.prod` antes de crear el archivo.
+- Las pruebas del admin (`test_usuarios.py` y `test_bitacora_admin.py`) renderizan páginas que usan `{% static %}`: cualquier cambio del almacenamiento estático las afecta (ver B3).
+- Hoy no hay página 500 propia (solo `403.html` y `404.html`), y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
 - 406 pruebas en verde (`python manage.py test --noinput`, unos 7 minutos, necesita MySQL arriba).
 
-Qué revisar primero: `config/settings.py` (¿lee `DEBUG`, `SECRET_KEY` y hosts del entorno?, ¿hay `STATIC_ROOT`?), `config/urls.py` (¿sirve `media/` solo con `DEBUG`?), la vista que entrega los justificantes, `docker-compose.yml`, `.env.example`, `.gitignore` y la plantilla base.
+Qué confirmar antes de empezar, por si algo cambió desde el 15/10/2026: `config/settings.py`, `config/urls.py`, `docker-compose.yml`, `.env.example`, `.gitignore` y la plantilla base.
 
 ## 3. Antes de escribir código: pregunta a Victo
 
@@ -41,17 +46,18 @@ No elijas por él. Si no responde, usa el valor por defecto y anótalo en el REA
 |---|---|---|
 | 1 | ¿El sistema debe estar en internet, o basta una demo con `docker compose up` en una laptop o servidor de la facultad? | El mismo stack sirve para ambos casos |
 | 2 | Si va a internet: ¿tiene un servidor donde correr Docker y un dominio apuntando a él? | Con dominio: HTTPS automático. Solo IP: HTTP y se advierte (las contraseñas viajarían sin cifrar; aceptable solo para una demo) |
-| 3 | ¿La capacitación o la demo puede ser sin internet? | Si es posible, copiar Bootstrap a `static/` en vez de usar el CDN |
+| 3 | ¿La capacitación o la demo puede ser sin internet? | Si es posible, copiar Bootstrap a `static/` en vez de usar el CDN, con las precauciones de B3 (archivos `.map` y atributo `integrity`) |
 | 4 | ¿Dónde se guardan las copias de respaldo fuera de la misma máquina? | Solo local en `respaldos/`, con aviso en el README de que eso no protege contra la pérdida del servidor |
 | 5 | ¿El servidor es Linux o Windows? | Linux. Si es Windows, el respaldo se programa con el Programador de tareas |
 
 ## 4. Reglas de trabajo
 
+- **Normas de Victo, siempre:** 1) **Planificar antes de actuar**: muestra el plan del bloque antes de escribir código. 2) **Ejecutar e iterar en Git**: un commit por paso verificable y `git push` al cerrar cada bloque. 3) **Validar con pruebas**: cada cambio se comprueba (con una prueba automática si se puede probar sin Docker; si no, con una comprobación reproducible) y el resultado se anota en el commit o en el resumen.
 - Se aplican las de `CLAUDE.md` sección 5: commits pequeños en español, sin `Co-Authored-By`, sin tocar `models.py` ni migraciones sin avisar.
 - Prefijos de commit: `RNF-08: ...` para el respaldo, `H-02: ...` para la página 500 y `Despliegue: ...` para el resto.
-- **Pide aprobación a Victo, una sola vez, antes de agregar `gunicorn` y `whitenoise` a `requirements.txt`.** Ninguna otra dependencia sin preguntar. `gunicorn` no corre en Windows: solo se usa dentro del contenedor y el desarrollo local sigue con `runserver`.
+- **Pide aprobación a Victo, una sola vez, antes de agregar `gunicorn` y `whitenoise` a `requirements.txt`.** Ninguna otra dependencia sin preguntar. `gunicorn` no corre en Windows: solo se usa dentro del contenedor y el desarrollo local sigue con `runserver`. Puedes escribirlo con el marcador `gunicorn; sys_platform != "win32"` para no instalarlo en el equipo de desarrollo.
 - **Nunca uses `docker compose down -v`.** Protege el volumen de desarrollo `control_asistencia_mysql_data`. El stack de producción usa un nombre de proyecto propio (`name: control_asistencia_prod`) y volúmenes propios, para no chocar con el de desarrollo.
-- No subas a Git: `.env`, `.env.prod`, `respaldos/`, ni datos de MySQL.
+- No subas a Git: `.env`, `.env.prod`, `respaldos/`, ni datos de MySQL. El `.gitignore` ya lo impide: no lo debilites, y antes de cada commit revisa `git status` en busca de archivos `.env*` o `respaldos/`.
 - Cada cambio de código lleva su prueba cuando se pueda probar sin Docker. Corre la suite completa al final de cada bloque que toque código Python.
 - Si una prueba falla, dime la causa antes de corregir. No las marques como `skip` ni cambies una aserción para que pasen.
 
