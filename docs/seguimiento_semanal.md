@@ -9,6 +9,7 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | Tablero Trello | <https://trello.com/b/1CRpoq6E/control-de-asistencia-cronograma> |
 | Fuente de verdad del proyecto | [CLAUDE.md](../CLAUDE.md) (requisitos, reglas, estado y decisiones) |
 | Informe de pruebas de la fase H | [informe_pruebas.md](informe_pruebas.md) |
+| Plan técnico de despliegue (fase J) | [DESPLIEGUE.md](DESPLIEGUE.md) |
 | Instalación y uso | [README.md](../README.md) |
 
 Este documento sirve para revisar los avances contra las actividades que el cronograma asigna a cada semana. Las cifras salen del historial de Git y de las pruebas, no de estimaciones. Lo que no se verificó aparece como tal.
@@ -171,7 +172,7 @@ Defectos: ninguno crítico ni mayor. Tres hallazgos menores siguen abiertos (sec
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 406 pruebas pasan.
+- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 406 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
   - [ ] Definir el hosting y desplegar el sistema.
   - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
   - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
