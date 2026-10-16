@@ -59,7 +59,8 @@ control_asistencia/
 │   └── tests/
 ├── docs/
 │   ├── informe_pruebas.md      # informe de la fase H
-│   └── seguimiento_semanal.md  # avance contra el cronograma y el tablero de Trello
+│   ├── seguimiento_semanal.md  # avance contra el cronograma y el tablero de Trello
+│   └── DESPLIEGUE.md           # plan técnico de la fase J (Docker, respaldo, producción)
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
@@ -231,6 +232,9 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **RNF-07 medido.** Con 6 grupos de 50 alumnos y 48 sesiones (14 400 registros) en MySQL, el peor caso fue 570 ms (importar un CSV de 50 alumnos) contra el límite de 3 s; las demás vistas quedaron por debajo de 280 ms en su peor repetición. Método y tabla completos en `docs/informe_pruebas.md`.
 - **RNF-01 no se cronometra aquí.** Se mide el costo de interacción (5 excepciones = 5 toques y un envío; botones de 48 px; guardar siempre visible), no un tiempo humano. Verificarlo requiere probar con docentes.
 - **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): H-01 botones secundarios `btn-sm` de unos 31 px en el teléfono; H-02 no hay página 500 propia; H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
+
+- **Plan de despliegue (fase J).** `docs/DESPLIEGUE.md` describe lo técnico de la fase J. Se revisó el 15/10/2026 contra el código y con pruebas desechables, y sus correcciones están en el historial de Git de ese archivo. `.gitignore` ya cubre `.env.*` (menos los ejemplos) y `*.sql.gz`: antes `.env.prod` se habría subido a un repositorio público. El plan aún no se ejecuta; la fase J sigue pendiente.
+- **Normas de trabajo de Victo.** Planificar antes de actuar; ejecutar e iterar en Git (un commit por paso verificable y `git push` al cerrar un bloque); validar con pruebas (automáticas cuando se puede, o comprobaciones reproducibles cuyo resultado se anota).
 
 ### Decisiones abiertas
 
