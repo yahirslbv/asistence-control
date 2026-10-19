@@ -195,6 +195,13 @@ main.container { padding-top: 1.75rem; padding-bottom: 3rem; }
 /* Un botón dentro de una tabla no parte su etiqueta; la tabla se desplaza en horizontal. */
 .table .btn { white-space: nowrap; }
 
+/* Cada mes de las sesiones es su propia tabla: diseño fijo para que las columnas queden alineadas.
+   El ancho mínimo deja sitio a los tres botones de la última columna; en pantallas angostas la tabla se desplaza. */
+.tabla-sesiones { table-layout: fixed; min-width: 46rem; }
+.tabla-sesiones th:nth-child(1) { width: 12.5rem; }
+.tabla-sesiones th:nth-child(2) { width: 8rem; }
+.tabla-sesiones th:nth-child(3) { width: 8rem; }
+
 /* La fila de un alumno bajo el mínimo (RF-14). */
 .table-danger {
   --bs-table-bg: var(--rojo-fondo);
