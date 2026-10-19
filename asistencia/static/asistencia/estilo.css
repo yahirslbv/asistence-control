@@ -195,6 +195,9 @@ main.container { padding-top: 1.75rem; padding-bottom: 3rem; }
 /* Un botón dentro de una tabla no parte su etiqueta; la tabla se desplaza en horizontal. */
 .table .btn { white-space: nowrap; }
 
+/* El reporte del grupo tiene siete columnas: al nombre se le reserva sitio para que no se parta en tres líneas. */
+.tabla-alumnos th:nth-child(2) { min-width: 11rem; }
+
 /* Cada mes de las sesiones es su propia tabla: diseño fijo para que las columnas queden alineadas.
    El ancho mínimo deja sitio a los tres botones de la última columna; en pantallas angostas la tabla se desplaza. */
 .tabla-sesiones { table-layout: fixed; min-width: 46rem; }
