@@ -2,19 +2,6 @@
 
 {% block titulo %}Pase de lista · {{ grupo.clave }} · Control de asistencia{% endblock %}
 
-{% block cabecera %}
-<style>
-  /* Cuatro botones de estado en una fila, también en 375 px de ancho. */
-  .estados { display: grid; grid-template-columns: repeat(4, 1fr); gap: .25rem; }
-  .estado-btn {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 48px; padding: .5rem .1rem;
-    font-size: .75rem; line-height: 1.1; text-align: center;
-  }
-  @media (min-width: 576px) { .estado-btn { min-height: 52px; font-size: 1rem; } }
-</style>
-{% endblock %}
-
 {% block contenido %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -73,7 +60,7 @@
     <input type="hidden" name="modo" value="{{ modo }}">
 
     {% for fila in filas %}
-      <div class="card shadow-sm mb-2">
+      <div class="card fila-alumno mb-2">
         <div class="card-body p-2 p-sm-3">
           <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
             <div>
@@ -108,7 +95,7 @@
     {% endfor %}
 
     {# En el teléfono la barra fija solo lleva «Guardar»: «Volver» la haría el doble de alta. #}
-    <div class="sticky-bottom bg-body-tertiary border-top py-2 mt-3 d-grid d-sm-flex gap-2">
+    <div class="sticky-bottom barra-guardar py-2 mt-3 d-grid d-sm-flex gap-2">
       <button type="submit" class="btn btn-primary btn-lg" id="guardar">
         {% if modo == 'captura' %}Guardar pase de lista{% else %}Guardar correcciones{% endif %}
       </button>

@@ -1,0 +1,492 @@
+/* Estilo del Sistema de Control de Asistencia.
+ *
+ * Se apoya en Bootstrap 5.3 (cargado antes): aquí solo se cambian sus variables
+ * y se afinan los componentes. Los nombres de clase de Bootstrap que usan las
+ * plantillas y las pruebas (btn-check, table-danger, text-bg-*, alert-link) no
+ * se tocan; el aspecto se logra desde este archivo.
+ *
+ * Criterios: paleta cálida casi monocroma, bordes de 1 px, esquinas de 8 px,
+ * sin degradados ni sombras marcadas, y color solo para dar significado
+ * (estado de asistencia, avisos). Fuente del sistema: no se descarga nada.
+ */
+
+/* ---------- 1. Tokens ---------- */
+
+:root {
+  --tinta: #1f2124;            /* texto principal (nunca negro puro) */
+  --tinta-suave: #5f5d58;      /* texto secundario, contraste 5:1 sobre el lienzo */
+  --lienzo: #f7f6f3;           /* fondo de página */
+  --superficie: #ffffff;       /* tarjetas y barra superior */
+  --realce: #f1f0ec;           /* hover y filas de encabezado */
+  --linea: #e6e4de;            /* bordes y divisores */
+  --linea-fuerte: #d3d1ca;     /* bordes de controles */
+  --enlace: #1f6c9f;
+  --enlace-hover: #144c73;
+  --radio: .5rem;
+  --foco: 0 0 0 .2rem rgba(31, 108, 159, .35);
+
+  /* Colores con significado: fondo suave y texto con contraste >= 4.5:1. */
+  --verde-fondo: #edf3ec;     --verde-texto: #2f5e33;     --verde-borde: #d3e3d2;
+  --ambar-fondo: #fbf3db;     --ambar-texto: #7a5200;     --ambar-borde: #f0e0a6;
+  --rojo-fondo: #fdebec;      --rojo-texto: #9f2f2d;      --rojo-borde: #f4ced0;
+  --azul-fondo: #e1f3fe;      --azul-texto: #1a5f8e;      --azul-borde: #bde0f4;
+  --turquesa-fondo: #e2f3f2;  --turquesa-texto: #1b6560;  --turquesa-borde: #bfe2df;
+  --gris-fondo: #f1f0ec;      --gris-texto: #55534f;      --gris-borde: #dedcd5;
+
+  /* Variables de Bootstrap. */
+  --bs-body-font-family: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  --bs-body-color: var(--tinta);
+  --bs-body-color-rgb: 31, 33, 36;
+  --bs-secondary-color: var(--tinta-suave);
+  --bs-secondary-color-rgb: 95, 93, 88;
+  --bs-body-bg: var(--lienzo);
+  --bs-body-bg-rgb: 247, 246, 243;
+  --bs-tertiary-bg: var(--lienzo);
+  --bs-tertiary-bg-rgb: 247, 246, 243;
+  --bs-secondary-bg: var(--realce);
+  --bs-secondary-bg-rgb: 241, 240, 236;
+  --bs-border-color: var(--linea);
+  --bs-border-radius: var(--radio);
+  --bs-border-radius-sm: .375rem;
+  --bs-border-radius-lg: .75rem;
+  --bs-primary: #111111;
+  --bs-primary-rgb: 17, 17, 17;
+  --bs-success: #2f5e33;
+  --bs-success-rgb: 47, 94, 51;
+  --bs-danger: #9f2f2d;
+  --bs-danger-rgb: 159, 47, 45;
+  --bs-warning-rgb: 122, 82, 0;
+  --bs-info-rgb: 27, 101, 96;
+  --bs-link-color: var(--enlace);
+  --bs-link-color-rgb: 31, 108, 159;
+  --bs-link-hover-color: var(--enlace-hover);
+  --bs-link-hover-color-rgb: 20, 76, 115;
+  --bs-focus-ring-color: rgba(31, 108, 159, .25);
+}
+
+/* ---------- 2. Base ---------- */
+
+body {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: 600;
+  letter-spacing: -.015em;
+  line-height: 1.25;
+  color: var(--tinta);
+}
+
+a { text-underline-offset: .2em; }
+
+:focus-visible { outline: 2px solid var(--enlace); outline-offset: 2px; }
+
+main.container { padding-top: 1.75rem; padding-bottom: 3rem; }
+
+.text-secondary { color: var(--tinta-suave) !important; }
+
+/* ---------- 3. Barra superior ---------- */
+
+.app-nav {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--linea);
+  padding-block: .6rem;
+}
+
+.app-nav .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin-right: 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--tinta);
+}
+
+.app-nav .marca { flex: none; }
+.app-nav .marca rect { fill: var(--tinta); }
+
+.app-nav .navbar-nav { gap: .15rem; }
+
+.app-nav .nav-link {
+  padding: .45rem .8rem;
+  border-radius: .375rem;
+  font-weight: 500;
+  color: var(--tinta-suave);
+}
+
+.app-nav .nav-link:hover { color: var(--tinta); background: var(--realce); }
+.app-nav .nav-link.active { color: var(--tinta); background: var(--realce); }
+
+.app-nav .navbar-toggler {
+  border-color: var(--linea-fuerte);
+  padding: .4rem .6rem;
+}
+
+.app-nav .navbar-text { color: var(--tinta-suave); font-size: .9rem; padding: 0; }
+
+@media (max-width: 767.98px) {
+  .app-nav .navbar-collapse { padding-top: .75rem; }
+  .app-nav .navbar-collapse form { padding: .75rem 0 .25rem; border-top: 1px solid var(--linea); margin-top: .75rem; }
+  .app-nav .nav-link { padding: .65rem .8rem; }
+}
+
+/* ---------- 4. Migas de pan ---------- */
+
+.breadcrumb { font-size: .875rem; margin-bottom: 1.25rem; }
+.breadcrumb a { color: var(--tinta-suave); text-decoration: none; }
+.breadcrumb a:hover { color: var(--tinta); text-decoration: underline; }
+.breadcrumb-item + .breadcrumb-item::before { color: var(--linea-fuerte); }
+.breadcrumb-item.active { color: var(--tinta); }
+
+/* ---------- 5. Tarjetas y tablas ---------- */
+
+.card {
+  --bs-card-bg: var(--superficie);
+  --bs-card-border-color: var(--linea);
+  --bs-card-border-radius: .75rem;
+  --bs-card-inner-border-radius: calc(.75rem - 1px);
+  --bs-card-cap-bg: var(--superficie);
+}
+
+.shadow-sm { box-shadow: 0 1px 2px rgba(20, 20, 20, .04) !important; }
+
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--tinta);
+  --bs-table-border-color: var(--linea);
+  --bs-table-hover-bg: var(--lienzo);
+  --bs-table-striped-bg: var(--lienzo);
+  font-variant-numeric: tabular-nums;
+}
+
+.table > :not(caption) > * > * { padding: .75rem 1rem; }
+.table-sm > :not(caption) > * > * { padding: .55rem .85rem; }
+
+.table > thead > tr > th {
+  background: var(--lienzo);
+  color: var(--tinta-suave);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--linea);
+}
+
+.table > tbody > tr:last-child > * { border-bottom-width: 0; }
+.table-hover > tbody > tr:hover > * { --bs-table-bg-state: var(--lienzo); }
+
+.table-responsive { border-radius: inherit; }
+
+/* La fila de un alumno bajo el mínimo (RF-14). */
+.table-danger {
+  --bs-table-bg: var(--rojo-fondo);
+  --bs-table-color: var(--tinta);
+  --bs-table-border-color: var(--rojo-borde);
+  --bs-table-hover-bg: #fbe1e2;
+}
+
+pre.bg-body-secondary {
+  background: var(--realce) !important;
+  border: 1px solid var(--linea);
+  font-size: .85rem;
+}
+
+/* ---------- 6. Botones ---------- */
+
+.btn {
+  --bs-btn-border-radius: var(--radio);
+  --bs-btn-font-weight: 500;
+  --bs-btn-focus-box-shadow: var(--foco);
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease,
+    transform .1s ease;
+}
+
+.btn:active { transform: scale(.985); }
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #111111;
+  --bs-btn-border-color: #111111;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #333333;
+  --bs-btn-hover-border-color: #333333;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #000;
+  --bs-btn-active-border-color: #000;
+  --bs-btn-disabled-bg: #111111;
+  --bs-btn-disabled-border-color: #111111;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary {
+  --bs-btn-color: var(--tinta);
+  --bs-btn-bg: var(--superficie);
+  --bs-btn-border-color: var(--linea-fuerte);
+  --bs-btn-hover-color: var(--tinta);
+  --bs-btn-hover-bg: var(--realce);
+  --bs-btn-hover-border-color: #b9b7b0;
+  --bs-btn-active-color: var(--tinta);
+  --bs-btn-active-bg: #e8e6e0;
+  --bs-btn-active-border-color: #b9b7b0;
+  --bs-btn-disabled-color: var(--tinta-suave);
+  --bs-btn-disabled-border-color: var(--linea);
+}
+
+.btn-outline-success {
+  --bs-btn-color: var(--verde-texto);
+  --bs-btn-bg: var(--superficie);
+  --bs-btn-border-color: #b9d3ba;
+  --bs-btn-hover-color: var(--verde-texto);
+  --bs-btn-hover-bg: var(--verde-fondo);
+  --bs-btn-hover-border-color: #9fc2a1;
+  --bs-btn-active-color: var(--verde-texto);
+  --bs-btn-active-bg: #dfeadd;
+  --bs-btn-active-border-color: #9fc2a1;
+}
+
+.btn-outline-danger {
+  --bs-btn-color: var(--rojo-texto);
+  --bs-btn-bg: var(--superficie);
+  --bs-btn-border-color: #e8bcbe;
+  --bs-btn-hover-color: var(--rojo-texto);
+  --bs-btn-hover-bg: var(--rojo-fondo);
+  --bs-btn-hover-border-color: #dfa3a6;
+  --bs-btn-active-color: var(--rojo-texto);
+  --bs-btn-active-bg: #f8dcde;
+  --bs-btn-active-border-color: #dfa3a6;
+}
+
+.btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--rojo-texto);
+  --bs-btn-border-color: var(--rojo-texto);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #84261f;
+  --bs-btn-hover-border-color: #84261f;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #6f1f19;
+  --bs-btn-active-border-color: #6f1f19;
+}
+
+.btn-warning {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #8a5a00;
+  --bs-btn-border-color: #8a5a00;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #6f4800;
+  --bs-btn-hover-border-color: #6f4800;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #5d3c00;
+  --bs-btn-active-border-color: #5d3c00;
+}
+
+/* Objetivo táctil de 44 px en el teléfono (también para los botones pequeños). */
+@media (max-width: 575.98px) {
+  .btn-sm {
+    --bs-btn-padding-y: .6rem;
+    --bs-btn-padding-x: .85rem;
+    --bs-btn-font-size: .875rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ---------- 7. Formularios ---------- */
+
+.form-label { font-size: .875rem; font-weight: 500; margin-bottom: .35rem; }
+.form-text { color: var(--tinta-suave); }
+
+.form-control,
+.form-select {
+  background-color: var(--superficie);
+  border-color: var(--linea-fuerte);
+  border-radius: var(--radio);
+  padding: .6rem .8rem;
+}
+
+.form-control-lg { padding: .7rem .95rem; font-size: 1rem; }
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 .2rem rgba(17, 17, 17, .08);
+}
+
+.form-check-input { border-color: #a9a7a0; }
+.form-check-input:checked { background-color: #111; border-color: #111; }
+.form-check-input:focus { border-color: #111; box-shadow: var(--foco); }
+.form-check-inline { margin-right: 1.25rem; }
+.form-check-label { font-size: .95rem; }
+
+/* ---------- 8. Avisos ---------- */
+
+.alert {
+  --bs-alert-border-radius: var(--radio);
+  --bs-alert-padding-y: .8rem;
+  font-size: .95rem;
+}
+
+.alert-success { --bs-alert-color: var(--verde-texto); --bs-alert-bg: var(--verde-fondo); --bs-alert-border-color: var(--verde-borde); --bs-alert-link-color: var(--verde-texto); }
+.alert-info    { --bs-alert-color: var(--azul-texto);  --bs-alert-bg: var(--azul-fondo);  --bs-alert-border-color: var(--azul-borde);  --bs-alert-link-color: var(--azul-texto); }
+.alert-warning { --bs-alert-color: var(--ambar-texto); --bs-alert-bg: var(--ambar-fondo); --bs-alert-border-color: var(--ambar-borde); --bs-alert-link-color: var(--ambar-texto); }
+.alert-danger  { --bs-alert-color: var(--rojo-texto);  --bs-alert-bg: var(--rojo-fondo);  --bs-alert-border-color: var(--rojo-borde);  --bs-alert-link-color: var(--rojo-texto); }
+
+/* ---------- 9. Etiquetas de estado ---------- */
+
+.badge {
+  padding: .35em .7em;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.badge.text-bg-primary   { background-color: var(--azul-fondo) !important;     color: var(--azul-texto) !important; }
+.badge.text-bg-success   { background-color: var(--verde-fondo) !important;    color: var(--verde-texto) !important; }
+.badge.text-bg-warning   { background-color: var(--ambar-fondo) !important;    color: var(--ambar-texto) !important; }
+.badge.text-bg-danger    { background-color: var(--rojo-fondo) !important;     color: var(--rojo-texto) !important; }
+.badge.text-bg-info      { background-color: var(--turquesa-fondo) !important; color: var(--turquesa-texto) !important; }
+.badge.text-bg-secondary { background-color: var(--gris-fondo) !important;     color: var(--gris-texto) !important; }
+
+/* ---------- 10. Inicio ---------- */
+
+.encabezado-inicio { margin-bottom: 1.75rem; }
+.encabezado-inicio h1 { margin-bottom: .35rem; }
+
+.accesos { display: grid; gap: .85rem; grid-template-columns: 1fr; }
+@media (min-width: 768px) { .accesos { grid-template-columns: repeat(3, 1fr); } }
+
+.acceso {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  padding: 1.25rem;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: .75rem;
+  color: var(--tinta);
+  text-decoration: none;
+  transition: border-color .15s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+.acceso:hover {
+  color: var(--tinta);
+  border-color: var(--linea-fuerte);
+  box-shadow: 0 2px 8px rgba(20, 20, 20, .05);
+  transform: translateY(-1px);
+}
+
+.acceso .icono {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: .5rem;
+  border-radius: .6rem;
+  background: var(--realce);
+  color: var(--tinta);
+}
+
+.acceso .icono svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.acceso strong { font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em; }
+.acceso span.detalle { color: var(--tinta-suave); font-size: .92rem; }
+
+/* ---------- 11. Inicio de sesión ---------- */
+
+.entrada { max-width: 26rem; margin: 2.5rem auto 0; }
+.entrada .marca-grande { display: block; margin: 0 auto 1rem; }
+.entrada .marca-grande rect { fill: var(--tinta); }
+.entrada h1 { text-align: center; margin-bottom: .25rem; }
+.entrada .lema { text-align: center; color: var(--tinta-suave); margin-bottom: 1.5rem; }
+
+/* ---------- 12. Pase de lista (pantalla crítica, RNF-01 y RNF-02) ---------- */
+
+/* Cuatro botones de estado en una fila, también en 375 px de ancho. */
+.estados { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+
+.estados .estado-btn {
+  --bs-btn-color: var(--tinta-suave);
+  --bs-btn-bg: var(--superficie);
+  --bs-btn-border-color: var(--linea-fuerte);
+  --bs-btn-border-radius: .6rem;
+  --bs-btn-hover-color: var(--estado-tinta);
+  --bs-btn-hover-bg: var(--estado-fondo);
+  --bs-btn-hover-border-color: var(--estado-borde);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--estado-solido);
+  --bs-btn-active-border-color: var(--estado-solido);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: .5rem .1rem;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.estados .btn-outline-success { --estado-tinta: var(--verde-texto);    --estado-fondo: var(--verde-fondo);    --estado-borde: #b9d3ba; --estado-solido: #2f5e33; }
+.estados .btn-outline-warning { --estado-tinta: var(--ambar-texto);    --estado-fondo: var(--ambar-fondo);    --estado-borde: #e6cf86; --estado-solido: #8a5a00; }
+.estados .btn-outline-danger  { --estado-tinta: var(--rojo-texto);     --estado-fondo: var(--rojo-fondo);     --estado-borde: #e8bcbe; --estado-solido: #9f2f2d; }
+.estados .btn-outline-info    { --estado-tinta: var(--turquesa-texto); --estado-fondo: var(--turquesa-fondo); --estado-borde: #a8d4d0; --estado-solido: #1b6560; }
+
+.estados .btn-check:checked + .estado-btn { font-weight: 600; }
+
+@media (min-width: 576px) {
+  .estados .estado-btn { min-height: 52px; font-size: 1rem; }
+
+  /* Marca de verificación dibujada con bordes: el estado elegido no depende solo del color. */
+  .estados .btn-check:checked + .estado-btn::before {
+    content: "";
+    width: .32em;
+    height: .62em;
+    margin-right: .6em;
+    border: solid currentColor;
+    border-width: 0 .14em .14em 0;
+    transform: rotate(45deg) translateY(-.08em);
+  }
+}
+
+.fila-alumno {
+  --bs-card-border-radius: .75rem;
+  transition: box-shadow .15s ease;
+}
+
+/* Quien no está «presente» se distingue de un vistazo al recorrer la lista. */
+.fila-alumno:has(.btn-check:checked[value="retardo"])     { box-shadow: inset 3px 0 0 #8a5a00; }
+.fila-alumno:has(.btn-check:checked[value="ausente"])     { box-shadow: inset 3px 0 0 #9f2f2d; }
+.fila-alumno:has(.btn-check:checked[value="justificado"]) { box-shadow: inset 3px 0 0 #1b6560; }
+
+.barra-guardar {
+  background: rgba(247, 246, 243, .94);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--linea);
+  bottom: 0;
+  z-index: 1020;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
