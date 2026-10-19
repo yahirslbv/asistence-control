@@ -184,6 +184,17 @@ main.container { padding-top: 1.75rem; padding-bottom: 3rem; }
 
 .table-responsive { border-radius: inherit; }
 
+/* Los enlaces de las tablas conservan el subrayado (no depender solo del color), pero fino y tenue. */
+.table a:not(.btn) {
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(31, 108, 159, .4);
+}
+
+.table a:not(.btn):hover { text-decoration-color: currentColor; }
+
+/* Un botón dentro de una tabla no parte su etiqueta; la tabla se desplaza en horizontal. */
+.table .btn { white-space: nowrap; }
+
 /* La fila de un alumno bajo el mínimo (RF-14). */
 .table-danger {
   --bs-table-bg: var(--rojo-fondo);
@@ -289,14 +300,17 @@ pre.bg-body-secondary {
 
 /* Objetivo táctil de 44 px en el teléfono (también para los botones pequeños). */
 @media (max-width: 575.98px) {
-  .btn-sm {
-    --bs-btn-padding-y: .6rem;
-    --bs-btn-padding-x: .85rem;
-    --bs-btn-font-size: .875rem;
+  .btn {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .btn-sm {
+    --bs-btn-padding-y: .5rem;
+    --bs-btn-padding-x: .85rem;
+    --bs-btn-font-size: .875rem;
   }
 }
 

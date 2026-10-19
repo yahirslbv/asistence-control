@@ -3,35 +3,39 @@
 {% block titulo %}Iniciar sesión · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<div class="row justify-content-center">
-  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
-    <div class="card shadow-sm">
-      <div class="card-body p-4">
-        <h1 class="h4 mb-4 text-center">Control de asistencia</h1>
+<div class="entrada">
+  <svg class="marca-grande" width="44" height="44" viewBox="0 0 24 24" aria-hidden="true">
+    <rect width="24" height="24" rx="6"/>
+    <path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <h1 class="h4">Control de asistencia</h1>
+  <p class="lema">Entra con tu correo institucional.</p>
 
-        <form method="post" novalidate>
-          {% csrf_token %}
-          {% if form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-            </div>
-          {% endif %}
-
-          <div class="mb-3">
-            <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-            {{ form.username }}
-            {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
           </div>
-          <div class="mb-4">
-            <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-            {{ form.password }}
-            {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-          </div>
+        {% endif %}
 
-          <input type="hidden" name="next" value="{{ next }}">
-          <button type="submit" class="btn btn-primary btn-lg w-100">Entrar</button>
-        </form>
-      </div>
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+          {{ form.username }}
+          {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="mb-4">
+          <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+          {{ form.password }}
+          {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn btn-primary btn-lg w-100">Entrar</button>
+      </form>
     </div>
   </div>
 </div>
