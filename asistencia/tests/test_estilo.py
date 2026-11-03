@@ -82,14 +82,19 @@ class MenuYHojaEnLasPantallasTests(TestCase):
         enlaces = re.findall(r'<a class="nav-link([^"]*)"\s*(aria-current="page")?\s*href="[^"]*">([^<]+)</a>', menu)
         return [texto for clase, actual, texto in enlaces if actual and 'active' in clase]
 
+    def _carga_la_hoja(self, respuesta):
+        # Con el almacenamiento de producción el nombre lleva una huella: estilo.3153bc6eb70d.css.
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertRegex(respuesta.content.decode(), r'href="[^"]*asistencia/estilo(\.[0-9a-f]{12})?\.css"')
+
     def test_las_pantallas_con_sesion_cargan_la_hoja_de_estilos(self):
         for url in (reverse('inicio'), reverse('grupos'), reverse('pase_de_lista', args=[self.sesion.pk])):
             with self.subTest(url):
-                self.assertContains(self.client.get(url), 'asistencia/estilo.css')
+                self._carga_la_hoja(self.client.get(url))
 
     def test_la_pantalla_de_acceso_carga_la_hoja_de_estilos(self):
         # Con sesión iniciada /login/ redirige: se prueba con un cliente anónimo.
-        self.assertContains(Client().get(reverse('login')), 'asistencia/estilo.css')
+        self._carga_la_hoja(Client().get(reverse('login')))
 
     def test_el_menu_marca_grupos_en_el_grupo_y_en_sus_sesiones(self):
         for url in (reverse('grupos'), reverse('grupo_detalle', args=[self.grupo.pk]),
