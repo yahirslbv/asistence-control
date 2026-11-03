@@ -19,7 +19,7 @@ Fecha límite de entrega del proyecto: viernes 27/11/2026. La fase J es la únic
 8. Protección de la contraseña de demostración de `seed_demo`.
 9. Sección "Despliegue" en el README.
 
-**Fuera (no lo hagas):** elegir proveedor de hosting, contratar o configurar un servidor, crear dominios, cambiar `models.py` o migraciones, nuevas funciones de la aplicación, manuales de usuario y de administrador (fase I), los hallazgos H-01 y H-03.
+**Fuera (no lo hagas):** elegir proveedor de hosting, contratar o configurar un servidor, crear dominios, cambiar `models.py` o migraciones, nuevas funciones de la aplicación, manuales de usuario y de administrador (fase I), el hallazgo H-03 (el H-01 ya se corrigió con el rediseño del 19/10/2026).
 
 ## 2. Estado de partida
 
@@ -29,12 +29,12 @@ Esto sale del README y del seguimiento. **Verifícalo leyendo el código antes d
 - `docker-compose.yml` (desarrollo): contenedor `control_asistencia_db`, volumen `control_asistencia_mysql_data`, puerto configurable con `DB_PORT`, arranca con `--log-bin-trust-function-creators=1`. El contenedor usa UTC y Django abre cada conexión con `time_zone='+00:00'`. **Conserva ambas cosas en producción.**
 - Variables del `.env`: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` (por defecto `localhost,127.0.0.1`), `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `ASISTENCIA_MINIMA`. En desarrollo el usuario de la base es `root`.
 - `config/settings.py` hoy: `DJANGO_DEBUG` **ya está apagado por defecto** y `DJANGO_ALLOWED_HOSTS` **ya se lee del entorno**. Lo que falta: rechazar una clave débil (el valor por defecto es `cambia-esto`), `CSRF_TRUSTED_ORIGINS`, las opciones de HTTPS, `STATIC_ROOT` y WhiteNoise. La conexión a MySQL ya fija `sql_mode` y `time_zone='+00:00'` en `init_command`: no pierdas ninguna de las dos.
-- Bootstrap 5.3.3 se carga por CDN, con el atributo `integrity` (SRI) en las dos etiquetas (`<link>` y `<script>`) de `base.html`. La plantilla hace `{% load static %}` pero **no usa ninguna etiqueta `{% static %}`** y no existe `asistencia/static/`: hoy lo único que Django sirve como estático es el admin.
+- Bootstrap 5.3.3 se carga por CDN, con el atributo `integrity` (SRI) en las dos etiquetas (`<link>` y `<script>`) de `base.html`. **Desde el rediseño del 19/10/2026**, `base.html` también carga la hoja de estilos propia con `{% static 'asistencia/estilo.css' %}` (archivo `asistencia/static/asistencia/estilo.css`): en producción `/static/` ya no es solo del admin, **toda pantalla de la aplicación depende de que se sirva**. Bootstrap sigue por CDN.
 - Los justificantes se guardan en `media/justificantes/` con nombre aleatorio y se descargan solo por una vista del docente dueño del grupo (RNF-04). No tienen URL pública. `config/urls.py` **no sirve `media/` en ningún caso**, ni con `DEBUG`: hay que mantenerlo así, no hay nada que quitar.
 - `.gitignore`: **ya corregido el 15/10/2026** (commit `a094f13`). Antes solo cubría `.env` exacto, y un `.env.prod` se habría subido a un repositorio público. Ahora cubre `.env.*` (menos `.env.example` y `.env.prod.example`) y `*.sql.gz`. Compruébalo con `git check-ignore -v .env.prod` antes de crear el archivo.
-- Las pruebas del admin (`test_usuarios.py` y `test_bitacora_admin.py`) renderizan páginas que usan `{% static %}`: cualquier cambio del almacenamiento estático las afecta (ver B3).
+- Casi todas las pruebas que renderizan una pantalla (las del admin y, desde el rediseño, cualquiera que use `base.html`) pasan por `{% static %}`: cualquier cambio del almacenamiento estático las afecta (ver B3).
 - Hoy no hay página 500 propia (solo `403.html` y `404.html`), y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
-- 406 pruebas en verde (`python manage.py test --noinput`, unos 7 minutos, necesita MySQL arriba).
+- 416 pruebas en verde (`python manage.py test --noinput`, de 7 a 9 minutos, necesita MySQL arriba).
 
 Qué confirmar antes de empezar, por si algo cambió desde el 15/10/2026: `config/settings.py`, `config/urls.py`, `docker-compose.yml`, `.env.example`, `.gitignore` y la plantilla base.
 
@@ -88,7 +88,9 @@ Criterio: `python manage.py check --deploy` con las variables de producción no 
   2. **Quita el atributo `integrity` de las dos etiquetas** (`<link>` y `<script>`). El manifiesto reescribe dentro del CSS la referencia al `.map`, así que el archivo servido ya no coincide con el hash del CDN y el navegador lo bloquearía.
   3. Usa `{% static 'vendor/bootstrap/...' %}`; la plantilla ya hace `{% load static %}`.
 
-Criterio: con `DEBUG=0` y `DJANGO_STATIC_MANIFEST=1`, `collectstatic` termina sin errores y el CSS del admin y de la base cargan; y la suite completa sigue en verde **sin** esa variable.
+- **Olvidar `collectstatic` rompe toda la aplicación, no solo el admin.** Medido el 19/10/2026 con el manifiesto activo y la carpeta de estáticos vacía: `base.html` lanza `ValueError: Missing staticfiles manifest entry for 'asistencia/estilo.css'` y ninguna pantalla se muestra. Con `collectstatic` previo el enlace sale con huella (`asistencia/estilo.3153bc6eb70d.css`). `test_estilo.py` ya acepta ambas formas.
+
+Criterio: con `DEBUG=0` y `DJANGO_STATIC_MANIFEST=1`, `collectstatic` termina sin errores y el CSS del admin y la hoja de la aplicación (`estilo.css`) cargan; y la suite completa sigue en verde **sin** esa variable.
 
 ### B4. Imagen de la aplicación
 - `Dockerfile` basado en Python 3.11 slim. `mysqlclient` se compila en Linux: instala las dependencias de compilación necesarias y no las dejes en la imagen final (por ejemplo, en dos etapas).
@@ -141,7 +143,7 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
 9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
 10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
-11. La suite completa sigue pasando (406 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
+11. La suite completa sigue pasando (416 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
 12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
 ## 7. Lo que no puedes hacer tú (le toca a Victo)
@@ -168,6 +170,7 @@ Se hicieron en un MySQL 8.0.46 desechable (eliminado al terminar), con configura
 |---|---|
 | `.gitignore` con `.env.*` | 8 nombres que deben ignorarse y 7 que deben versionarse: 15 de 15 correctos; ningún archivo ya versionado quedó afectado |
 | Manifiesto de estáticos y pruebas del admin | Sin la variable: 11 de 11 pruebas pasan. Con manifiesto y sin `collectstatic` previo: 7 de 11 fallan (`Missing staticfiles manifest entry`). Con `collectstatic` previo: 11 de 11 |
+| Hoja de estilos propia con manifiesto (19/10/2026) | Sin la variable: 10 de 10 pruebas de `test_estilo.py` pasan. Con manifiesto y `collectstatic` previo (`estilo.css` queda como `estilo.3153bc6eb70d.css`): 10 de 10. Con manifiesto y sin `collectstatic`: las 7 pruebas que renderizan pantallas fallan con `Missing staticfiles manifest entry for 'asistencia/estilo.css'` |
 | Bootstrap autoalojado con manifiesto | `collectstatic` falla sin el `.map` (`ValueError`) y pasa con él; el CSS servido trae la referencia al `.map` reescrita |
 | Clave obligatoria frente a `collectstatic` | Sin clave: `ImproperlyConfigured`. Con una clave desechable en esa línea: termina bien |
 | `ALLOWED_HOSTS` de producción frente a un `healthcheck` | `Host: 127.0.0.1` y `localhost` dan 400; el dominio da 200 |
