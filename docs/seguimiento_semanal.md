@@ -220,7 +220,7 @@ Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02
 
 | Medida | Valor |
 |---|---|
-| Commits | 78 (39 el 13/10, 10 el 14/10, 24 el 15/10 y 5 el 19/10) |
+| Commits | 78 hasta el 19/10 (39 el 13/10, 10 el 14/10, 24 el 15/10 y 5 el 19/10) |
 | Archivos versionados | 100 |
 | Código de la aplicación (Python, sin pruebas) | 3 525 líneas |
 | Pruebas (Python) | 6 082 líneas, 416 pruebas en 22 archivos |
