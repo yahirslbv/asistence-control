@@ -18,7 +18,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 - **Estado:** las actividades A a H están terminadas, la I (manuales) está en curso y la J (despliegue y entrega) está por hacer.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
-- **Calidad:** 406 pruebas automáticas en verde. El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
+- **Calidad:** 416 pruebas automáticas en verde. El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
 - **Requisitos:** los 16 requisitos funcionales están implementados y probados. Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
 - **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y tres hallazgos menores de la fase H (sección 8).
 
@@ -56,7 +56,7 @@ python manage.py test --noinput
 ```
 
 - `seed_demo` crea 1 administrador, 2 docentes, 2 grupos y 40 alumnos. La contraseña de las cuentas de demostración está en `asistencia/management/commands/seed_demo.py`.
-- La suite completa debe terminar con `Ran 406 tests` y `OK`. Tardó unos siete minutos en la última corrida.
+- La suite completa debe terminar con `Ran 416 tests` y `OK`. En la última corrida (3/11/2026) tardó 547 s, con el equipo ocupado en otras tareas; sin carga tarda unos siete minutos.
 - La carpeta [docs](.) contiene este seguimiento y el informe de pruebas.
 
 ## 3. Estado por semana
@@ -166,13 +166,15 @@ Pruebas: `test_reportes` (68) y `test_exportar` (34).
 | RNF-01 | 5 excepciones = 5 toques y un envío; botones de 48 px; no se cronometró con personas | |
 | RNF-02 | Sin desbordes horizontales a 375, 768 y 1280 px | |
 | Informe de pruebas | `docs/informe_pruebas.md` | `fee1cb2` |
+| Diseño visual (RNF-02, 19/10) | Hoja de estilos propia (`estilo.css`), inicio con accesos, pantalla de acceso, pase de lista con estados de color, menú con la sección activa y botones de 44 px en el teléfono. Medido a 375 px en 7 pantallas: ningún botón bajo 44 px y sin desbordes | `e323a33` a `9de20e9` |
+| Pruebas del diseño | `test_estilo.py`, 10 pruebas: contraste mínimo de 4.5:1 en 18 pares de color, hoja cargada también con el almacenamiento de producción y sección activa del menú. Se comprobó que fallan si se rompe el contraste o la regla del menú | `990437e` |
 
-Defectos: ninguno crítico ni mayor. Tres hallazgos menores siguen abiertos (sección 8).
+Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02 y H-03 (sección 8); el H-01 se corrigió con el diseño visual.
 
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 406 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
+- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 416 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
   - [ ] Definir el hosting y desplegar el sistema.
   - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
   - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
@@ -218,11 +220,12 @@ Defectos: ninguno crítico ni mayor. Tres hallazgos menores siguen abiertos (sec
 
 | Medida | Valor |
 |---|---|
-| Commits | 63 (39 el 13/10, 10 el 14/10 y 14 el 15/10) |
-| Archivos versionados | 96 |
+| Commits | 78 (39 el 13/10, 10 el 14/10, 24 el 15/10 y 5 el 19/10) |
+| Archivos versionados | 100 |
 | Código de la aplicación (Python, sin pruebas) | 3 525 líneas |
-| Pruebas (Python) | 5 959 líneas, 406 pruebas en 21 archivos |
-| Plantillas HTML | 25 archivos, 1 281 líneas |
+| Pruebas (Python) | 6 082 líneas, 416 pruebas en 22 archivos |
+| Plantillas HTML | 25 archivos, 1 321 líneas |
+| Hoja de estilos | 1 archivo (`estilo.css`), 516 líneas |
 | Modelos / migraciones / rutas | 7 / 2 / 25 |
 | Servicios de negocio | 12 módulos en `asistencia/services/` |
 
@@ -239,6 +242,9 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 | RF-12 y RF-16 | 15/10 | 6 | `3a3c3ea` a `229d225` |
 | Documentación | 15/10 | 2 | `b064f23`, `5989873` |
 | H · Integración y pruebas | 15/10 | 6 | `2140ed3` a `f2f4a9b` |
+| Seguimiento semanal | 15/10 | 2 | `138ecd4`, `bc09d30` |
+| Plan de despliegue (revisión de `DESPLIEGUE.md`) | 15/10 | 8 | `34c3dfb` a `aed255a` |
+| Diseño visual (RNF-02) | 19/10 | 5 | `e323a33` a `9de20e9` |
 
 ## 8. Decisiones abiertas, hallazgos y riesgos
 
@@ -252,7 +258,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 
 | Id | Hallazgo | Propuesta |
 |---|---|---|
-| H-01 | Los botones secundarios miden unos 31 px en el teléfono | Quitar `btn-sm` en esas pantallas |
+| H-01 | Los botones secundarios miden unos 31 px en el teléfono | **Corregido el 19/10/2026** con el rediseño visual: 44 px o más en 7 pantallas a 375 px |
 | H-02 | No hay página 500 propia | Agregarla y probarla con `DEBUG` desactivado |
 | H-03 | Importar un CSV de 500 filas tarda 3.8 s (con 50 filas, 0.4 s) | Importar por bloques en lugar de por fila |
 
@@ -260,7 +266,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 - **Ruta crítica en J.** Es la única actividad pendiente de la ruta crítica y depende de una decisión que sigue abierta (el hosting).
 - **RNF-01 sin evidencia con personas.** El diseño no impone esperas, pero solo se puede confirmar con docentes.
 - **Repositorio público.** La contraseña de demostración de `seed_demo` está escrita en el código y cada commit lleva el correo del autor. Conviene cambiar esa contraseña antes de desplegar, o hacer el repositorio privado.
-- **Cambios después de la fase H.** Cada cambio exige repetir la suite (unos siete minutos) y conviene actualizar el informe de pruebas.
+- **Cambios después de la fase H.** Cada cambio exige repetir la suite (de siete a nueve minutos) y conviene actualizar el informe de pruebas.
 
 ## 9. Qué se anotó en Trello
 

@@ -54,7 +54,7 @@ control_asistencia/
 │   │   └── reportes.py           # porcentajes, PDF, Excel (RF-13/14/15)
 │   ├── views/               # auth.py, usuarios.py, grupos.py, sesiones.py, asistencia.py, reportes.py
 │   ├── templates/asistencia/
-│   ├── static/
+│   ├── static/              # asistencia/estilo.css: hoja de estilos propia (diseño visual)
 │   ├── management/commands/seed_demo.py
 │   └── tests/
 ├── docs/
@@ -231,7 +231,8 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Pruebas de integración (fase H).** `test_flujos.py` encadena las pantallas por sus URL y formularios reales, con reloj fijo y cifras calculadas a mano. `test_matriz_de_acceso.py` toma las rutas de `urls.py`: una ruta nueva que no se clasifique rompe la primera prueba, a propósito, y obliga a decidir quién puede entrar. `test_rendimiento.py` protege contra un N+1 en las pantallas que no tenían prueba de conteo.
 - **RNF-07 medido.** Con 6 grupos de 50 alumnos y 48 sesiones (14 400 registros) en MySQL, el peor caso fue 570 ms (importar un CSV de 50 alumnos) contra el límite de 3 s; las demás vistas quedaron por debajo de 280 ms en su peor repetición. Método y tabla completos en `docs/informe_pruebas.md`.
 - **RNF-01 no se cronometra aquí.** Se mide el costo de interacción (5 excepciones = 5 toques y un envío; botones de 48 px; guardar siempre visible), no un tiempo humano. Verificarlo requiere probar con docentes.
-- **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): H-01 botones secundarios `btn-sm` de unos 31 px en el teléfono; H-02 no hay página 500 propia; H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
+- **Diseño visual (RNF-02, 19/10/2026).** Bootstrap 5 se conserva; el aspecto propio vive en `asistencia/static/asistencia/estilo.css` (variables de color, tipografía del sistema, tarjetas, tablas, botones, formularios, avisos y etiquetas de estado; sin degradados, sin fuentes ni librerías nuevas). Los nombres de clase de los que dependen las pruebas (`btn-check`, `table-danger`, `text-bg-*`, `alert-link`) no cambian. El color solo significa algo: presente (verde), retardo (ámbar), ausente (rojo) y justificado (turquesa), y el estado elegido en el pase de lista lleva además relleno y marca de verificación, no solo color. Los botones miden 44 px en el teléfono. `test_estilo.py` protege el contraste mínimo de 4.5:1 de la paleta, la carga de la hoja y la sección activa del menú. El inicio muestra los tres accesos del docente (RF-02). Esto agrega `{% static %}` a `base.html`: ver `docs/DESPLIEGUE.md` (B3), porque en producción toda pantalla depende de servir `/static/`.
+- **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): ~~H-01 botones secundarios de unos 31 px~~ corregido con el rediseño (44 px en el teléfono); H-02 no hay página 500 propia; H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
 
 - **Plan de despliegue (fase J).** `docs/DESPLIEGUE.md` describe lo técnico de la fase J. Se revisó el 15/10/2026 contra el código y con pruebas desechables, y sus correcciones están en el historial de Git de ese archivo. `.gitignore` ya cubre `.env.*` (menos los ejemplos) y `*.sql.gz`: antes `.env.prod` se habría subido a un repositorio público. El plan aún no se ejecuta; la fase J sigue pendiente.
 - **Normas de trabajo de Victo.** Planificar antes de actuar; ejecutar e iterar en Git (un commit por paso verificable y `git push` al cerrar un bloque); validar con pruebas (automáticas cuando se puede, o comprobaciones reproducibles cuyo resultado se anota).
@@ -239,7 +240,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 ### Decisiones abiertas
 
 - **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
-- **Hallazgos H-01 a H-03.** Decidir si se corrigen antes de la entrega (el informe propone cómo) o se dejan como mejoras.
+- **Hallazgos H-02 y H-03.** Decidir si se corrigen antes de la entrega (el informe propone cómo) o se dejan como mejoras. El H-01 ya se corrigió.
 - **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
 - **Hosting (actividad J).** Sin definir.
 
