@@ -3,10 +3,11 @@
 {% block titulo %}Sin permiso · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<div class="text-center py-5">
-  <p class="display-4 fw-bold text-secondary mb-2">403</p>
+<div class="vacio mt-4">
+  <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-candado"/></svg></span>
+  <p class="display-4 fw-bold text-secondary mb-1">403</p>
   <h1 class="h4">No tienes permiso para ver esta página</h1>
-  <p class="text-secondary">Tu rol no incluye esta opción.</p>
-  <a class="btn btn-primary" href="{% url 'inicio' %}">Ir al inicio</a>
+  <p>Tu rol no incluye esta opción.</p>
+  <a class="btn btn-primary" href="{% url 'inicio' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-inicio"/></svg>Ir al inicio</a>
 </div>
 {% endblock %}

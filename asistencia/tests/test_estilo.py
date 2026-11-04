@@ -80,7 +80,7 @@ class MenuYHojaEnLasPantallasTests(TestCase):
         """Textos de los enlaces del menú marcados como página actual."""
         html = self.client.get(url).content.decode()
         menu = html.split('<ul class="navbar-nav')[1].split('</ul>')[0]
-        enlaces = re.findall(r'<a class="nav-link([^"]*)"\s*(aria-current="page")?\s*href="[^"]*">([^<]+)</a>', menu)
+        enlaces = re.findall(r'<a class="nav-link([^"]*)"\s*(aria-current="page")?\s*href="[^"]*">(?:<svg.*?</svg>)?([^<]+)</a>', menu)
         return [texto for clase, actual, texto in enlaces if actual and 'active' in clase]
 
     def _carga_la_hoja(self, respuesta):
