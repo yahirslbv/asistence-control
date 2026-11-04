@@ -19,6 +19,15 @@ from .services.usuarios import (
 )
 
 
+# Textos del admin (RF-16 y RF-17). Un administrador no tiene otra pantalla a la que
+# volver: el inicio lo regresa aquí, así que no se ofrece «Ver sitio».
+admin.site.site_header = 'Control de asistencia'
+admin.site.site_title = 'Control de asistencia'
+admin.site.index_title = 'Administración'
+admin.site.site_url = None
+admin.site.enable_nav_sidebar = False   # con dos modelos, la barra lateral solo estorba
+
+
 class UsuarioCreationForm(AdminUserCreationForm):
     """Alta de usuarios (RF-16): nombre, apellido, correo y rol son obligatorios."""
 

@@ -26,13 +26,15 @@ ALLOWED_HOSTS = [
 
 
 INSTALLED_APPS = [
+    # `asistencia` va antes que el admin para que sus plantillas (admin/base_site.html)
+    # y su hoja de estilos del admin tengan prioridad sobre las de Django.
+    'asistencia',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'asistencia',
 ]
 
 MIDDLEWARE = [

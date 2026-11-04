@@ -3,10 +3,11 @@
 import re
 
 from django.contrib.staticfiles import finders
+from django.template.loader import get_template
 from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
-from .utils import PASSWORD, crear_docente, crear_grupo, crear_sesion
+from .utils import PASSWORD, crear_administrador, crear_docente, crear_grupo, crear_sesion
 
 HOJA = 'asistencia/estilo.css'
 MINIMO_TEXTO_NORMAL = 4.5  # WCAG 2.1 AA
@@ -121,3 +122,95 @@ class MenuYHojaEnLasPantallasTests(TestCase):
 
         for destino in ('grupos', 'pase_de_lista_inicio', 'reportes'):
             self.assertContains(respuesta, f'class="acceso" href="{reverse(destino)}"')
+
+
+class TemaDelAdminHojaTests(SimpleTestCase):
+    """`admin.css` tiene dos paletas (clara y oscura): las dos deben leerse bien y estar en sincronía."""
+
+    HOJA_ADMIN = 'asistencia/admin.css'
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        ruta = finders.find(cls.HOJA_ADMIN)
+        cls.css = open(ruta, encoding='utf-8').read() if ruta else ''
+
+    def _tokens(self, patron):
+        bloque = re.search(patron, self.css, re.DOTALL)
+        self.assertIsNotNone(bloque, f'No se encontró el bloque {patron!r}')
+        return dict(re.findall(r'--([a-z-]+):\s*(#[0-9a-fA-F]{6})', bloque.group(1)))
+
+    def claro(self):
+        return self._tokens(r':root,\s*html\[data-theme="light"\]\s*\{(.*?)\n\}')
+
+    def oscuro(self):
+        return self._tokens(r'html\[data-theme="dark"\]\s*\{(.*?)\n\}')
+
+    def oscuro_automatico(self):
+        return self._tokens(r'@media \(prefers-color-scheme: dark\) \{\s*:root \{(.*?)\n  \}\n\}')
+
+    def test_la_hoja_esta_en_los_estaticos(self):
+        self.assertTrue(self.css, f'No se encontró {self.HOJA_ADMIN} en los estáticos')
+
+    def test_el_tema_oscuro_automatico_y_el_forzado_son_el_mismo(self):
+        self.assertEqual(self.oscuro_automatico(), self.oscuro())
+
+    def test_las_dos_paletas_cumplen_el_contraste_minimo(self):
+        for nombre, t in (('claro', self.claro()), ('oscuro', self.oscuro())):
+            pares = {
+                'texto principal / lienzo': (t['tinta'], t['lienzo']),
+                'texto principal / tarjeta': (t['tinta'], t['superficie']),
+                'texto secundario / lienzo': (t['tinta-suave'], t['lienzo']),
+                'texto secundario / tarjeta': (t['tinta-suave'], t['superficie']),
+                'texto secundario / realce': (t['tinta-suave'], t['realce']),
+                'enlace / tarjeta': (t['enlace'], t['superficie']),
+                'enlace / lienzo': (t['enlace'], t['lienzo']),
+                'botón': (t['button-fg'], t['button-bg']),
+                'botón principal': (t['button-fg'], t['default-button-bg']),
+                'botón de acciones': (t['object-tools-fg'], t['object-tools-bg']),
+                'borrar': ('#ffffff', t.get('delete-button-bg') or t['rojo-texto']),
+            }
+            for color in ('verde', 'ambar', 'rojo', 'azul', 'gris'):
+                pares[f'aviso {color}'] = (t[f'{color}-texto'], t[f'{color}-fondo'])
+            for par, (texto, fondo) in pares.items():
+                with self.subTest(f'{nombre}: {par}'):
+                    self.assertGreaterEqual(_contraste(texto, fondo), MINIMO_TEXTO_NORMAL)
+
+
+@override_settings(DEBUG=False)
+class AdminConTemaTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        crear_administrador()
+
+    def setUp(self):
+        self.client.login(username='admin@asistencia.test', password=PASSWORD)
+
+    def test_la_plantilla_base_del_admin_es_la_del_proyecto(self):
+        # Solo gana la del proyecto si `asistencia` va antes que el admin en INSTALLED_APPS.
+        origen = get_template('admin/base_site.html').origin.name.replace(chr(92), '/')
+        self.assertTrue(origen.endswith('asistencia/templates/admin/base_site.html'), origen)
+
+    def test_el_admin_carga_su_hoja_la_marca_y_los_textos_del_proyecto(self):
+        respuesta = self.client.get(reverse('admin:index'))
+
+        self.assertContains(respuesta, 'asistencia/admin.css')
+        self.assertContains(respuesta, 'class="marca"')
+        self.assertContains(respuesta, 'Control de asistencia')
+        self.assertContains(respuesta, 'Administración')
+        self.assertNotContains(respuesta, 'Django administration')
+        self.assertNotContains(respuesta, 'Administración de Django')
+
+    def test_no_se_ofrece_ver_sitio_ni_la_barra_lateral(self):
+        for url in (reverse('admin:index'), reverse('admin:asistencia_periodo_changelist')):
+            with self.subTest(url):
+                respuesta = self.client.get(url)
+                self.assertNotContains(respuesta, 'view-site')
+                self.assertNotContains(respuesta, 'nav-sidebar')
+
+    def test_las_pantallas_de_periodos_y_usuarios_usan_el_tema(self):
+        for nombre in ('admin:asistencia_periodo_changelist', 'admin:asistencia_periodo_add',
+                       'admin:asistencia_usuario_changelist', 'admin:asistencia_usuario_add'):
+            with self.subTest(nombre):
+                self.assertContains(self.client.get(reverse(nombre)), 'asistencia/admin.css')

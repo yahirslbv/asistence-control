@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{# Tema propio: la misma paleta y tipografía que la aplicación (ver asistencia/admin.css). #}
+{% block extrastyle %}{{ block.super }}
+  <link rel="stylesheet" href="{% static 'asistencia/admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}">
+    <svg class="marca" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <rect width="24" height="24" rx="6"/>
+      <path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    {{ site_header|default:_('Django administration') }}
+  </a>
+</div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
