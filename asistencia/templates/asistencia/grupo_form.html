@@ -17,12 +17,19 @@
             </div>
           {% endif %}
 
+          {% if form.sin_periodo_activo and not object %}
+            <div class="alert alert-warning" role="alert" id="aviso-sin-periodo">
+              <strong>No hay un periodo activo.</strong>
+              Para crear un grupo, pide al administrador que active el periodo.
+            </div>
+          {% endif %}
+
           {% include 'asistencia/_campo.html' with campo=form.clave %}
           {% include 'asistencia/_campo.html' with campo=form.materia %}
           {% include 'asistencia/_campo.html' with campo=form.periodo %}
 
           <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="submit" class="btn btn-primary"{% if form.sin_periodo_activo and not object %} disabled{% endif %}>Guardar</button>
             <a class="btn btn-outline-secondary"
                href="{% if object %}{% url 'grupo_detalle' object.pk %}{% else %}{% url 'grupos' %}{% endif %}">Cancelar</a>
           </div>

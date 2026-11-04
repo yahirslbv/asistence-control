@@ -10,6 +10,7 @@ from .services.importar_alumnos import (
     LONGITUD_CORREO, LONGITUD_MATRICULA, LONGITUD_NOMBRE, TAMANO_MAXIMO_BYTES,
 )
 from .services.justificantes import ArchivoNoValido, validar_archivo
+from .services.periodos import periodo_activo
 
 
 class EstiloBootstrapMixin:
@@ -40,20 +41,43 @@ class LoginForm(AuthenticationForm):
 
 
 class GrupoForm(EstiloBootstrapMixin, forms.ModelForm):
-    """Alta y edición de un grupo (RF-03). El docente lo asigna la vista."""
+    """Alta y edición de un grupo (RF-03). El docente lo asigna la vista.
+
+    El periodo se elige entre los que el administrador tiene activos (RF-17): hoy
+    es uno solo. Al editar también se conserva el periodo que el grupo ya tiene.
+    """
+
+    periodo = forms.ChoiceField(
+        label='Periodo',
+        choices=(),
+        error_messages={
+            'required': 'Elige un periodo.',
+            'invalid_choice': 'Ese periodo no está activo. Elige el periodo activo.',
+        },
+    )
 
     class Meta:
         model = Grupo
         fields = ['clave', 'materia', 'periodo']
         help_texts = {
             'clave': 'Única por periodo. Ejemplo: ADM-101.',
-            'periodo': 'Ejemplo: 2026-2.',
         }
         error_messages = {
             NON_FIELD_ERRORS: {
                 'unique_together': 'Ya existe un grupo con esa clave en ese periodo.',
             },
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        activo = periodo_activo()
+        claves = [activo.clave] if activo else []
+        if self.instance.pk and self.instance.periodo not in claves:
+            claves.append(self.instance.periodo)
+        self.sin_periodo_activo = activo is None
+        self.fields['periodo'].choices = [(clave, clave) for clave in claves]
+        self.fields['periodo'].help_text = (
+            'Solo se pueden crear grupos en el periodo activo.' if activo else '')
 
 
 class GenerarSesionesForm(EstiloBootstrapMixin, forms.Form):

@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 from django.test import override_settings
 
-from asistencia.models import Alumno, Grupo, Inscripcion, Sesion, Usuario
+from asistencia.models import Alumno, Grupo, Inscripcion, Periodo, Sesion, Usuario
 from asistencia.services.usuarios import sincronizar_permisos
 
 PASSWORD = 'clave-de-prueba-123'
@@ -73,6 +73,11 @@ def crear_administrador(correo='admin@asistencia.test', username='admin'):
     )
     sincronizar_permisos(administrador)
     return administrador
+
+
+def crear_periodo(clave='2026-2', activo=False, inicio=date(2026, 8, 24), fin=date(2026, 12, 4)):
+    """Un periodo escolar (RF-17). Nace inactivo, salvo que se pida lo contrario."""
+    return Periodo.objects.create(clave=clave, fecha_inicio=inicio, fecha_fin=fin, activo=activo)
 
 
 def crear_grupo(docente, clave='ADM-101', materia='Administración de Proyectos',

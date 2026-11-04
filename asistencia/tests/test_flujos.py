@@ -26,7 +26,7 @@ from .test_exportar import hoja_de, texto_del_pdf
 from .test_justificantes import PDF
 from .utils import (
     PASSWORD, MediaTemporalMixin, RelojFijoMixin, celdas_de_la_tabla,
-    crear_administrador, datos_del_pase,
+    crear_administrador, crear_periodo, datos_del_pase,
 )
 
 CLAVE_DEL_DOCENTE = 'Clave-Docente-2026#x'
@@ -46,6 +46,7 @@ class FlujoBase(MediaTemporalMixin, RelojFijoMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.administrador = crear_administrador()
+        crear_periodo('2026-2', activo=True)   # el periodo que el administrador tiene activo (RF-17)
 
     # --- Administrador ---------------------------------------------------
 

@@ -14,14 +14,10 @@ from asistencia.services.periodos import (
     desactivar_periodo, grupos_del_periodo, periodo_activo, periodo_cerrado,
 )
 
-from .utils import crear_docente, crear_grupo, crear_sesion
+from .utils import crear_docente, crear_grupo, crear_periodo, crear_sesion
 
 INICIO = date(2026, 8, 24)
 FIN = date(2026, 12, 4)
-
-
-def crear_periodo(clave='2026-2', activo=False, inicio=INICIO, fin=FIN):
-    return Periodo.objects.create(clave=clave, fecha_inicio=inicio, fecha_fin=fin, activo=activo)
 
 
 class PeriodoModeloTests(TestCase):

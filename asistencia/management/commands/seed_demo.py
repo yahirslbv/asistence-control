@@ -14,7 +14,8 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from asistencia.models import Alumno, Grupo, Inscripcion
+from asistencia.models import Alumno, Grupo, Inscripcion, Periodo
+from asistencia.services.periodos import activar_periodo, periodo_activo
 from asistencia.services.usuarios import aplicar_rol, sincronizar_permisos
 
 # Contraseña de las cuentas de demostración. Se puede cambiar con la variable
@@ -22,6 +23,8 @@ from asistencia.services.usuarios import aplicar_rol, sincronizar_permisos
 PASSWORD_DEMO = 'Asistencia#2026'
 
 PERIODO = '2026-2'
+INICIO_DEL_PERIODO = date(2026, 8, 24)
+FIN_DEL_PERIODO = date(2026, 12, 4)
 
 NOMBRES = [
     'Ana', 'Luis', 'María', 'Carlos', 'Sofía', 'Jorge', 'Valeria', 'Diego',
@@ -57,6 +60,15 @@ class Command(BaseCommand):
             Usuario, 'docente2@asistencia.test', 'Marco', 'Salazar',
             Usuario.Rol.DOCENTE, password,
         )
+
+        # El periodo de la demostración (RF-17). Se activa solo si no hay otro
+        # activo: no le quita el lugar a uno que el administrador ya eligió.
+        periodo, _ = Periodo.objects.get_or_create(
+            clave=PERIODO,
+            defaults={'fecha_inicio': INICIO_DEL_PERIODO, 'fecha_fin': FIN_DEL_PERIODO},
+        )
+        if periodo_activo() is None:
+            activar_periodo(periodo)
 
         grupo_a, _ = Grupo.objects.get_or_create(
             clave='ADM-101', periodo=PERIODO,

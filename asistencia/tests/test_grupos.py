@@ -9,7 +9,7 @@ from asistencia.models import (
     Alumno, Asistencia, BitacoraCambio, Grupo, Inscripcion, Sesion,
 )
 
-from .utils import PASSWORD, crear_docente, crear_grupo
+from .utils import PASSWORD, crear_docente, crear_grupo, crear_periodo
 
 
 class GruposTests(TestCase):
@@ -18,6 +18,7 @@ class GruposTests(TestCase):
     def setUpTestData(cls):
         cls.docente = crear_docente()
         cls.otro = crear_docente('otro@asistencia.test', 'otro')
+        crear_periodo('2026-2', activo=True)   # un grupo nuevo solo se crea en el periodo activo (RF-17)
 
     def setUp(self):
         self.client.login(username='docente@asistencia.test', password=PASSWORD)

@@ -12,10 +12,9 @@ from asistencia.services.justificantes import adjuntar_justificante
 from asistencia.services.pendientes import sesiones_pendientes
 from asistencia.services.periodos import activar_periodo, desactivar_periodo
 
-from .test_periodos import crear_periodo
 from .utils import (
     HOY, PASSWORD, MediaTemporalMixin, RelojFijoMixin, crear_docente, crear_grupo,
-    crear_sesion, datos_del_pase, inscribir_alumnos,
+    crear_periodo, crear_sesion, datos_del_pase, inscribir_alumnos,
 )
 
 PDF = b'%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n'
