@@ -18,20 +18,25 @@
   <div class="d-flex flex-wrap gap-2">
     <a class="btn btn-primary" href="{% url 'sesiones' grupo.pk %}">Sesiones</a>
     <a class="btn btn-outline-primary" href="{% url 'reporte_grupo' grupo.pk %}">Reporte</a>
-    <a class="btn btn-outline-primary" href="{% url 'grupo_editar' grupo.pk %}">Editar</a>
-    <a class="btn btn-outline-danger" href="{% url 'grupo_eliminar' grupo.pk %}">Eliminar grupo</a>
+    {% if not solo_lectura %}
+      <a class="btn btn-outline-primary" href="{% url 'grupo_editar' grupo.pk %}">Editar</a>
+      <a class="btn btn-outline-danger" href="{% url 'grupo_eliminar' grupo.pk %}">Eliminar grupo</a>
+    {% endif %}
   </div>
 </div>
 
+{% include 'asistencia/_periodo_inactivo.html' %}
 {% include 'asistencia/_pendientes.html' %}
 
 <div class="card shadow-sm">
   <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
     <span>Alumnos inscritos ({{ inscripciones|length }})</span>
-    <div class="d-flex flex-wrap gap-2">
-      <a class="btn btn-outline-primary btn-sm" href="{% url 'alumno_agregar' grupo.pk %}">Agregar alumno</a>
-      <a class="btn btn-primary btn-sm" href="{% url 'alumnos_importar' grupo.pk %}">Cargar lista (CSV)</a>
-    </div>
+    {% if not solo_lectura %}
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'alumno_agregar' grupo.pk %}">Agregar alumno</a>
+        <a class="btn btn-primary btn-sm" href="{% url 'alumnos_importar' grupo.pk %}">Cargar lista (CSV)</a>
+      </div>
+    {% endif %}
   </div>
   {% if inscripciones %}
     <div class="table-responsive">
@@ -46,7 +51,9 @@
               <td>{{ inscripcion.alumno.nombre }}</td>
               <td>{{ inscripcion.alumno.correo|default:"—" }}</td>
               <td class="text-end">
-                <a class="btn btn-outline-danger btn-sm" href="{% url 'alumno_baja' grupo.pk inscripcion.alumno_id %}">Dar de baja</a>
+                {% if not solo_lectura %}
+                  <a class="btn btn-outline-danger btn-sm" href="{% url 'alumno_baja' grupo.pk inscripcion.alumno_id %}">Dar de baja</a>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}

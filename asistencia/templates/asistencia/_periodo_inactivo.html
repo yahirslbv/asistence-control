@@ -1,0 +1,8 @@
+{# Aviso de RF-17: el grupo es de un periodo inactivo y está en solo lectura. Espera `grupo` y `solo_lectura`. #}
+{% if solo_lectura %}
+  <div class="alert alert-secondary" role="status" id="aviso-periodo-inactivo">
+    <strong>Periodo {{ grupo.periodo }} inactivo.</strong>
+    Este grupo está en solo lectura: puedes consultarlo y ver sus reportes, pero no modificarlo.
+    Si necesitas hacerlo, pide al administrador que active el periodo.
+  </div>
+{% endif %}

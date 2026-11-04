@@ -18,6 +18,7 @@ from ..services.inscripciones import (
 )
 from ..services.justificantes import borrar_archivos, nombres_de_justificantes
 from ..services.pendientes import sesiones_pendientes
+from ..services.periodos import claves_de_periodos_cerrados, periodo_cerrado
 
 MENSAJE_GRUPO_DUPLICADO = 'Ya existe un grupo con esa clave en ese periodo.'
 
@@ -52,7 +53,11 @@ class GrupoListView(SoloDocenteMixin, ListView):
 
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
-        contexto['pendientes'] = sesiones_pendientes(self.request.user)   # RF-10
+        # RF-10, sin las sesiones de periodos inactivos: ya no se pueden atender (RF-17).
+        contexto['pendientes'] = sesiones_pendientes(self.request.user, solo_atendibles=True)
+        cerrados = claves_de_periodos_cerrados()
+        for grupo in contexto['grupos']:
+            grupo.solo_lectura = grupo.periodo in cerrados
         return contexto
 
 
@@ -72,6 +77,7 @@ class GrupoCrearView(SoloDocenteMixin, GuardarGrupoMixin, CreateView):
 
 
 class GrupoEditarView(GrupoDelDocenteMixin, GuardarGrupoMixin, UpdateView):
+    exige_periodo_abierto = True
     form_class = GrupoForm
     template_name = 'asistencia/grupo_form.html'
 
@@ -97,7 +103,9 @@ class GrupoDetalleView(GrupoDelDocenteMixin, DetailView):
         contexto['inscripciones'] = (
             self.grupo.inscripciones.select_related('alumno').order_by('alumno__nombre')
         )
-        contexto['pendientes'] = sesiones_pendientes(self.request.user, grupo=self.grupo)  # RF-10
+        contexto['pendientes'] = sesiones_pendientes(      # RF-10
+            self.request.user, grupo=self.grupo, solo_atendibles=True)
+        contexto['solo_lectura'] = periodo_cerrado(self.grupo.periodo)   # RF-17
         return contexto
 
 
@@ -108,6 +116,7 @@ class ImportarAlumnosView(GrupoDelDocenteMixin, FormView):
     fila. Repetir el envío es inofensivo: la importación es idempotente.
     """
 
+    exige_periodo_abierto = True
     form_class = ImportarAlumnosForm
     template_name = 'asistencia/grupo_importar.html'
 
@@ -129,6 +138,7 @@ class ImportarAlumnosView(GrupoDelDocenteMixin, FormView):
 class InscribirAlumnoView(GrupoDelDocenteMixin, FormView):
     """Inscripción individual de un alumno (RF-05)."""
 
+    exige_periodo_abierto = True
     form_class = InscribirAlumnoForm
     template_name = 'asistencia/grupo_inscribir.html'
 
@@ -160,6 +170,7 @@ class InscribirAlumnoView(GrupoDelDocenteMixin, FormView):
 class BajaAlumnoView(GrupoDelDocenteMixin, TemplateView):
     """Baja individual de un alumno del grupo (RF-05), con confirmación."""
 
+    exige_periodo_abierto = True
     template_name = 'asistencia/inscripcion_confirmar_baja.html'
 
     def cargar_recursos(self, *args, **kwargs):
@@ -188,6 +199,7 @@ class BajaAlumnoView(GrupoDelDocenteMixin, TemplateView):
 class GrupoEliminarView(GrupoDelDocenteMixin, DeleteView):
     """Baja de un grupo (RF-03). Borra en cascada, así que pide confirmación."""
 
+    exige_periodo_abierto = True
     template_name = 'asistencia/grupo_confirmar_eliminar.html'
     context_object_name = 'grupo'
     success_url = reverse_lazy('grupos')

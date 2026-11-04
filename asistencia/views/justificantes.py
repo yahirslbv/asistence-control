@@ -39,6 +39,7 @@ class RegistroDeLaSesionMixin(SesionDelDocenteMixin):
 class JustificanteView(RegistroDeLaSesionMixin, FormView):
     """Ver el estado del justificante y adjuntarlo o reemplazarlo."""
 
+    exige_periodo_abierto = True
     form_class = JustificanteForm
     template_name = 'asistencia/justificante.html'
 
@@ -97,6 +98,7 @@ class DescargarJustificanteView(RegistroDeLaSesionMixin, View):
 class QuitarJustificanteView(RegistroDeLaSesionMixin, TemplateView):
     """Quita el justificante (y borra el archivo), con confirmación."""
 
+    exige_periodo_abierto = True
     template_name = 'asistencia/justificante_confirmar_quitar.html'
 
     def cargar_recursos(self, *args, **kwargs):

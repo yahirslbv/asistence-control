@@ -29,7 +29,10 @@
             <tr>
               <td class="fw-semibold">{{ grupo.clave }}</td>
               <td>{{ grupo.materia }}</td>
-              <td>{{ grupo.periodo }}</td>
+              <td>
+                {{ grupo.periodo }}
+                {% if grupo.solo_lectura %}<span class="badge text-bg-secondary ms-1" title="Periodo inactivo: el grupo está en solo lectura">Solo lectura</span>{% endif %}
+              </td>
               <td class="text-end">{{ grupo.num_alumnos }}</td>
               <td class="text-end">{{ grupo.num_sesiones }}</td>
               <td class="text-end">

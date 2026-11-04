@@ -22,6 +22,8 @@
   </p>
 </div>
 
+{% include 'asistencia/_periodo_inactivo.html' %}
+
 {% if sesion.estado == 'cancelada' %}
   <div class="alert alert-warning" role="alert">
     Esta sesión está cancelada y no admite registros de asistencia.
@@ -34,6 +36,12 @@
   </div>
   <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver a las sesiones</a>
 
+{% elif sin_toma_por_periodo %}
+  <div class="alert alert-info" role="alert">
+    Esta sesión no tiene el pase de lista guardado y el periodo está inactivo, así que ya no se puede tomar lista.
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver a las sesiones</a>
+
 {% elif not filas %}
   <div class="alert alert-info" role="alert">
     El grupo no tiene alumnos inscritos para tomar lista.
@@ -41,7 +49,9 @@
   </div>
 
 {% else %}
-  {% if modo == 'captura' %}
+  {% if solo_lectura %}
+    <p class="text-secondary">Consulta de solo lectura: con el periodo inactivo no se puede corregir esta lista.</p>
+  {% elif modo == 'captura' %}
     <p class="text-secondary">
       Todos empiezan en «Presente». Cambia solo a quienes no lo estuvieron y guarda.
     </p>
@@ -55,7 +65,7 @@
     </p>
   {% endif %}
 
-  <form method="post" id="pase-de-lista">
+  <form method="post" id="pase-de-lista"{% if solo_lectura %} class="solo-lectura"{% endif %}>
     {% csrf_token %}
     <input type="hidden" name="modo" value="{{ modo }}">
 
@@ -73,7 +83,8 @@
             {% for valor, etiqueta, color in estados %}
               <input type="radio" class="btn-check" autocomplete="off"
                      name="estado_{{ fila.alumno.pk }}" id="a{{ fila.alumno.pk }}-{{ valor }}"
-                     value="{{ valor }}" {% if fila.estado == valor %}checked{% endif %}>
+                     value="{{ valor }}" {% if fila.estado == valor %}checked{% endif %}
+                     {% if solo_lectura %}disabled{% endif %}>
               <label class="btn btn-outline-{{ color }} estado-btn" for="a{{ fila.alumno.pk }}-{{ valor }}">{{ etiqueta }}</label>
             {% endfor %}
           </div>
@@ -82,10 +93,12 @@
             <div class="small mt-2">
               {% if fila.registro.justificante %}
                 <span class="text-success">Justificante adjunto</span> ·
-                <a href="{% url 'justificante_archivo' sesion.pk fila.alumno.pk %}">Ver</a> ·
-                <a href="{% url 'justificante' sesion.pk fila.alumno.pk %}">Reemplazar</a> ·
-                <a class="text-danger" href="{% url 'justificante_quitar' sesion.pk fila.alumno.pk %}">Quitar</a>
-              {% else %}
+                <a href="{% url 'justificante_archivo' sesion.pk fila.alumno.pk %}">Ver</a>
+                {% if not solo_lectura %}
+                  · <a href="{% url 'justificante' sesion.pk fila.alumno.pk %}">Reemplazar</a> ·
+                  <a class="text-danger" href="{% url 'justificante_quitar' sesion.pk fila.alumno.pk %}">Quitar</a>
+                {% endif %}
+              {% elif not solo_lectura %}
                 <a href="{% url 'justificante' sesion.pk fila.alumno.pk %}">Adjuntar justificante</a>
               {% endif %}
             </div>
@@ -94,13 +107,19 @@
       </div>
     {% endfor %}
 
-    {# En el teléfono la barra fija solo lleva «Guardar»: «Volver» la haría el doble de alta. #}
-    <div class="sticky-bottom barra-guardar py-2 mt-3 d-grid d-sm-flex gap-2">
-      <button type="submit" class="btn btn-primary btn-lg" id="guardar">
-        {% if modo == 'captura' %}Guardar pase de lista{% else %}Guardar correcciones{% endif %}
-      </button>
-      <a class="btn btn-outline-secondary btn-lg d-none d-sm-inline-block" href="{% url 'sesiones' grupo.pk %}">Volver</a>
-    </div>
+    {% if solo_lectura %}
+      <div class="py-2 mt-3">
+        <a class="btn btn-outline-secondary" href="{% url 'sesiones' grupo.pk %}">Volver a las sesiones</a>
+      </div>
+    {% else %}
+      {# En el teléfono la barra fija solo lleva «Guardar»: «Volver» la haría el doble de alta. #}
+      <div class="sticky-bottom barra-guardar py-2 mt-3 d-grid d-sm-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-lg" id="guardar">
+          {% if modo == 'captura' %}Guardar pase de lista{% else %}Guardar correcciones{% endif %}
+        </button>
+        <a class="btn btn-outline-secondary btn-lg d-none d-sm-inline-block" href="{% url 'sesiones' grupo.pk %}">Volver</a>
+      </div>
+    {% endif %}
   </form>
 
   {% if modo == 'correccion' %}
@@ -128,15 +147,17 @@
     </div>
   {% endif %}
 
-  <script>
-    // Evita el doble clic en «Guardar». Si el envío se repite igual, el servidor
-    // no duplica nada: esto solo ahorra el aviso.
-    (function () {
-      var formulario = document.getElementById('pase-de-lista');
-      var boton = document.getElementById('guardar');
-      formulario.addEventListener('submit', function () { boton.disabled = true; });
-      window.addEventListener('pageshow', function () { boton.disabled = false; });
-    })();
-  </script>
+  {% if not solo_lectura %}
+    <script>
+      // Evita el doble clic en «Guardar». Si el envío se repite igual, el servidor
+      // no duplica nada: esto solo ahorra el aviso.
+      (function () {
+        var formulario = document.getElementById('pase-de-lista');
+        var boton = document.getElementById('guardar');
+        formulario.addEventListener('submit', function () { boton.disabled = true; });
+        window.addEventListener('pageshow', function () { boton.disabled = false; });
+      })();
+    </script>
+  {% endif %}
 {% endif %}
 {% endblock %}

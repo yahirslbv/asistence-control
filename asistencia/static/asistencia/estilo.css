@@ -363,6 +363,7 @@ pre.bg-body-secondary {
 .alert-info    { --bs-alert-color: var(--azul-texto);  --bs-alert-bg: var(--azul-fondo);  --bs-alert-border-color: var(--azul-borde);  --bs-alert-link-color: var(--azul-texto); }
 .alert-warning { --bs-alert-color: var(--ambar-texto); --bs-alert-bg: var(--ambar-fondo); --bs-alert-border-color: var(--ambar-borde); --bs-alert-link-color: var(--ambar-texto); }
 .alert-danger  { --bs-alert-color: var(--rojo-texto);  --bs-alert-bg: var(--rojo-fondo);  --bs-alert-border-color: var(--rojo-borde);  --bs-alert-link-color: var(--rojo-texto); }
+.alert-secondary { --bs-alert-color: var(--gris-texto); --bs-alert-bg: var(--gris-fondo); --bs-alert-border-color: var(--gris-borde); --bs-alert-link-color: var(--gris-texto); }
 
 /* ---------- 9. Etiquetas de estado ---------- */
 
@@ -491,6 +492,10 @@ pre.bg-body-secondary {
     transform: rotate(45deg) translateY(-.08em);
   }
 }
+
+/* Consulta de un periodo inactivo (RF-17): los botones no se pueden tocar y solo se ve lo elegido. */
+.solo-lectura .estados .btn-check:disabled + .estado-btn { opacity: .45; pointer-events: none; }
+.solo-lectura .estados .btn-check:disabled:checked + .estado-btn { opacity: 1; }
 
 .fila-alumno {
   --bs-card-border-radius: .75rem;

@@ -10,6 +10,7 @@ Reglas:
 """
 
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 
 from ..models import Grupo, Periodo
 
@@ -30,6 +31,18 @@ def periodo_activo():
 def periodo_cerrado(clave):
     """True si el periodo existe y está inactivo. Una clave sin fila no cuenta."""
     return Periodo.objects.filter(clave=clave, activo=False).exists()
+
+
+def de_periodo_cerrado(campo_periodo='periodo'):
+    """Expresión para `filter` o `exclude` que es verdadera cuando el periodo
+    del grupo está inactivo; se evalúa dentro de la misma consulta. En una
+    consulta de sesiones, `campo_periodo` es 'grupo__periodo'."""
+    return Exists(Periodo.objects.filter(clave=OuterRef(campo_periodo), activo=False))
+
+
+def claves_de_periodos_cerrados():
+    """Claves de los periodos inactivos (una consulta)."""
+    return set(Periodo.objects.filter(activo=False).values_list('clave', flat=True))
 
 
 def asegurar_periodo_abierto(grupo):

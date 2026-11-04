@@ -8,6 +8,7 @@ from django.views.generic import FormView, TemplateView, UpdateView
 from ..forms import GenerarSesionesForm, SesionForm
 from ..permissions import GrupoDelDocenteMixin, SesionDelDocenteMixin
 from ..services.generar_sesiones import generar_sesiones
+from ..services.periodos import periodo_cerrado
 from ..services.sesiones import (
     SesionNoModificable, asegurar_programada, calendario_de_sesiones,
     cancelar_sesion,
@@ -37,6 +38,7 @@ class SesionListView(GrupoDelDocenteMixin, TemplateView):
             desde=desde,
             hasta=hasta,
             hoy=timezone.localdate(),   # el pase de lista se ofrece hasta la fecha de hoy
+            solo_lectura=periodo_cerrado(self.grupo.periodo),   # RF-17
         )
         return contexto
 
@@ -47,6 +49,8 @@ class SesionProgramadaMixin(SesionDelDocenteMixin):
     Una sesión ajena sigue respondiendo 404 (lo resuelve el mixin base antes);
     una propia que ya no está programada vuelve al calendario con el motivo.
     """
+
+    exige_periodo_abierto = True
 
     def cargar_recursos(self, *args, **kwargs):
         super().cargar_recursos(*args, **kwargs)
@@ -106,6 +110,7 @@ class SesionCancelarView(SesionProgramadaMixin, TemplateView):
 class GenerarSesionesView(GrupoDelDocenteMixin, FormView):
     """Genera las sesiones del grupo desde su horario y periodo (RF-06)."""
 
+    exige_periodo_abierto = True
     form_class = GenerarSesionesForm
     template_name = 'asistencia/sesiones_generar.html'
 

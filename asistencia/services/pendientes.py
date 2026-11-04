@@ -4,11 +4,16 @@ from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 
 from ..models import Asistencia, Inscripcion, Sesion
+from .periodos import de_periodo_cerrado
 
 
-def sesiones_pendientes(docente, grupo=None, ahora=None):
+def sesiones_pendientes(docente, grupo=None, ahora=None, solo_atendibles=False):
     """Sesiones pasadas del docente que necesitan atención, de la más antigua
     a la más reciente. Es una sola consulta, sin importar cuántas sean.
+
+    Con `solo_atendibles` se omiten las de grupos de un periodo inactivo (RF-17):
+    están en solo lectura y el docente ya no puede atenderlas. Los reportes no lo
+    usan: siguen avisando que su porcentaje no las incluye.
 
     Una sesión es pendiente si ya pasó y cumple una de estas condiciones:
     - está programada y no tiene ningún registro;
@@ -48,4 +53,6 @@ def sesiones_pendientes(docente, grupo=None, ahora=None):
     )
     if grupo is not None:
         sesiones = sesiones.filter(grupo=grupo)
+    if solo_atendibles:
+        sesiones = sesiones.exclude(de_periodo_cerrado('grupo__periodo'))
     return list(sesiones)

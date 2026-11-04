@@ -14,6 +14,7 @@ from ..services.asistencia import (
     sesion_es_futura,
 )
 from ..services.pendientes import sesiones_pendientes
+from ..services.periodos import de_periodo_cerrado, periodo_cerrado
 
 MODO_CAPTURA = 'captura'
 MODO_CORRECCION = 'correccion'
@@ -64,16 +65,24 @@ class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
     template_name = 'asistencia/pase_de_lista.html'
     http_method_names = ['get', 'post', 'head', 'options']
 
+    def requiere_periodo_abierto(self):
+        # Consultar la lista siempre se puede; guardar o corregir, solo con el periodo activo (RF-17).
+        return self.request.method == 'POST'
+
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
         sesion = self.sesion
+        solo_lectura = periodo_cerrado(self.grupo.periodo)
         contexto.update(
             sesion=sesion, grupo=self.grupo, estados=ESTADOS_EN_PANTALLA, modo=None,
-            futura=False)
+            futura=False, solo_lectura=solo_lectura, sin_toma_por_periodo=False)
         if sesion.estado == Sesion.Estado.CANCELADA:
             return contexto
         if sesion_es_futura(sesion):
             contexto['futura'] = True   # solo mensaje, sin formulario
+            return contexto
+        if solo_lectura and sesion.estado == Sesion.Estado.PROGRAMADA:
+            contexto['sin_toma_por_periodo'] = True   # no se puede tomar lista: solo mensaje
             return contexto
 
         filas = lista_de_la_sesion(sesion)
@@ -132,11 +141,13 @@ class PaseDeListaInicioView(SoloDocenteMixin, TemplateView):
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
         hoy = timezone.localdate()
-        todas = sesiones_pendientes(self.request.user)
+        # Sin las sesiones de periodos inactivos: están en solo lectura (RF-17).
+        todas = sesiones_pendientes(self.request.user, solo_atendibles=True)
         ids_pendientes = {sesion.pk for sesion in todas}
 
         de_hoy = list(
             Sesion.objects.filter(grupo__docente=self.request.user, fecha=hoy)
+            .exclude(de_periodo_cerrado('grupo__periodo'))
             .select_related('grupo')
             .order_by('hora_inicio', 'grupo__clave')
         )
