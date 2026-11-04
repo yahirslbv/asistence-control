@@ -18,9 +18,9 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 - **Estado:** las actividades A a H están terminadas, la I (manuales) está en curso y la J (despliegue y entrega) está por hacer.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
-- **Calidad:** 416 pruebas automáticas en verde. El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
-- **Requisitos:** los 16 requisitos funcionales están implementados y probados. Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
-- **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y tres hallazgos menores de la fase H (sección 8).
+- **Calidad:** 507 pruebas automáticas en verde. El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
+- **Requisitos:** los 17 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
+- **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y dos hallazgos menores de la fase H, H-02 y H-03 (sección 8).
 
 ### Avance contra el cronograma
 
@@ -56,7 +56,7 @@ python manage.py test --noinput
 ```
 
 - `seed_demo` crea 1 administrador, 2 docentes, 2 grupos y 40 alumnos. La contraseña de las cuentas de demostración está en `asistencia/management/commands/seed_demo.py`.
-- La suite completa debe terminar con `Ran 416 tests` y `OK`. En la última corrida (3/11/2026) tardó 547 s, con el equipo ocupado en otras tareas; sin carga tarda unos siete minutos.
+- La suite completa debe terminar con `Ran 507 tests` y `OK`. En la última corrida (3/11/2026) tardó 391 s (unos seis minutos y medio).
 - La carpeta [docs](.) contiene este seguimiento y el informe de pruebas.
 
 ## 3. Estado por semana
@@ -142,6 +142,8 @@ Extra: **RF-12 · justificantes de asistencia**, terminado el 15/10 (`3a3c3ea`, 
 
 Pruebas: `test_reportes` (68) y `test_exportar` (34).
 
+Extra de esta semana: **RF-17 · periodos escolares y tema del admin** (3/11, a petición de Victo). El administrador crea, edita, activa y desactiva periodos desde el admin; solo uno está activo y uno inactivo congela sus grupos (solo lectura, con reportes). Cinco commits, `f220dc9` a `8e2b97e`: modelo y migración 0003, congelamiento en las pantallas del docente, formulario de grupo con el periodo activo, admin con botones por fila y tema propio del admin (claro y oscuro). Decisiones y reglas en `CLAUDE.md`. 91 pruebas nuevas, una por cada regla, cada una comprobada con una mutación del código. Como el requisito no está en el documento original, no tiene tarjeta en el cronograma.
+
 ### S6 · 02/11 al 06/11 (holgura hasta S8) · I · Manuales y documentación
 - **Responsable:** documentador. **Ruta crítica:** no.
 - **Resultado esperado:** manual de usuario y manual de administrador terminados.
@@ -174,7 +176,7 @@ Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 416 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
+- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 507 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
   - [ ] Definir el hosting y desplegar el sistema.
   - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
   - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
@@ -201,6 +203,7 @@ Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02
 | RF-14 · Alumnos bajo el mínimo | Alta | Hecho | `test_reportes` | 14/10 |
 | RF-15 · Exportar a PDF y Excel | Media | Hecho | `test_exportar` (34) | 14/10 |
 | RF-16 · Alta de usuarios con rol | Media | Hecho | `test_usuarios` (38) | 15/10 |
+| RF-17 · Periodos escolares | Media | Hecho | `test_periodos` (24), `test_periodo_congelado` (18), `test_grupo_periodo` (13), `test_periodos_admin` (28), `test_flujos` | 3/11 |
 
 ## 5. Requisitos no funcionales
 
@@ -220,14 +223,14 @@ Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02
 
 | Medida | Valor |
 |---|---|
-| Commits | 78 hasta el 19/10 (39 el 13/10, 10 el 14/10, 24 el 15/10 y 5 el 19/10) |
-| Archivos versionados | 100 |
-| Código de la aplicación (Python, sin pruebas) | 3 525 líneas |
-| Pruebas (Python) | 6 082 líneas, 416 pruebas en 22 archivos |
-| Plantillas HTML | 25 archivos, 1 321 líneas |
-| Hoja de estilos | 1 archivo (`estilo.css`), 516 líneas |
-| Modelos / migraciones / rutas | 7 / 2 / 25 |
-| Servicios de negocio | 12 módulos en `asistencia/services/` |
+| Commits | 87 (39 el 13/10, 10 el 14/10, 24 el 15/10, 5 el 19/10 y 9 el 3/11) |
+| Archivos versionados | 111 |
+| Código de la aplicación (Python, sin pruebas ni migraciones) | 3 568 líneas |
+| Pruebas (Python) | 7 279 líneas, 507 pruebas en 26 archivos |
+| Plantillas HTML | 29 archivos, 1 433 líneas |
+| Hojas de estilo | 2 archivos: `estilo.css` (521 líneas) y `admin.css` (613 líneas) |
+| Modelos / migraciones / rutas | 8 / 3 / 25 |
+| Servicios de negocio | 13 módulos en `asistencia/services/` |
 
 Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 
@@ -245,6 +248,8 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 | Seguimiento semanal | 15/10 | 2 | `138ecd4`, `bc09d30` |
 | Plan de despliegue (revisión de `DESPLIEGUE.md`) | 15/10 | 8 | `34c3dfb` a `aed255a` |
 | Diseño visual (RNF-02) | 19/10 | 5 | `e323a33` a `9de20e9` |
+| Cifras y documentación del diseño visual | 3/11 | 4 | `b598ee9` a `aaf5d5b` |
+| RF-17 · Periodos y tema del admin | 3/11 | 5 | `f220dc9` a `8e2b97e` |
 
 ## 8. Decisiones abiertas, hallazgos y riesgos
 

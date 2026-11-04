@@ -48,13 +48,15 @@ control_asistencia/
 │   ├── backends.py          # EmailBackend (login con correo)
 │   ├── permissions.py       # mixins: solo grupos del docente, solo administrador
 │   ├── forms.py
+│   ├── admin.py             # usuarios (RF-16) y periodos (RF-17) en el admin de Django
 │   ├── services/            # lógica fuera de las vistas
 │   │   ├── importar_alumnos.py   # CSV (RF-04)
 │   │   ├── generar_sesiones.py   # horario + periodo (RF-06)
+│   │   ├── periodos.py           # activar, desactivar y congelar periodos (RF-17)
 │   │   └── reportes.py           # porcentajes, PDF, Excel (RF-13/14/15)
 │   ├── views/               # auth.py, usuarios.py, grupos.py, sesiones.py, asistencia.py, reportes.py
 │   ├── templates/asistencia/
-│   ├── static/              # asistencia/estilo.css: hoja de estilos propia (diseño visual)
+│   ├── static/              # asistencia/estilo.css (aplicación) y admin.css (tema del admin)
 │   ├── management/commands/seed_demo.py
 │   └── tests/
 ├── docs/
@@ -99,6 +101,7 @@ control_asistencia/
 | RF-14 | Reportes | Alta | Señalar a los alumnos por debajo del mínimo |
 | RF-15 | Reportes | Media | Exportar reportes a PDF y Excel |
 | RF-16 | Autenticación | Media | El administrador da de alta usuarios y les asigna un rol |
+| RF-17 | Periodos | Media | El administrador crea, edita, activa y desactiva periodos escolares. Solo uno está activo; un periodo inactivo deja sus grupos en solo lectura. Agregado el 3/11/2026 a petición de Victo, fuera del documento de requisitos original |
 
 ## 7. Requisitos no funcionales y cómo cumplirlos
 
@@ -116,7 +119,7 @@ control_asistencia/
 
 ## 8. Modelo de datos
 
-Siete tablas. La separación entre `alumno` e `inscripcion` permite que un alumno esté en varios grupos sin duplicar sus datos.
+Ocho tablas: las siete del diseño original y `periodo` (RF-17, migración 0003). La separación entre `alumno` e `inscripcion` permite que un alumno esté en varios grupos sin duplicar sus datos. `grupo.periodo` sigue siendo texto: guarda la clave del periodo, sin clave foránea.
 
 ```
 Usuario 1──N Grupo (docente)            Grupo 1──N Sesion
@@ -138,6 +141,9 @@ Reglas de integridad ya definidas:
 | Una entrada de bitácora refleja un cambio real | `CheckConstraint valor_anterior != valor_nuevo` |
 | No se borra un alumno o usuario con historial | `on_delete=PROTECT` |
 | Al eliminar un grupo se eliminan sus sesiones e inscripciones | `on_delete=CASCADE` |
+| Solo un periodo activo a la vez (RF-17) | `UniqueConstraint` sobre la expresión `CASE WHEN activo THEN 1 END` (índice único funcional de MySQL 8; los NULL no chocan) |
+| Un periodo termina después de empezar (RF-17) | `CheckConstraint fecha_fin > fecha_inicio` |
+| La clave de periodo es única y tiene el formato AAAA-N (RF-17) | `unique=True` y validador de la expresión `^\d{4}-\d$` |
 
 ## 9. Reglas de negocio que no debes romper
 
@@ -203,6 +209,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] F · Asistencia (RF-08 a RF-12; el justificante, RF-12, se adjunta desde la pantalla de corrección)
 - [x] G · Reportes (RF-13, RF-14 y RF-15: reportes por periodo, grupo y alumno, exportables a PDF y Excel)
 - [x] RF-16 · Alta de usuarios con rol, desde el admin de Django (cerrado después de la fase G)
+- [x] RF-17 · Periodos escolares: el administrador los crea, edita, activa y desactiva; uno inactivo congela sus grupos (3/11/2026)
 - [ ] I · Manuales
 - [x] H · Integración y pruebas (informe en `docs/informe_pruebas.md`; RNF-01 sin cronometrar con personas)
 - [ ] J · Despliegue y entrega
@@ -223,7 +230,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Almacenamiento y descarga del justificante.** El archivo se guarda como `<uuid4 hex>.<ext>`; el nombre original se descarta. Solo se descarga por la vista (adjunto, `justificante_<matrícula>_<AAAA-MM-DD>.<ext>`, tipo según la firma, `Cache-Control: private, no-store`) y solo para el docente dueño del grupo; no hay URL pública de `media/`. Adjuntar o quitar solo toca el campo `justificante`: no cambia el estado, `registrado_por` ni la bitácora.
 - **Justificante y corrección.** Un registro con justificante solo admite el estado `justificado`: para cambiarlo hay que quitar primero el justificante (la pantalla lo avisa), así no se choca con el `CHECK` de la base de datos.
 - **Justificante y eliminación de grupo.** La confirmación de eliminar un grupo cuenta los justificantes adjuntos y avisa que los archivos también se borran; se borran una vez confirmada la eliminación.
-- **Alta de usuarios (RF-16).** Solo en el admin de Django, donde el administrador ve únicamente «Usuarios». El alta pide nombre, apellido, correo, rol, usuario y contraseña.
+- **Alta de usuarios (RF-16).** Solo en el admin de Django, donde el administrador ve «Usuarios» y, desde el RF-17, «Periodos» y nada más. El alta pide nombre, apellido, correo, rol, usuario y contraseña.
 - **El rol manda sobre el acceso al admin.** Al guardar un usuario, `is_staff` y los permisos se ajustan al rol (`services/usuarios.py`): administrador con `is_staff` y solo ver/agregar/modificar usuario; docente sin `is_staff` y sin esos permisos. El admin no deja editar `is_staff`, superusuario, grupos ni permisos sueltos, para que nadie se dé más acceso. Quien gestiona usuarios no puede modificar a un superusuario. Un docente no entra al admin y un administrador no ve los grupos (403).
 - **Bajas de usuarios.** No hay borrado de usuarios en el admin (ni la acción masiva): se desactivan con «Activo» (regla 9.5). No se puede desactivar ni quitar el rol al último administrador activo, ni desactivarse a uno mismo; la comprobación bloquea las filas de los administradores activos para que dos cambios simultáneos no la burlen.
 - **`createsuperuser` y `seed_demo`.** `createsuperuser` sigue creando usuarios con rol docente; para tener un administrador de la aplicación se le cambia el rol desde el admin (README). `seed_demo` prepara el administrador de demo con las mismas reglas.
@@ -232,6 +239,9 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **RNF-07 medido.** Con 6 grupos de 50 alumnos y 48 sesiones (14 400 registros) en MySQL, el peor caso fue 570 ms (importar un CSV de 50 alumnos) contra el límite de 3 s; las demás vistas quedaron por debajo de 280 ms en su peor repetición. Método y tabla completos en `docs/informe_pruebas.md`.
 - **RNF-01 no se cronometra aquí.** Se mide el costo de interacción (5 excepciones = 5 toques y un envío; botones de 48 px; guardar siempre visible), no un tiempo humano. Verificarlo requiere probar con docentes.
 - **Diseño visual (RNF-02, 19/10/2026).** Bootstrap 5 se conserva; el aspecto propio vive en `asistencia/static/asistencia/estilo.css` (variables de color, tipografía del sistema, tarjetas, tablas, botones, formularios, avisos y etiquetas de estado; sin degradados, sin fuentes ni librerías nuevas). Los nombres de clase de los que dependen las pruebas (`btn-check`, `table-danger`, `text-bg-*`, `alert-link`) no cambian. El color solo significa algo: presente (verde), retardo (ámbar), ausente (rojo) y justificado (turquesa), y el estado elegido en el pase de lista lleva además relleno y marca de verificación, no solo color. Los botones miden 44 px en el teléfono. `test_estilo.py` protege el contraste mínimo de 4.5:1 de la paleta, la carga de la hoja y la sección activa del menú. El inicio muestra los tres accesos del docente (RF-02). Esto agrega `{% static %}` a `base.html`: ver `docs/DESPLIEGUE.md` (B3), porque en producción toda pantalla depende de servir `/static/`.
+- **Periodos (RF-17, 3/11/2026).** Tabla `periodo` (clave AAAA-N, primer y último día, activo); `grupo.periodo` sigue como texto y no se tocó ninguna tabla ni restricción existente. Decisiones de Victo: **solo un periodo activo a la vez** (activar uno desactiva el otro; lo garantiza la base de datos con un índice único, y `services/periodos.py` serializa los cambios) y **desactivar un periodo congela sus grupos**: quedan en solo lectura, con sus reportes y exportaciones. Congelar bloquea editar o eliminar el grupo, cargar CSV, inscribir y dar de baja, generar, editar y cancelar sesiones, guardar o corregir el pase de lista y adjuntar o quitar justificantes (lo decide `permissions.py`: el docente vuelve al grupo con un aviso y no se toca nada). Consultar sigue permitido: detalle, sesiones, listas con los botones deshabilitados, reportes, Excel, PDF y descarga del justificante. Un grupo cuyo periodo no tiene fila en `periodo` no se congela. Los avisos de sesiones pendientes (RF-10) omiten los grupos congelados, porque ya no se pueden atender, pero los reportes siguen avisando que su porcentaje no los incluye. Un grupo nuevo solo se crea en el periodo activo (lista en lugar de texto libre; sin periodo activo el formulario lo avisa y no deja guardar) y al editar se conserva el periodo que ya tiene. La migración 0003 crea una fila por cada periodo que ya usaban los grupos (fechas tomadas de sus sesiones) y deja activo solo el más reciente.
+- **Periodos en el admin.** Lista con clave, fechas, estado, número de grupos y un botón **Activar** o **Desactivar** por fila (con confirmación), y **Guardar y activar** en el formulario. No se borran (sin fila, sus grupos dejarían de congelarse) y la clave no se cambia cuando ya tiene grupos. El acceso es por rol (administrador o superusuario), no por permisos sueltos, para que un administrador que ya existía no tenga que volver a guardarse. Cada cambio queda en el registro de acciones del admin. `seed_demo` crea y activa 2026-2 solo si no hay otro activo.
+- **Diseño del admin (3/11/2026).** Tema propio en `asistencia/static/asistencia/admin.css` con la paleta de la aplicación, claro y oscuro (respeta el interruptor del admin), y plantilla `admin/base_site.html` con la marca. Para que esa plantilla gane a la de Django, `asistencia` va antes que `django.contrib.admin` en `INSTALLED_APPS`. Sin barra lateral ni «Ver sitio». `test_estilo.py` comprueba el contraste de las dos paletas y que la oscura automática y la forzada no se desincronicen.
 - **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): ~~H-01 botones secundarios de unos 31 px~~ corregido con el rediseño (44 px en el teléfono); H-02 no hay página 500 propia; H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
 
 - **Plan de despliegue (fase J).** `docs/DESPLIEGUE.md` describe lo técnico de la fase J. Se revisó el 15/10/2026 contra el código y con pruebas desechables, y sus correcciones están en el historial de Git de ese archivo. `.gitignore` ya cubre `.env.*` (menos los ejemplos) y `*.sql.gz`: antes `.env.prod` se habría subido a un repositorio público. El plan aún no se ejecuta; la fase J sigue pendiente.

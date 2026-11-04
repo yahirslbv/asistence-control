@@ -25,7 +25,8 @@ Fecha límite de entrega del proyecto: viernes 27/11/2026. La fase J es la únic
 
 Esto sale del README y del seguimiento. **Verifícalo leyendo el código antes de empezar; no lo des por cierto.**
 
-- Django 5.2, Python 3.11, `mysqlclient`, MySQL 8.0 en Docker. MariaDB no sirve: el disparador de la bitácora (migración 0002) y las restricciones `CHECK` son de MySQL 8.
+- Django 5.2, Python 3.11, `mysqlclient`, MySQL 8.0 en Docker. MariaDB no sirve: el disparador de la bitácora (migración 0002), las restricciones `CHECK` y el índice único sobre una expresión que garantiza un solo periodo activo (migración 0003, RF-17) son de MySQL 8.
+- **Periodos (RF-17, 3/11/2026).** Hay una tabla más, `periodo`. La migración 0003 crea una fila por cada periodo que ya usaban los grupos y deja activo solo el más reciente. **En un despliegue nuevo no hay ningún periodo**: antes de que un docente cree su primer grupo, el administrador debe crear y activar uno desde el admin (sección **Periodos**); sin periodo activo el formulario de grupos no deja guardar. `seed_demo` crea y activa 2026-2, pero es solo de demostración. Un periodo inactivo deja sus grupos en solo lectura.
 - `docker-compose.yml` (desarrollo): contenedor `control_asistencia_db`, volumen `control_asistencia_mysql_data`, puerto configurable con `DB_PORT`, arranca con `--log-bin-trust-function-creators=1`. El contenedor usa UTC y Django abre cada conexión con `time_zone='+00:00'`. **Conserva ambas cosas en producción.**
 - Variables del `.env`: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` (por defecto `localhost,127.0.0.1`), `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `ASISTENCIA_MINIMA`. En desarrollo el usuario de la base es `root`.
 - `config/settings.py` hoy: `DJANGO_DEBUG` **ya está apagado por defecto** y `DJANGO_ALLOWED_HOSTS` **ya se lee del entorno**. Lo que falta: rechazar una clave débil (el valor por defecto es `cambia-esto`), `CSRF_TRUSTED_ORIGINS`, las opciones de HTTPS, `STATIC_ROOT` y WhiteNoise. La conexión a MySQL ya fija `sql_mode` y `time_zone='+00:00'` en `init_command`: no pierdas ninguna de las dos.
@@ -34,7 +35,7 @@ Esto sale del README y del seguimiento. **Verifícalo leyendo el código antes d
 - `.gitignore`: **ya corregido el 15/10/2026** (commit `a094f13`). Antes solo cubría `.env` exacto, y un `.env.prod` se habría subido a un repositorio público. Ahora cubre `.env.*` (menos `.env.example` y `.env.prod.example`) y `*.sql.gz`. Compruébalo con `git check-ignore -v .env.prod` antes de crear el archivo.
 - Casi todas las pruebas que renderizan una pantalla (las del admin y, desde el rediseño, cualquiera que use `base.html`) pasan por `{% static %}`: cualquier cambio del almacenamiento estático las afecta (ver B3).
 - Hoy no hay página 500 propia (solo `403.html` y `404.html`), y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
-- 416 pruebas en verde (`python manage.py test --noinput`, de 7 a 9 minutos, necesita MySQL arriba).
+- 507 pruebas en verde (`python manage.py test --noinput`, unos 7 minutos, necesita MySQL arriba).
 
 Qué confirmar antes de empezar, por si algo cambió desde el 15/10/2026: `config/settings.py`, `config/urls.py`, `docker-compose.yml`, `.env.example`, `.gitignore` y la plantilla base.
 
@@ -134,8 +135,8 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 ## 6. Lista de verificación final
 
 1. `docker compose -f docker-compose.prod.yml up -d --build` desde cero: los tres servicios sanos (el `healthcheck` de `web` en verde, con un `Host` válido). Que `migrate` corra dentro del contenedor prueba a la vez que `mysqlclient` compiló en Linux y que la autenticación contra MySQL 8 funciona (ver la sección 9, «No comprobado»).
-2. Un docente y un administrador inician sesión y ven sus pantallas.
-3. El CSS de Bootstrap y el del admin cargan con `DEBUG=0` (si se autoaloja Bootstrap, sin el atributo `integrity`).
+2. Un docente y un administrador inician sesión y ven sus pantallas. El administrador crea y activa un periodo en **Periodos**, y el docente puede crear un grupo en él; al desactivarlo, el grupo queda en solo lectura (RF-17).
+3. El CSS de Bootstrap, el de la aplicación (`estilo.css`) y el del admin (`admin.css`) cargan con `DEBUG=0` (si se autoaloja Bootstrap, sin el atributo `integrity`).
 4. Pase de lista y una corrección: aparece la fila en la bitácora (el disparador funciona con el usuario de base de datos sin privilegios).
 5. Se sube un justificante, se ejecuta `docker compose ... down` (**sin `-v`**) y `up -d`, y el justificante se sigue descargando por la vista.
 6. Una URL directa a `/media/...` responde 404.
@@ -143,7 +144,7 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
 9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
 10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
-11. La suite completa sigue pasando (416 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
+11. La suite completa sigue pasando (507 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
 12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
 ## 7. Lo que no puedes hacer tú (le toca a Victo)
@@ -171,6 +172,7 @@ Se hicieron en un MySQL 8.0.46 desechable (eliminado al terminar), con configura
 | `.gitignore` con `.env.*` | 8 nombres que deben ignorarse y 7 que deben versionarse: 15 de 15 correctos; ningún archivo ya versionado quedó afectado |
 | Manifiesto de estáticos y pruebas del admin | Sin la variable: 11 de 11 pruebas pasan. Con manifiesto y sin `collectstatic` previo: 7 de 11 fallan (`Missing staticfiles manifest entry`). Con `collectstatic` previo: 11 de 11 |
 | Hoja de estilos propia con manifiesto (19/10/2026) | Sin la variable: 10 de 10 pruebas de `test_estilo.py` pasan. Con manifiesto y `collectstatic` previo (`estilo.css` queda como `estilo.3153bc6eb70d.css`): 10 de 10. Con manifiesto y sin `collectstatic`: las 7 pruebas que renderizan pantallas fallan con `Missing staticfiles manifest entry for 'asistencia/estilo.css'` |
+| Migración 0003 en MySQL 8.0.46 (3/11/2026) | Crea la tabla y el índice único `uq_periodo_un_activo` (`CASE WHEN activo = b'1' THEN 1 ELSE NULL END`); un segundo periodo activo da `IntegrityError` y varios inactivos conviven. Sobre la base de desarrollo copió los 2 periodos que usaban los grupos (fechas de sus sesiones) y dejó activo el más reciente |
 | Bootstrap autoalojado con manifiesto | `collectstatic` falla sin el `.map` (`ValueError`) y pasa con él; el CSS servido trae la referencia al `.map` reescrita |
 | Clave obligatoria frente a `collectstatic` | Sin clave: `ImproperlyConfigured`. Con una clave desechable en esa línea: termina bien |
 | `ALLOWED_HOSTS` de producción frente a un `healthcheck` | `Host: 127.0.0.1` y `localhost` dan 400; el dominio da 200 |

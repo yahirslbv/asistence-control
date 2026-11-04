@@ -94,7 +94,7 @@ entorno `SEED_PASSWORD` antes de ejecutar el comando.
 
 El administrador da de alta a los usuarios desde el admin de Django
 (<http://127.0.0.1:8000/admin/>, sección **Usuarios**), con nombre, apellido,
-correo, rol, usuario y contraseña. Un administrador solo ve esa sección.
+correo, rol, usuario y contraseña. Un administrador ve esa sección y la de **Periodos**, y nada más.
 
 - **El rol manda sobre el acceso.** Al guardar, el sistema ajusta `is_staff` y los
   permisos según el rol: un administrador puede entrar al admin y gestionar
@@ -108,6 +108,22 @@ correo, rol, usuario y contraseña. Un administrador solo ve esa sección.
 `createsuperuser` crea el usuario con rol **docente** (y como superusuario sí entra
 al admin). Para que sea también administrador de la aplicación, entra al admin con
 ese usuario, abre su ficha y cambia el rol a Administrador.
+
+### Periodos escolares (RF-17)
+
+El administrador gestiona los periodos en el admin (**Periodos**): crea uno con su
+clave (`AAAA-N`, por ejemplo `2027-1`) y sus fechas, y lo **activa** o **desactiva**
+con el botón de su fila. Para crearlo y activarlo de una vez, usa **Guardar y activar**.
+
+- **Solo un periodo está activo a la vez.** Activar uno desactiva el que estuviera
+  activo. Un docente solo puede crear grupos nuevos en el periodo activo; sin uno,
+  el formulario lo avisa y pide al administrador que active uno.
+- **Un periodo inactivo congela sus grupos.** Siguen visibles, con sus reportes y
+  exportaciones, pero en solo lectura: no se pasa lista, no se corrige, no se
+  cambian sesiones, alumnos ni justificantes. Reactivar el periodo lo devuelve todo.
+- **Los periodos no se borran.** La clave solo se corrige mientras no tenga grupos.
+- Al actualizar desde una versión anterior, `python manage.py migrate` crea un periodo
+  por cada uno que ya usaban los grupos y deja activo el más reciente.
 
 ## Justificantes y la carpeta `media/`
 
@@ -128,7 +144,7 @@ python manage.py test
 ```
 
 El usuario de MySQL necesita permiso para crear la base `test_control_asistencia`
-(`root` en el contenedor ya lo tiene). La suite completa (416 pruebas) tarda de siete a nueve minutos.
+(`root` en el contenedor ya lo tiene). La suite completa (507 pruebas) tarda unos siete minutos.
 
 Los resultados de las pruebas de la fase H (flujos de extremo a extremo, matriz de
 acceso, mediciones del RNF-07, revisión responsiva y hallazgos) están en
@@ -139,7 +155,7 @@ acceso, mediciones del RNF-07, revisión responsiva y hallazgos) están en
 Se usan estos valores por defecto hasta que se confirmen:
 
 - **Asistencia mínima:** 80 %, configurable con `ASISTENCIA_MINIMA`.
-- **Administrador:** solo gestiona usuarios; no ve los grupos de los docentes.
+- **Administrador:** gestiona usuarios y periodos; no ve los grupos de los docentes.
 - **Hosting:** sin definir. Se resuelve en la actividad J (despliegue).
 - **Trabajo:** una sola persona, sin flujo de pull requests.
 
@@ -148,19 +164,19 @@ Se usan estos valores por defecto hasta que se confirmen:
 ```
 config/        configuración de Django (settings, urls, wsgi)
 asistencia/    única app del proyecto
-  models.py        siete modelos y sus restricciones
-  migrations/      0001 (esquema) y 0002 (disparador de la bitácora)
+  models.py        ocho modelos y sus restricciones
+  migrations/      0001 (esquema), 0002 (disparador de la bitácora) y 0003 (periodos)
   backends.py      inicio de sesión con correo
   permissions.py   mixins: cada docente ve solo sus grupos (404 ante uno ajeno)
-  admin.py         alta de usuarios con rol (RF-16)
+  admin.py         usuarios con rol (RF-16) y periodos (RF-17)
   forms.py         formularios
   services/        lógica de negocio: importar CSV, inscripciones, sesiones,
                    pase de lista y correcciones, justificantes, sesiones
-                   pendientes, usuarios y roles, reportes y exportación a PDF
-                   y Excel
+                   pendientes, periodos, usuarios y roles, reportes y
+                   exportación a PDF y Excel
   views/           vistas por módulo
   templates/       plantillas con Bootstrap 5
-  static/          estilo.css: hoja de estilos propia (paleta, tipografía y componentes)
+  static/          estilo.css (aplicación) y admin.css (tema del admin), con la misma paleta
   management/      comando seed_demo
   tests/           pruebas
 docs/          informe de pruebas (fase H) y seguimiento semanal contra el cronograma
