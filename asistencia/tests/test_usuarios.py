@@ -391,14 +391,15 @@ class AccesoAlAdminTests(BaseDelAdmin):
         self.assertEqual(respuesta.status_code, 200)
         self.assertNotIn('_auth_user_id', self.client.session)
 
-    def test_un_administrador_solo_ve_usuarios_en_el_admin(self):
+    def test_un_administrador_solo_ve_periodos_y_usuarios_en_el_admin(self):
+        # RF-16 le da los usuarios y RF-17 los periodos: nada más.
         self.entrar_como(self.admin)
 
         respuesta = self.client.get('/admin/')
 
         modelos = [(app['app_label'], m['object_name'])
                    for app in respuesta.context['app_list'] for m in app['models']]
-        self.assertEqual(modelos, [('asistencia', 'Usuario')])
+        self.assertEqual(modelos, [('asistencia', 'Periodo'), ('asistencia', 'Usuario')])
 
     def test_un_administrador_no_entra_a_otros_modelos(self):
         self.entrar_como(self.admin)

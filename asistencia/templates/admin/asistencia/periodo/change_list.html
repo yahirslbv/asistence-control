@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+  <p class="ayuda-periodos">
+    Solo un periodo está activo a la vez. Al activar uno, el que estaba activo se desactiva y sus
+    grupos quedan en solo lectura: se pueden consultar y sacar reportes, pero no modificar.
+  </p>
+  {{ block.super }}
+  {# Los botones «Activar» y «Desactivar» de cada fila envían este formulario (atributo form=), sin anidar formularios. #}
+  <form id="form-periodos" method="post" action="{% url 'admin:asistencia_periodo_cambiar_estado' %}">
+    {% csrf_token %}
+  </form>
+{% endblock %}

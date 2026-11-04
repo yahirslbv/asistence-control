@@ -18,7 +18,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from asistencia.models import Alumno, Asistencia, BitacoraCambio, Grupo, Sesion, Usuario
+from asistencia.models import Alumno, Asistencia, BitacoraCambio, Grupo, Periodo, Sesion, Usuario
 from asistencia.services.exportar import a_pdf
 from asistencia.services.reportes import reporte_del_grupo, tabla_del_grupo
 
@@ -26,7 +26,7 @@ from .test_exportar import hoja_de, texto_del_pdf
 from .test_justificantes import PDF
 from .utils import (
     PASSWORD, MediaTemporalMixin, RelojFijoMixin, celdas_de_la_tabla,
-    crear_administrador, crear_periodo, datos_del_pase,
+    crear_administrador, datos_del_pase,
 )
 
 CLAVE_DEL_DOCENTE = 'Clave-Docente-2026#x'
@@ -46,7 +46,6 @@ class FlujoBase(MediaTemporalMixin, RelojFijoMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.administrador = crear_administrador()
-        crear_periodo('2026-2', activo=True)   # el periodo que el administrador tiene activo (RF-17)
 
     # --- Administrador ---------------------------------------------------
 
@@ -66,6 +65,30 @@ class FlujoBase(MediaTemporalMixin, RelojFijoMixin, TestCase):
         self.assertEqual(docente.rol, Usuario.Rol.DOCENTE)
         self.assertFalse(docente.is_staff)
         return docente
+
+    def abrir_el_periodo(self):
+        """El administrador crea el periodo y lo activa desde el admin de Django (RF-17)."""
+        self.assertTrue(self.client.login(
+            username='admin@asistencia.test', password=PASSWORD))
+        respuesta = self.client.post('/admin/asistencia/periodo/add/', {
+            'clave': '2026-2', 'fecha_inicio': '2026-08-24', 'fecha_fin': '2026-12-04',
+            '_activar': 'Guardar y activar',
+        })
+        self.assertRedirects(respuesta, '/admin/asistencia/periodo/', fetch_redirect_response=False)
+        self.assertTrue(Periodo.objects.get(clave='2026-2').activo)
+        self.client.logout()
+
+    def cambiar_el_estado_del_periodo(self, accion):
+        """El administrador activa o desactiva el periodo con el botón de la lista."""
+        self.assertTrue(self.client.login(
+            username='admin@asistencia.test', password=PASSWORD))
+        lista = self.client.get('/admin/asistencia/periodo/')
+        pk = Periodo.objects.get(clave='2026-2').pk
+        self.assertContains(lista, f'value="{accion}-{pk}"')
+        respuesta = self.client.post(
+            '/admin/asistencia/periodo/cambiar-estado/', {'accion': f'{accion}-{pk}'}, follow=True)
+        self.assertEqual(respuesta.status_code, 200)
+        self.client.logout()
 
     # --- Docente ---------------------------------------------------------
 
@@ -134,8 +157,9 @@ class FlujoBase(MediaTemporalMixin, RelojFijoMixin, TestCase):
         return respuesta
 
     def armar_el_ciclo(self):
-        """Pasos 1 a 5 del ciclo: del alta del docente a cuatro pases de lista."""
+        """Pasos 1 a 5 del ciclo: del alta del docente y la apertura del periodo a cuatro pases de lista."""
         self.dar_de_alta_al_docente()
+        self.abrir_el_periodo()
         self.entrar_como_docente()
         self.grupo = self.crear_el_grupo()
         self.alumnos = self.importar_la_lista(self.grupo)
@@ -382,3 +406,49 @@ class DobleEnvioTests(FlujoBase):
         self.assertEqual(segundo.status_code, 200)
         self.assertEqual(Asistencia.objects.filter(sesion=self.s5).count(), 40)
         self.assertEqual(BitacoraCambio.objects.count(), 0)
+
+
+class CierreDeUnPeriodoTests(FlujoBase):
+    """El administrador cierra el periodo: el docente solo consulta. Al reabrirlo, todo vuelve."""
+
+    def test_un_periodo_inactivo_deja_al_docente_en_solo_lectura_y_al_reactivarlo_todo_vuelve(self):
+        self.armar_el_ciclo()
+        antes, _ = self.celdas_del_reporte()
+        self.client.logout()
+
+        self.cambiar_el_estado_del_periodo('desactivar')
+        self.entrar_como_docente()
+
+        # Consulta: el detalle avisa, el reporte da las mismas cifras y las listas se ven.
+        detalle = self.client.get(reverse('grupo_detalle', args=[self.grupo.pk]))
+        self.assertContains(detalle, 'Periodo 2026-2 inactivo')
+        self.assertNotContains(detalle, reverse('grupo_editar', args=[self.grupo.pk]))
+        despues, _ = self.celdas_del_reporte()
+        self.assertEqual(despues, antes)
+        self.assertEqual(
+            self.client.get(reverse('pase_de_lista', args=[self.s2.pk])).status_code, 200)
+
+        # El pendiente del 19/10 ya no se avisa como pendiente en las pantallas del docente...
+        self.assertNotContains(self.client.get(reverse('grupos')), 'id="pendientes"')
+        # ...y no se puede tomar ni corregir lista, ni cambiar nada del grupo.
+        estados = {a.pk: AUSENTE for a in self.alumnos}
+        respuesta = self.client.post(
+            reverse('pase_de_lista', args=[self.s5.pk]), datos_del_pase('captura', estados), follow=True)
+        self.assertContains(respuesta, 'solo lectura')
+        self.s5.refresh_from_db()
+        self.assertEqual(self.s5.estado, Sesion.Estado.PROGRAMADA)
+        self.assertEqual(Asistencia.objects.filter(sesion=self.s5).count(), 0)
+        respuesta = self.client.post(
+            reverse('alumno_agregar', args=[self.grupo.pk]),
+            {'matricula': '9990001', 'nombre': 'Nueva Alumna', 'correo': ''}, follow=True)
+        self.assertContains(respuesta, 'solo lectura')
+        self.assertFalse(Alumno.objects.filter(matricula='9990001').exists())
+        self.client.logout()
+
+        # El administrador lo reactiva y el docente retoma el pase de lista pendiente.
+        self.cambiar_el_estado_del_periodo('activar')
+        self.entrar_como_docente()
+        self.assertNotContains(
+            self.client.get(reverse('grupo_detalle', args=[self.grupo.pk])), 'Periodo 2026-2 inactivo')
+        self.assertContains(self.client.get(reverse('grupos')), 'id="pendientes"')
+        self.pasar_lista(self.s5, self.alumnos)

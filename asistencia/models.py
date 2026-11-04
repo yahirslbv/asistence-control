@@ -84,6 +84,11 @@ class Periodo(models.Model):
             ),
         ]
 
+    def clean(self):
+        if self.fecha_inicio and self.fecha_fin and self.fecha_fin <= self.fecha_inicio:
+            raise ValidationError(
+                {'fecha_fin': 'El último día debe ser posterior al primer día.'})
+
     def __str__(self):
         return self.clave
 

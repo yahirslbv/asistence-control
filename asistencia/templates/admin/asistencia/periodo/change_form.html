@@ -1,0 +1,22 @@
+{% extends "admin/change_form.html" %}
+
+{% block form_top %}
+  {% if original %}
+    <p class="ayuda-periodos">
+      Estado:
+      {% if original.activo %}<span class="etiqueta etiqueta-activa">Activo</span>{% else %}<span class="etiqueta etiqueta-inactiva">Inactivo</span>{% endif %}
+      Se activa y se desactiva desde la lista de periodos.
+    </p>
+  {% endif %}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+  <div class="submit-row">
+    <input type="submit" value="Guardar" class="default" name="_save">
+    {% if not original or not original.activo %}
+      <input type="submit" value="Guardar y activar" name="_activar">
+    {% endif %}
+    {% if add %}<input type="submit" value="Guardar y añadir otro" name="_addanother">{% endif %}
+    <input type="submit" value="Guardar y continuar editando" name="_continue">
+  </div>
+{% endblock %}
