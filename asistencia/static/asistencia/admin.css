@@ -3,45 +3,53 @@
  * Cambia las variables de color del admin y afina sus componentes; no toca su
  * estructura. Se carga desde admin/base_site.html, después de las hojas de Django.
  * Tiene tema claro y oscuro, y respeta el interruptor del admin (auto, claro, oscuro).
+ * Paleta «pino y ámbar»: un verde de marca, un acento ámbar y neutros con tinte verdoso.
  */
 
 /* ---------- 1. Paletas ---------- */
 
 :root,
 html[data-theme="light"] {
-  --tinta: #1f2124;
-  --tinta-suave: #5f5d58;
-  --lienzo: #f7f6f3;
+  --tinta: #16201c;
+  --tinta-suave: #52605a;
+  --lienzo: #f1f4f1;
   --superficie: #ffffff;
-  --realce: #f1f0ec;
-  --linea: #e6e4de;
-  --linea-fuerte: #d3d1ca;
-  --enlace: #1f6c9f;
-  --enlace-hover: #144c73;
-  --foco: rgba(31, 108, 159, .35);
+  --realce: #e9eeea;
+  --linea: #dbe2dc;
+  --linea-fuerte: #c5cfc7;
+  --enlace: #135a45;
+  --enlace-hover: #0b2e26;
+  --foco: rgba(20, 82, 63, .3);
 
-  --verde-fondo: #edf3ec;  --verde-texto: #2f5e33;  --verde-borde: #d3e3d2;
-  --ambar-fondo: #fbf3db;  --ambar-texto: #7a5200;  --ambar-borde: #f0e0a6;
-  --rojo-fondo: #fdebec;   --rojo-texto: #9f2f2d;   --rojo-borde: #f4ced0;
-  --azul-fondo: #e1f3fe;   --azul-texto: #1a5f8e;   --azul-borde: #bde0f4;
-  --gris-fondo: #f1f0ec;   --gris-texto: #55534f;   --gris-borde: #dedcd5;
+  --barra-bg: #0b2e26;
+  --barra-fg: #ffffff;
+  --barra-suave: rgba(255, 255, 255, .82);
+  --marca-fondo: #f2b33d;
+  --marca-trazo: #081f19;
+
+  --verde-fondo: #e3f3ea;  --verde-texto: #17603a;  --verde-borde: #bfe0cc;
+  --ambar-fondo: #fcf0d2;  --ambar-texto: #7a5200;  --ambar-borde: #f0d58a;
+  --rojo-fondo: #fbe7e7;   --rojo-texto: #962a2a;   --rojo-borde: #f2c6c6;
+  --azul-fondo: #e1eff7;   --azul-texto: #1a5a84;   --azul-borde: #b9d6e8;
+  --gris-fondo: #e9eeea;   --gris-texto: #4b5a53;   --gris-borde: #d0d9d3;
 
   /* Variables del admin de Django. */
-  --primary: #1f2124;
-  --secondary: #1f2124;
-  --accent: #1f2124;
+  --primary: #14523f;
+  --secondary: #14523f;
+  --accent: #14523f;
   --primary-fg: #ffffff;
+
+  --body-medium-color: #3b4a43;
+  --body-loud-color: #000000;
 
   --body-fg: var(--tinta);
   --body-bg: var(--superficie);
   --body-quiet-color: var(--tinta-suave);
-  --body-medium-color: #44423e;
-  --body-loud-color: #000000;
 
-  --header-color: var(--tinta);
-  --header-branding-color: var(--tinta);
-  --header-bg: var(--superficie);
-  --header-link-color: var(--tinta-suave);
+  --header-color: var(--barra-fg);
+  --header-branding-color: var(--barra-fg);
+  --header-bg: var(--barra-bg);
+  --header-link-color: var(--barra-suave);
 
   --breadcrumbs-fg: var(--tinta-suave);
   --breadcrumbs-link-fg: var(--tinta-suave);
@@ -61,21 +69,21 @@ html[data-theme="light"] {
 
   --darkened-bg: var(--lienzo);
   --selected-bg: var(--realce);
-  --selected-row: var(--azul-fondo);
+  --selected-row: var(--verde-fondo);
 
   --button-fg: #ffffff;
-  --button-bg: #111111;
-  --button-hover-bg: #333333;
-  --default-button-bg: #111111;
-  --default-button-hover-bg: #333333;
-  --close-button-bg: #6b6964;
-  --close-button-hover-bg: #44423e;
-  --delete-button-bg: var(--rojo-texto);
-  --delete-button-hover-bg: #84261f;
+  --button-bg: #14523f;
+  --button-hover-bg: #0f3d32;
+  --default-button-bg: #14523f;
+  --default-button-hover-bg: #0f3d32;
+  --close-button-bg: #52605a;
+  --close-button-hover-bg: #3b4a43;
+  --delete-button-bg: #962a2a;
+  --delete-button-hover-bg: #7b2222;
 
   --object-tools-fg: #ffffff;
-  --object-tools-bg: #111111;
-  --object-tools-hover-bg: #333333;
+  --object-tools-bg: #14523f;
+  --object-tools-hover-bg: #0f3d32;
 
   --font-family-primary: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;
@@ -85,38 +93,45 @@ html[data-theme="light"] {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --tinta: #ecebe8;
-    --tinta-suave: #aaa8a2;
-    --lienzo: #151617;
-    --superficie: #1e1f21;
-    --realce: #28292c;
-    --linea: #2f3134;
-    --linea-fuerte: #46484c;
-    --enlace: #86c3ee;
-    --enlace-hover: #b6dcf6;
-    --foco: rgba(134, 195, 238, .45);
+    --tinta: #e6ede8;
+    --tinta-suave: #a3b3aa;
+    --lienzo: #0e1512;
+    --superficie: #151e1a;
+    --realce: #1f2b25;
+    --linea: #26332d;
+    --linea-fuerte: #3a4a42;
+    --enlace: #7fd1ab;
+    --enlace-hover: #b5e8d0;
+    --foco: rgba(127, 209, 171, .4);
 
-    --verde-fondo: #1f2e21;  --verde-texto: #a9d6ac;  --verde-borde: #2f4a32;
+    --barra-bg: #081f19;
+    --barra-fg: #ffffff;
+    --barra-suave: rgba(255, 255, 255, .82);
+    --marca-fondo: #f2b33d;
+    --marca-trazo: #081f19;
+
+    --verde-fondo: #1a2f24;  --verde-texto: #9fdcb7;  --verde-borde: #2a4a39;
     --ambar-fondo: #33290f;  --ambar-texto: #ecc66a;  --ambar-borde: #54431a;
     --rojo-fondo: #381a1b;   --rojo-texto: #f0a5a3;   --rojo-borde: #5c2b2c;
     --azul-fondo: #14283a;   --azul-texto: #95cdf2;   --azul-borde: #274762;
-    --gris-fondo: #2a2b2e;   --gris-texto: #b9b7b1;   --gris-borde: #3d3f43;
+    --gris-fondo: #1f2b25;   --gris-texto: #b4c2ba;   --gris-borde: #36443d;
 
-    --primary: #ecebe8;
-    --secondary: #ecebe8;
-    --accent: #ecebe8;
-    --primary-fg: #16171a;
+    --primary: #7fd1ab;
+    --secondary: #7fd1ab;
+    --accent: #7fd1ab;
+    --primary-fg: #081f19;
+
+    --body-medium-color: #d3ddd7;
+    --body-loud-color: #ffffff;
 
     --body-fg: var(--tinta);
     --body-bg: var(--superficie);
     --body-quiet-color: var(--tinta-suave);
-    --body-medium-color: #d6d4cf;
-    --body-loud-color: #ffffff;
 
-    --header-color: var(--tinta);
-    --header-branding-color: var(--tinta);
-    --header-bg: var(--superficie);
-    --header-link-color: var(--tinta-suave);
+    --header-color: var(--barra-fg);
+    --header-branding-color: var(--barra-fg);
+    --header-bg: var(--barra-bg);
+    --header-link-color: var(--barra-suave);
 
     --breadcrumbs-fg: var(--tinta-suave);
     --breadcrumbs-link-fg: var(--tinta-suave);
@@ -136,59 +151,66 @@ html[data-theme="light"] {
 
     --darkened-bg: var(--lienzo);
     --selected-bg: var(--realce);
-    --selected-row: var(--azul-fondo);
+    --selected-row: var(--verde-fondo);
 
-    --button-fg: #16171a;
-    --button-bg: #ecebe8;
-    --button-hover-bg: #ffffff;
-    --default-button-bg: #ecebe8;
-    --default-button-hover-bg: #ffffff;
-    --close-button-bg: #46484c;
-    --close-button-hover-bg: #5a5c61;
+    --button-fg: #081f19;
+    --button-bg: #7fd1ab;
+    --button-hover-bg: #a6e3c8;
+    --default-button-bg: #7fd1ab;
+    --default-button-hover-bg: #a6e3c8;
+    --close-button-bg: #3a4a42;
+    --close-button-hover-bg: #4b5f55;
     --delete-button-bg: #b3403d;
     --delete-button-hover-bg: #c9534f;
 
-    --object-tools-fg: #16171a;
-    --object-tools-bg: #ecebe8;
-    --object-tools-hover-bg: #ffffff;
+    --object-tools-fg: #081f19;
+    --object-tools-bg: #7fd1ab;
+    --object-tools-hover-bg: #a6e3c8;
 
     color-scheme: dark;
   }
 }
 
 html[data-theme="dark"] {
-  --tinta: #ecebe8;
-  --tinta-suave: #aaa8a2;
-  --lienzo: #151617;
-  --superficie: #1e1f21;
-  --realce: #28292c;
-  --linea: #2f3134;
-  --linea-fuerte: #46484c;
-  --enlace: #86c3ee;
-  --enlace-hover: #b6dcf6;
-  --foco: rgba(134, 195, 238, .45);
+  --tinta: #e6ede8;
+  --tinta-suave: #a3b3aa;
+  --lienzo: #0e1512;
+  --superficie: #151e1a;
+  --realce: #1f2b25;
+  --linea: #26332d;
+  --linea-fuerte: #3a4a42;
+  --enlace: #7fd1ab;
+  --enlace-hover: #b5e8d0;
+  --foco: rgba(127, 209, 171, .4);
 
-  --verde-fondo: #1f2e21;  --verde-texto: #a9d6ac;  --verde-borde: #2f4a32;
+  --barra-bg: #081f19;
+  --barra-fg: #ffffff;
+  --barra-suave: rgba(255, 255, 255, .82);
+  --marca-fondo: #f2b33d;
+  --marca-trazo: #081f19;
+
+  --verde-fondo: #1a2f24;  --verde-texto: #9fdcb7;  --verde-borde: #2a4a39;
   --ambar-fondo: #33290f;  --ambar-texto: #ecc66a;  --ambar-borde: #54431a;
   --rojo-fondo: #381a1b;   --rojo-texto: #f0a5a3;   --rojo-borde: #5c2b2c;
   --azul-fondo: #14283a;   --azul-texto: #95cdf2;   --azul-borde: #274762;
-  --gris-fondo: #2a2b2e;   --gris-texto: #b9b7b1;   --gris-borde: #3d3f43;
+  --gris-fondo: #1f2b25;   --gris-texto: #b4c2ba;   --gris-borde: #36443d;
 
-  --primary: #ecebe8;
-  --secondary: #ecebe8;
-  --accent: #ecebe8;
-  --primary-fg: #16171a;
+  --primary: #7fd1ab;
+  --secondary: #7fd1ab;
+  --accent: #7fd1ab;
+  --primary-fg: #081f19;
+
+  --body-medium-color: #d3ddd7;
+  --body-loud-color: #ffffff;
 
   --body-fg: var(--tinta);
   --body-bg: var(--superficie);
   --body-quiet-color: var(--tinta-suave);
-  --body-medium-color: #d6d4cf;
-  --body-loud-color: #ffffff;
 
-  --header-color: var(--tinta);
-  --header-branding-color: var(--tinta);
-  --header-bg: var(--superficie);
-  --header-link-color: var(--tinta-suave);
+  --header-color: var(--barra-fg);
+  --header-branding-color: var(--barra-fg);
+  --header-bg: var(--barra-bg);
+  --header-link-color: var(--barra-suave);
 
   --breadcrumbs-fg: var(--tinta-suave);
   --breadcrumbs-link-fg: var(--tinta-suave);
@@ -208,21 +230,21 @@ html[data-theme="dark"] {
 
   --darkened-bg: var(--lienzo);
   --selected-bg: var(--realce);
-  --selected-row: var(--azul-fondo);
+  --selected-row: var(--verde-fondo);
 
-  --button-fg: #16171a;
-  --button-bg: #ecebe8;
-  --button-hover-bg: #ffffff;
-  --default-button-bg: #ecebe8;
-  --default-button-hover-bg: #ffffff;
-  --close-button-bg: #46484c;
-  --close-button-hover-bg: #5a5c61;
+  --button-fg: #081f19;
+  --button-bg: #7fd1ab;
+  --button-hover-bg: #a6e3c8;
+  --default-button-bg: #7fd1ab;
+  --default-button-hover-bg: #a6e3c8;
+  --close-button-bg: #3a4a42;
+  --close-button-hover-bg: #4b5f55;
   --delete-button-bg: #b3403d;
   --delete-button-hover-bg: #c9534f;
 
-  --object-tools-fg: #16171a;
-  --object-tools-bg: #ecebe8;
-  --object-tools-hover-bg: #ffffff;
+  --object-tools-fg: #081f19;
+  --object-tools-bg: #7fd1ab;
+  --object-tools-hover-bg: #a6e3c8;
 
   color-scheme: dark;
 }
@@ -255,11 +277,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   padding: .6rem 1.75rem;
   background: var(--header-bg);
   color: var(--header-color);
-  border-bottom: 1px solid var(--hairline-color);
+  border-bottom: 1px solid var(--barra-bg);
 }
 
 #header a:link, #header a:visited, #logout-form button { color: var(--header-link-color); }
-#header a:hover, #header a:focus, #logout-form button:hover { color: var(--tinta); text-decoration: none; }
+#header a:hover, #header a:focus, #logout-form button:hover { color: var(--barra-fg); text-decoration: none; }
 
 #branding h1, #site-name { margin: 0; }
 
@@ -267,18 +289,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   display: inline-flex;
   align-items: center;
   gap: .6rem;
-  color: var(--tinta);
+  color: var(--barra-fg);
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: -.01em;
 }
 
 #site-name .marca { flex: none; }
-#site-name .marca rect { fill: var(--tinta); }
-#site-name .marca path { stroke: var(--lienzo); }
+#site-name .marca rect { fill: var(--marca-fondo); }
+#site-name .marca path { stroke: var(--marca-trazo); }
 
-#user-tools { font-size: .85rem; color: var(--tinta-suave); letter-spacing: 0; text-transform: none; }
-#user-tools strong { color: var(--tinta); font-weight: 600; }
+#user-tools { font-size: .85rem; color: var(--barra-suave); letter-spacing: 0; text-transform: none; }
+#user-tools strong { color: var(--barra-fg); font-weight: 600; }
 #user-tools a { border-bottom: 0; text-transform: none; }
 #user-tools a:hover { text-decoration: underline; }
 #logout-form button {
@@ -398,7 +420,7 @@ div.breadcrumbs a:hover, div.breadcrumbs a:focus { color: var(--tinta); text-dec
 
 #changelist-filter h2 { border-radius: 0; }
 #changelist-filter h3 { color: var(--tinta-suave); font-size: .8rem; }
-#changelist-filter li.selected a { color: var(--tinta); font-weight: 600; border-left-color: var(--tinta); }
+#changelist-filter li.selected a { color: var(--tinta); font-weight: 600; border-left-color: var(--ambar-texto); }
 
 /* ---------- 6. Botones ---------- */
 
@@ -519,12 +541,12 @@ input[type="tel"], select, textarea, .vTextField, .vDateField, .vTimeField {
 input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus,
 input[type="number"]:focus, input[type="date"]:focus, input[type="time"]:focus,
 input[type="search"]:focus, select:focus, textarea:focus {
-  border-color: var(--tinta);
+  border-color: var(--primary);
   box-shadow: 0 0 0 .2rem var(--foco);
   outline: 0;
 }
 
-input[type="checkbox"], input[type="radio"] { accent-color: var(--tinta); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--primary); }
 
 .readonly { color: var(--tinta); }
 
