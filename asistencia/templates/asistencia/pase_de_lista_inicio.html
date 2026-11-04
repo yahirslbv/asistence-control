@@ -3,59 +3,64 @@
 {% block titulo %}Pase de lista · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<h1 class="h3 mb-3">Pase de lista</h1>
-
-<h2 class="h5">Sesiones de hoy · {{ hoy|date:"l d/m/Y"|capfirst }}</h2>
-{% if sesiones_de_hoy %}
-  <div class="card shadow-sm mb-4">
-    <ul class="list-group list-group-flush">
-      {% for sesion in sesiones_de_hoy %}
-        <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <div>
-            <div class="fw-semibold">{{ sesion.grupo.clave }} · {{ sesion.grupo.materia }}</div>
-            <div class="small text-secondary">{{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }}</div>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            {% if sesion.estado == 'programada' %}
-              {% if sesion.pendiente %}<span class="badge text-bg-warning">Sin pase de lista</span>{% endif %}
-              <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}">Pase de lista</a>
-            {% elif sesion.estado == 'realizada' %}
-              {% if sesion.pendiente %}<span class="badge text-bg-warning">Incompleta</span>
-              {% else %}<span class="badge text-bg-success">Realizada</span>{% endif %}
-              <a class="btn btn-outline-primary" href="{% url 'pase_de_lista' sesion.pk %}">Ver asistencia</a>
-            {% else %}
-              <span class="badge text-bg-secondary">Cancelada</span>
-            {% endif %}
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
+<header class="encabezado">
+  <div>
+    <h1>Pase de lista</h1>
+    <p class="encabezado-sub">Las clases de hoy y las sesiones de días anteriores que todavía esperan su lista.</p>
   </div>
-{% else %}
-  <div class="alert alert-info" role="alert">No tienes sesiones programadas para hoy.</div>
-{% endif %}
+</header>
 
-<h2 class="h5">Pendientes de días anteriores</h2>
-{% if pendientes %}
-  <div class="card shadow-sm">
-    <ul class="list-group list-group-flush">
-      {% for sesion in pendientes %}
-        <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <div>
-            <div class="fw-semibold">{{ sesion.grupo.clave }} · {{ sesion.fecha|date:"l d/m/Y"|capfirst }}</div>
-            <div class="small text-secondary">
-              {{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }} ·
-              {% if sesion.estado == 'programada' %}sin pase de lista{% else %}pase de lista incompleto{% endif %}
-            </div>
-          </div>
-          <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}">
-            {% if sesion.estado == 'programada' %}Pase de lista{% else %}Completar{% endif %}
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-{% else %}
-  <div class="alert alert-success mb-0" role="alert">No tienes sesiones pendientes de días anteriores.</div>
-{% endif %}
+<section aria-labelledby="hoy">
+  <h2 class="h5" id="hoy">Sesiones de hoy · {{ hoy|date:"l d/m/Y"|capfirst }}</h2>
+  {% for sesion in sesiones_de_hoy %}
+    <article class="clase-de-hoy">
+      <div class="hora">{{ sesion.hora_inicio|time:"H:i" }}<small>a {{ sesion.hora_fin|time:"H:i" }}</small></div>
+      <div>
+        <div class="titulo">{{ sesion.grupo.clave }} · {{ sesion.grupo.materia }}</div>
+        <div class="detalle">{{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }}</div>
+      </div>
+      <div class="acciones">
+        {% if sesion.estado == 'programada' %}
+          {% if sesion.pendiente %}<span class="badge text-bg-warning">Sin pase de lista</span>{% endif %}
+          <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-pase"/></svg>Pase de lista</a>
+        {% elif sesion.estado == 'realizada' %}
+          {% if sesion.pendiente %}<span class="badge text-bg-warning">Incompleta</span>
+          {% else %}<span class="badge text-bg-success">Realizada</span>{% endif %}
+          <a class="btn btn-outline-primary" href="{% url 'pase_de_lista' sesion.pk %}">Ver asistencia</a>
+        {% else %}
+          <span class="badge text-bg-secondary">Cancelada</span>
+        {% endif %}
+      </div>
+    </article>
+  {% empty %}
+    <div class="vacio">
+      <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
+      <h2>Sin clases hoy</h2>
+      <p>No tienes sesiones programadas para hoy.</p>
+    </div>
+  {% endfor %}
+</section>
+
+<section class="seccion" aria-labelledby="anteriores">
+  <h2 class="h5" id="anteriores">Pendientes de días anteriores</h2>
+  {% for sesion in pendientes %}
+    <article class="clase-de-hoy">
+      <div class="hora">{{ sesion.fecha|date:"d/m" }}<small>{{ sesion.fecha|date:"D"|capfirst }}</small></div>
+      <div>
+        <div class="titulo">{{ sesion.grupo.clave }} · {{ sesion.fecha|date:"l d/m/Y"|capfirst }}</div>
+        <div class="detalle">
+          {{ sesion.hora_inicio|time:"H:i" }} – {{ sesion.hora_fin|time:"H:i" }} ·
+          {% if sesion.estado == 'programada' %}sin pase de lista{% else %}pase de lista incompleto{% endif %}
+        </div>
+      </div>
+      <div class="acciones">
+        <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}">
+          {% if sesion.estado == 'programada' %}Pase de lista{% else %}Completar{% endif %}
+        </a>
+      </div>
+    </article>
+  {% empty %}
+    <div class="alert alert-success mb-0" role="alert">No tienes sesiones pendientes de días anteriores.</div>
+  {% endfor %}
+</section>
 {% endblock %}

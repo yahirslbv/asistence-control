@@ -1,4 +1,5 @@
 {% extends 'asistencia/base.html' %}
+{% load diseno %}
 
 {% block titulo %}Reporte · {{ grupo.clave }} · Control de asistencia{% endblock %}
 
@@ -11,41 +12,37 @@
   </ol>
 </nav>
 
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+<header class="encabezado">
   <div>
-    <h1 class="h3 mb-1">{{ tabla.titulo }}</h1>
-    <p class="text-secondary mb-0">{{ tabla.subtitulo }}</p>
+    <h1>{{ tabla.titulo }}</h1>
+    <p class="encabezado-sub">{{ tabla.subtitulo }}</p>
   </div>
-  <div class="d-flex gap-2">
-    <a class="btn btn-outline-primary" id="descargar-pdf" href="{% url 'reporte_grupo_exportar' grupo.pk 'pdf' %}">Descargar PDF</a>
-    <a class="btn btn-outline-success" id="descargar-excel" href="{% url 'reporte_grupo_exportar' grupo.pk 'xlsx' %}">Descargar Excel</a>
+  <div class="encabezado-acciones">
+    <a class="btn btn-outline-primary" id="descargar-pdf" href="{% url 'reporte_grupo_exportar' grupo.pk 'pdf' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-descargar"/></svg>Descargar PDF</a>
+    <a class="btn btn-outline-success" id="descargar-excel" href="{% url 'reporte_grupo_exportar' grupo.pk 'xlsx' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-descargar"/></svg>Descargar Excel</a>
   </div>
-</div>
+</header>
 
-<div class="row g-2 mb-3 text-center">
-  <div class="col-6 col-md">
-    <div class="card shadow-sm h-100"><div class="card-body py-2">
-      <div class="small text-secondary">Porcentaje del grupo</div>
-      <div class="fs-4 fw-semibold">{{ reporte.porcentaje_texto }}</div>
-    </div></div>
+<div class="indicadores mb-4 escalonado">
+  <div class="indicador">
+    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-reportes"/></svg></span>
+    <span class="cifra">{{ reporte.porcentaje_texto }}</span>
+    <span class="etiqueta-indicador">Porcentaje del grupo</span>
   </div>
-  <div class="col-6 col-md">
-    <div class="card shadow-sm h-100"><div class="card-body py-2">
-      <div class="small text-secondary">Alumnos</div>
-      <div class="fs-4 fw-semibold">{{ reporte.filas|length }}</div>
-    </div></div>
+  <div class="indicador">
+    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
+    <span class="cifra">{{ reporte.filas|length }}</span>
+    <span class="etiqueta-indicador">Alumnos</span>
   </div>
-  <div class="col-6 col-md">
-    <div class="card shadow-sm h-100"><div class="card-body py-2">
-      <div class="small text-secondary">Sesiones realizadas</div>
-      <div class="fs-4 fw-semibold">{{ reporte.sesiones_realizadas }}</div>
-    </div></div>
+  <div class="indicador">
+    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
+    <span class="cifra">{{ reporte.sesiones_realizadas }}</span>
+    <span class="etiqueta-indicador">Sesiones realizadas</span>
   </div>
-  <div class="col-6 col-md">
-    <div class="card shadow-sm h-100 {% if reporte.alumnos_bajo_el_minimo %}border-danger{% endif %}"><div class="card-body py-2">
-      <div class="small text-secondary">Bajo el mínimo ({{ reporte.minimo }} %)</div>
-      <div class="fs-4 fw-semibold {% if reporte.alumnos_bajo_el_minimo %}text-danger{% endif %}">{{ reporte.alumnos_bajo_el_minimo }}</div>
-    </div></div>
+  <div class="indicador{% if reporte.alumnos_bajo_el_minimo %} alerta{% endif %}">
+    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
+    <span class="cifra">{{ reporte.alumnos_bajo_el_minimo }}</span>
+    <span class="etiqueta-indicador">Bajo el mínimo ({{ reporte.minimo }} %)</span>
   </div>
 </div>
 
@@ -78,14 +75,14 @@
           {% for fila in reporte.filas %}
             <tr {% if fila.bajo_el_minimo %}class="table-danger"{% endif %}>
               <td class="d-none d-md-table-cell">{{ fila.alumno.matricula }}</td>
-              <td><a href="{% url 'reporte_alumno' grupo.pk fila.alumno.pk %}">{{ fila.alumno.nombre }}</a></td>
+              <td><span class="avatar avatar-sm avatar-suave me-2" aria-hidden="true" data-texto="{{ fila.alumno.nombre|iniciales }}"></span><a href="{% url 'reporte_alumno' grupo.pk fila.alumno.pk %}">{{ fila.alumno.nombre }}</a></td>
               <td class="d-none d-sm-table-cell text-end">{{ fila.registros }}</td>
               <td class="d-none d-md-table-cell text-end">{{ fila.presentes }}</td>
               <td class="d-none d-md-table-cell text-end">{{ fila.retardos }}</td>
               <td class="d-none d-md-table-cell text-end">{{ fila.ausentes }}</td>
               <td class="d-none d-md-table-cell text-end">{{ fila.justificados }}</td>
               <td class="d-none d-sm-table-cell text-end">{{ fila.asistencias }}</td>
-              <td class="text-end {% if fila.bajo_el_minimo %}fw-bold{% endif %}">{{ fila.porcentaje_texto }}</td>
+              <td class="text-end text-nowrap {% if fila.bajo_el_minimo %}fw-bold{% endif %}">{% if fila.porcentaje is not None %}<progress class="barra-pct{% if fila.bajo_el_minimo %} baja{% endif %}" value="{{ fila.porcentaje|stringformat:'s' }}" max="100" aria-hidden="true"></progress>{% endif %}{{ fila.porcentaje_texto }}</td>
               <td>{% if fila.bajo_el_minimo %}<span class="badge text-bg-danger">{{ fila.situacion }}</span>{% elif fila.registros %}<span class="text-success">{{ fila.situacion }}</span>{% else %}{{ fila.situacion }}{% endif %}</td>
             </tr>
           {% endfor %}

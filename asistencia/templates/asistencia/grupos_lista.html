@@ -3,50 +3,50 @@
 {% block titulo %}Grupos · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-  <h1 class="h3 mb-0">Mis grupos</h1>
-  <a class="btn btn-primary" href="{% url 'grupo_crear' %}">Nuevo grupo</a>
-</div>
+<header class="encabezado">
+  <div>
+    <h1>Mis grupos</h1>
+    <p class="encabezado-sub">Tus grupos del periodo activo y los de periodos anteriores, que se consultan sin modificarse.</p>
+  </div>
+  <div class="encabezado-acciones">
+    <a class="btn btn-primary" href="{% url 'grupo_crear' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-mas"/></svg>Nuevo grupo</a>
+  </div>
+</header>
 
 {% include 'asistencia/_pendientes.html' %}
 
 {% if grupos %}
-  <div class="card shadow-sm">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead>
-          <tr>
-            <th>Clave</th>
-            <th>Materia</th>
-            <th>Periodo</th>
-            <th class="text-end">Alumnos</th>
-            <th class="text-end">Sesiones</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for grupo in grupos %}
-            <tr>
-              <td class="fw-semibold">{{ grupo.clave }}</td>
-              <td>{{ grupo.materia }}</td>
-              <td>
-                {{ grupo.periodo }}
-                {% if grupo.solo_lectura %}<span class="badge text-bg-secondary ms-1" title="Periodo inactivo: el grupo está en solo lectura">Solo lectura</span>{% endif %}
-              </td>
-              <td class="text-end">{{ grupo.num_alumnos }}</td>
-              <td class="text-end">{{ grupo.num_sesiones }}</td>
-              <td class="text-end">
-                <a class="btn btn-outline-primary btn-sm" href="{% url 'grupo_detalle' grupo.pk %}">Abrir</a>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <div class="grupos-rejilla escalonado">
+    {% for grupo in grupos %}
+      <article class="grupo-tarjeta">
+        <div class="cabeza">
+          <span class="ficha-grupo{% if grupo.solo_lectura %} congelado{% endif %}" aria-hidden="true" data-texto="{{ grupo.clave|slice:":3"|upper }}"></span>
+          <div>
+            <div class="clave">{{ grupo.clave }}</div>
+            <div class="materia">{{ grupo.materia }}</div>
+          </div>
+          <div class="ms-auto text-end">
+            <span class="badge text-bg-secondary">{{ grupo.periodo }}</span>
+            {% if grupo.solo_lectura %}<div class="mt-1"><span class="badge text-bg-warning" title="Periodo inactivo: el grupo está en solo lectura"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-candado"/></svg> Solo lectura</span></div>{% endif %}
+          </div>
+        </div>
+        <div class="cifras">
+          <div><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg><strong>{{ grupo.num_alumnos }}</strong> alumnos</div>
+          <div><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg><strong>{{ grupo.num_sesiones }}</strong> sesiones</div>
+        </div>
+        <div class="pie">
+          <a class="btn btn-primary btn-sm" href="{% url 'grupo_detalle' grupo.pk %}">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></a>
+          <a class="btn btn-outline-primary btn-sm" href="{% url 'reporte_grupo' grupo.pk %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-reportes"/></svg>Reporte</a>
+        </div>
+      </article>
+    {% endfor %}
   </div>
 {% else %}
-  <div class="alert alert-info mb-0" role="alert">
-    Todavía no tienes grupos. Crea el primero con «Nuevo grupo».
+  <div class="vacio">
+    <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-grupos"/></svg></span>
+    <h2>Todavía no tienes grupos</h2>
+    <p>Crea el primero con «Nuevo grupo»: después le cargas la lista de alumnos y programas las sesiones.</p>
+    <a class="btn btn-primary" href="{% url 'grupo_crear' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-mas"/></svg>Nuevo grupo</a>
   </div>
 {% endif %}
 {% endblock %}

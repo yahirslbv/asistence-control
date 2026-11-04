@@ -1,34 +1,104 @@
 {% extends 'asistencia/base.html' %}
+{% load diseno %}
 
 {% block titulo %}Inicio · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<div class="encabezado-inicio">
-  <h1 class="h3">Bienvenido, {{ user.get_full_name|default:user.email }}</h1>
-  <p class="text-secondary mb-0">Rol: <span class="badge text-bg-secondary ms-1">{{ user.get_rol_display }}</span></p>
-</div>
+<section class="hero" aria-labelledby="saludo">
+  <div>
+    <span class="rol"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-alumno"/></svg>{{ user.get_rol_display }}</span>
+    <h1 id="saludo">{{ resumen.saludo }}, {{ user.first_name|default:user.email }}</h1>
+    <p>
+      {% with n=resumen.sesiones_de_hoy|length %}
+        {% if n %}Hoy tienes {{ n }} clase{{ n|pluralize }} en tu calendario.{% else %}Hoy no tienes clases programadas.{% endif %}
+      {% endwith %}
+      {% if resumen.pendientes %}
+        {{ resumen.pendientes }} sesi{{ resumen.pendientes|pluralize:"ón,ones" }} espera{{ resumen.pendientes|pluralize:",n" }} su pase de lista.
+      {% endif %}
+    </p>
+  </div>
+  <div class="ficha-fecha" aria-hidden="true">
+    <span class="semana">{{ resumen.hoy|date:"l"|capfirst }}</span>
+    <span class="dia">{{ resumen.hoy|date:"j" }}</span>
+    <span class="mes">{{ resumen.hoy|date:"F"|capfirst }}</span>
+  </div>
+</section>
 
-<div class="accesos">
-  <a class="acceso" href="{% url 'grupos' %}">
-    <span class="icono" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 19.5c.6-3.3 3.1-5 6.5-5s5.9 1.7 6.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14.2c2.3.2 3.7 1.6 4 4.3"/></svg>
-    </span>
-    <strong>Grupos</strong>
-    <span class="detalle">Da de alta tus grupos, carga la lista de alumnos y programa las sesiones.</span>
-  </a>
-  <a class="acceso" href="{% url 'pase_de_lista_inicio' %}">
-    <span class="icono" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="16" rx="2"/><path d="M9 3.5h6v3H9z"/><path d="M8.6 13.6l2.4 2.4 4.4-4.8"/></svg>
-    </span>
-    <strong>Pase de lista</strong>
-    <span class="detalle">Toma lista de la sesión de hoy o corrige una anterior.</span>
-  </a>
-  <a class="acceso" href="{% url 'reportes' %}">
-    <span class="icono" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><rect x="7.5" y="12" width="3" height="5.5" rx=".6"/><rect x="12.5" y="8" width="3" height="9.5" rx=".6"/></svg>
-    </span>
-    <strong>Reportes</strong>
-    <span class="detalle">Consulta el porcentaje de asistencia y quiénes están por debajo del mínimo.</span>
-  </a>
-</div>
+<section class="seccion" aria-label="Resumen">
+  <div class="indicadores escalonado">
+    <div class="indicador">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-grupos"/></svg></span>
+      <span class="cifra">{{ resumen.grupos }}</span>
+      <span class="etiqueta-indicador">Grupo{{ resumen.grupos|pluralize }} activo{{ resumen.grupos|pluralize }}</span>
+    </div>
+    <div class="indicador">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
+      <span class="cifra">{{ resumen.alumnos }}</span>
+      <span class="etiqueta-indicador">Alumno{{ resumen.alumnos|pluralize }}</span>
+    </div>
+    <div class="indicador">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
+      <span class="cifra">{{ resumen.sesiones_de_hoy|length }}</span>
+      <span class="etiqueta-indicador">Clase{{ resumen.sesiones_de_hoy|length|pluralize }} hoy</span>
+    </div>
+    <div class="indicador{% if resumen.pendientes %} aviso{% endif %}">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
+      <span class="cifra">{{ resumen.pendientes }}</span>
+      <span class="etiqueta-indicador">Sin pase de lista</span>
+    </div>
+  </div>
+</section>
+
+<section class="seccion" aria-labelledby="clases-de-hoy">
+  <h2 id="clases-de-hoy">Clases de hoy</h2>
+  {% for sesion in resumen.sesiones_de_hoy %}
+    <article class="clase-de-hoy">
+      <div class="hora">{{ sesion.hora_inicio|time:"H:i" }}<small>a {{ sesion.hora_fin|time:"H:i" }}</small></div>
+      <div>
+        <div class="titulo">{{ sesion.grupo.clave }} · {{ sesion.grupo.materia }}</div>
+        <div class="detalle">Periodo {{ sesion.grupo.periodo }}</div>
+      </div>
+      <div class="acciones">
+        {% if sesion.hecha %}
+          <span class="badge text-bg-success">Realizada</span>
+          <a class="btn btn-outline-primary btn-sm" href="{% url 'pase_de_lista' sesion.pk %}">Ver lista</a>
+        {% else %}
+          {% if sesion.pendiente %}<span class="badge text-bg-warning">Sin lista</span>{% else %}<span class="badge text-bg-primary">Programada</span>{% endif %}
+          <a class="btn btn-primary btn-sm" href="{% url 'pase_de_lista' sesion.pk %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-pase"/></svg>Pasar lista</a>
+        {% endif %}
+      </div>
+    </article>
+  {% empty %}
+    <div class="vacio">
+      <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
+      <h2>Sin clases hoy</h2>
+      <p>Cuando programes sesiones para hoy, aparecerán aquí con su botón para pasar lista.</p>
+      <a class="btn btn-outline-primary" href="{% url 'grupos' %}">Ver mis grupos</a>
+    </div>
+  {% endfor %}
+</section>
+
+<section class="seccion" aria-labelledby="accesos">
+  <h2 id="accesos">Accesos</h2>
+  <div class="accesos escalonado">
+    <a class="acceso" href="{% url 'grupos' %}">
+      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-grupos"/></svg></span>
+      <strong>Grupos</strong>
+      <span class="detalle">Da de alta tus grupos, carga la lista de alumnos y programa las sesiones.</span>
+      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+    </a>
+    <a class="acceso" href="{% url 'pase_de_lista_inicio' %}">
+      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-pase"/></svg></span>
+      <strong>Pase de lista</strong>
+      <span class="detalle">Toma lista de hoy o corrige una anterior.</span>
+      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+    </a>
+    <a class="acceso" href="{% url 'reportes' %}">
+      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-reportes"/></svg></span>
+      <strong>Reportes</strong>
+      <span class="detalle">Porcentajes y alumnos bajo el mínimo.</span>
+      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+    </a>
+  </div>
+</section>
 {% endblock %}

@@ -4,40 +4,50 @@
 
 {% block contenido %}
 <div class="entrada">
-  <svg class="marca-grande" width="44" height="44" viewBox="0 0 24 24" aria-hidden="true">
-    <rect width="24" height="24" rx="6"/>
-    <path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2.2"
-          stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  <h1 class="h4">Control de asistencia</h1>
-  <p class="lema">Entra con tu correo institucional.</p>
-
-  <div class="card shadow-sm">
-    <div class="card-body p-4">
-      <form method="post" novalidate>
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger" role="alert">
-            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-          </div>
-        {% endif %}
-
-        <div class="mb-3">
-          <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-          {{ form.username }}
-          {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="mb-4">
-          <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-          {{ form.password }}
-          {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-        </div>
-
-        <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="btn btn-primary btn-lg w-100">Entrar</button>
-      </form>
+  <section class="entrada-marca" aria-label="Sobre la aplicación">
+    <div>
+      <svg class="marca-grande" width="48" height="48" viewBox="0 0 24 24" aria-hidden="true">
+        <rect width="24" height="24" rx="6"/>
+        <path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="titulo-marca">Control de asistencia</p>
+      <p>Pasa lista desde el teléfono y deja un historial de cada corrección.</p>
     </div>
-  </div>
+    <ul>
+      <li><svg class="ico" aria-hidden="true"><use href="#i-pase"/></svg>Todos empiezan en presente: solo marcas las excepciones.</li>
+      <li><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg>Te avisa de las sesiones que se quedaron sin lista.</li>
+      <li><svg class="ico" aria-hidden="true"><use href="#i-reportes"/></svg>Reportes por grupo y por alumno, en PDF y Excel.</li>
+    </ul>
+  </section>
+
+  <section class="entrada-form">
+    <h1 class="h2">Inicia sesión</h1>
+    <p class="lema">Entra con tu correo institucional.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        {{ form.username }}
+        {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        {{ form.password }}
+        {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+      </div>
+
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn-primary btn-lg w-100">Entrar<svg class="ico" aria-hidden="true"><use href="#i-flecha"/></svg></button>
+    </form>
+  </section>
 </div>
 
 <script>

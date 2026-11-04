@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render
 
 from ..forms import LoginForm
 from ..models import Usuario
+from ..services.resumen import resumen_del_docente
 
 
 class IniciarSesionView(LoginView):
@@ -21,4 +22,6 @@ def inicio(request):
     """
     if request.user.rol == Usuario.Rol.ADMINISTRADOR:
         return redirect('admin:index')
-    return render(request, 'asistencia/inicio.html')
+    return render(request, 'asistencia/inicio.html', {
+        'resumen': resumen_del_docente(request.user),
+    })
