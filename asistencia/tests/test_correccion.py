@@ -236,11 +236,14 @@ class AlumnosSinRegistroTests(CorreccionBase):
 
 class ValidacionDeLaCorreccionTests(CorreccionBase):
 
-    def test_un_estado_inventado_rechaza_toda_la_correccion(self):
-        # a0 trae un cambio válido y a1 un estado inventado: no se guarda ninguno.
-        respuesta = self.corregir(self.estados(a0=AUSENTE, a1='volando'), follow=True)
+    def test_una_combinacion_invalida_rechaza_toda_la_correccion(self):
+        # a0 trae un cambio válido y a1 casillas incompatibles (presente y ausente a la vez,
+        # RF-18): no se guarda ninguno.
+        datos = datos_del_pase('correccion', self.estados(a0=AUSENTE))
+        datos[f'ausente_{self.alumnos[1].pk}'] = 'on'
+        respuesta = self.client.post(self.url, datos, follow=True)
 
-        self.assertContains(respuesta, 'un estado que no existe')
+        self.assertContains(respuesta, 'No se guardó nada')
         guardados = {a.pk: self.registro(i).estado for i, a in enumerate(self.alumnos)}
         self.assertEqual(guardados, self.estados())
         self.assertFalse(BitacoraCambio.objects.exists())
@@ -248,9 +251,9 @@ class ValidacionDeLaCorreccionTests(CorreccionBase):
     def test_los_alumnos_ajenos_a_la_lista_se_ignoran(self):
         ajeno = Alumno.objects.create(matricula='8888888', nombre='No inscrito')
         datos = datos_del_pase('correccion', self.estados(a0=AUSENTE))
-        datos[f'estado_{ajeno.pk}'] = AUSENTE
-        datos['estado_999999'] = AUSENTE
-        datos['estado_x'] = AUSENTE
+        datos[f'ausente_{ajeno.pk}'] = 'on'
+        datos['ausente_999999'] = 'on'
+        datos['ausente_x'] = 'on'
 
         self.client.post(self.url, datos)
 

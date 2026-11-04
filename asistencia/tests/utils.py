@@ -182,8 +182,54 @@ def celdas_de_la_tabla(html, id_tabla='tabla-reporte'):
     }
 
 
+# Casillas que el formulario manda marcadas para cada estado (RF-18). Está escrita a
+# propósito aquí y no se importa del código de producción: si el servicio se equivoca,
+# las pruebas lo notan.
+CASILLAS_POR_ESTADO = {
+    'presente': ('presente',),
+    'retardo': ('retardo',),
+    'ausente': ('ausente',),
+    'justificado': ('ausente', 'justificado'),
+}
+
+
+class _LectorDeCasillas(HTMLParser):
+    """{alumno_id: {casilla: {'marcada', 'bloqueada', 'name'}}} de las casillas del pase de lista."""
+
+    def __init__(self):
+        super().__init__()
+        self.alumnos = {}
+
+    def handle_starttag(self, tag, attrs):
+        atributos = dict(attrs)
+        if tag != 'input' or atributos.get('type') != 'checkbox' or 'data-casilla' not in atributos:
+            return
+        alumno_id = int(atributos['name'].rsplit('_', 1)[1])
+        self.alumnos.setdefault(alumno_id, {})[atributos['data-casilla']] = {
+            'marcada': 'checked' in atributos,
+            'bloqueada': 'disabled' in atributos,
+            'name': atributos['name'],
+        }
+
+
+def casillas_de_la_pantalla(respuesta):
+    """Las casillas que muestra la pantalla del pase de lista, por alumno (RF-18)."""
+    lector = _LectorDeCasillas()
+    lector.feed(respuesta.content.decode('utf-8'))
+    return lector.alumnos
+
+
+def marcadas(casillas_del_alumno):
+    return {nombre for nombre, datos in casillas_del_alumno.items() if datos['marcada']}
+
+
 def datos_del_pase(modo, estados):
-    """Cuerpo del POST del pase de lista: {alumno_id: estado} -> campos del formulario."""
+    """Cuerpo del POST del pase de lista: {alumno_id: estado} -> casillas marcadas.
+
+    Cada casilla marcada llega como `<casilla>_<alumno_id>`; las que no se marcan no
+    se mandan, igual que hace un navegador con un checkbox."""
     datos = {'modo': modo}
-    datos.update({f'estado_{alumno_id}': estado for alumno_id, estado in estados.items()})
+    for alumno_id, estado in estados.items():
+        for casilla in CASILLAS_POR_ESTADO[estado]:
+            datos[f'{casilla}_{alumno_id}'] = 'on'
     return datos

@@ -182,6 +182,25 @@ No se cronometró a una persona; un tiempo inventado no probaría nada. Esto es 
 
 El diseño no impone esperas que se acerquen a los 3 minutos; el tiempo real dependerá de la persona. Verificarlo requiere una prueba con docentes, que no se hizo.
 
+### Actualización del 4/11/2026: casillas (RF-18) y fila compacta (RNF-10)
+
+La lista anterior describe el pase de lista con botones de radio y una tarjeta por alumno. Los evaluadores pidieron casillas con reglas de bloqueo y una fila compacta, y la pantalla cambió. Lo medido de nuevo:
+
+- **Costo de interacción.** Con las reglas del RF-18 (presente o retardo bloquean ausente y justificado; ausente bloquea presente y retardo; justificado solo con ausente), un retardo cuesta 1 toque, una falta 2 (quitar «Presente» y marcar «Ausente») y una falta justificada 3. Las 5 excepciones de arriba (2 ausentes, 2 retardos, 1 justificado) cuestan **9 toques** y el envío: **10 interacciones** en lugar de 6. Es el precio de las reglas pedidas: con «Presente» marcado, «Ausente» está bloqueado.
+- **Reglas en un navegador real.** Con Edge sin interfaz se simularon los toques sobre una fila y se leyó el estado de cada casilla (marcada o bloqueada) y los campos que se enviarían. Resultado de la secuencia: con «Presente» marcado, «Ausente» y «Justificado» quedan bloqueados y un toque sobre «Ausente» no hace nada; «Retardo» junto con «Presente» se envía como ambas casillas (se guarda `retardo`); al quitar «Presente» queda «Sin registrar» y se habilitan las otras tres; con «Ausente» marcado se bloquean «Presente» y «Retardo» y se habilita «Justificado»; al quitar «Ausente», «Justificado» se desmarca y se bloquea. El servidor repite las reglas y rechaza lo que no las cumpla (`test_casillas.py`).
+- **Tamaño de la fila (25 alumnos, medido en el navegador).**
+
+| Ancho | Desborde horizontal | Casilla más pequeña | Alto medio de fila |
+|---|---|---|---:|
+| 320 px | no | 44 × 44 px | 93 px |
+| 375 px | no | 44 × 44 px | 72 px |
+| 390 px | no | 44 × 44 px | 66 px |
+| 768 px | no | 116 × 44 px | 58 px |
+
+  Antes, cada alumno ocupaba unos 128 px (teléfono) y 148 px (escritorio). Con 40 alumnos a 375 px, la lista mide unos 2 900 px en lugar de unos 5 100 px.
+- **Contraste.** El borde de una casilla vacía tiene 3.6:1 sobre blanco (mínimo de 3:1 para componentes) y los colores sólidos de los cuatro estados mantienen más de 4.5:1 con texto blanco (`test_estilo.py`).
+- **Servidor.** Guardar un pase de lista sigue siendo un único envío; la vista agrega una o dos consultas (la lista de la sesión) para validar las casillas antes de guardar.
+
 ## 9. RNF-02: revisión responsiva
 
 Se cargó cada pantalla del docente (21) con una función en el navegador que mide el ancho de contenido contra el ancho de la ventana, y se revisaron a ojo el pase de lista, los reportes y la pantalla de justificante.

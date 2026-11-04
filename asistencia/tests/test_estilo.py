@@ -55,6 +55,10 @@ class HojaDeEstilosTests(SimpleTestCase):
             with self.subTest(nombre):
                 self.assertGreaterEqual(_contraste(texto, fondo), MINIMO_TEXTO_NORMAL)
 
+    def test_el_borde_de_una_casilla_vacia_se_distingue_del_fondo(self):
+        # RNF-10 (WCAG 1.4.11): el contorno de un componente necesita 3:1 contra lo que lo rodea.
+        self.assertGreaterEqual(_contraste(self.t['control-borde'], self.t['superficie']), 3.0)
+
     def test_los_estados_elegidos_del_pase_de_lista_se_leen_en_blanco(self):
         # Los cuatro colores sólidos están escritos en la regla de cada estado.
         solidos = re.findall(r'--estado-solido:\s*(#[0-9a-fA-F]{6})', self.css)

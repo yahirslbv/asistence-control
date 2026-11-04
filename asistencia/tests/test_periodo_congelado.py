@@ -195,7 +195,9 @@ class ConsultaPermitidaTests(PeriodoCongeladoBase):
         contenido = respuesta.content.decode()
         self.assertEqual(contenido.count('class="btn-check"'), 3 * 4)
         self.assertEqual(contenido.count('disabled'), 3 * 4)
-        self.assertEqual(contenido.count('checked'), 3)          # el estado de cada alumno sigue visible
+        # El estado de cada alumno sigue visible: una casilla por alumno y dos para el justificado
+        # (ausente y justificado, RF-18).
+        self.assertEqual(contenido.count('checked'), 3 + 1)
         # El justificante se puede ver, pero no reemplazar ni quitar.
         self.assertContains(respuesta, 'Justificante adjunto')
         self.assertContains(respuesta, reverse('justificante_archivo', args=[self.realizada.pk, self.alumnos[1].pk]))

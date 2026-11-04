@@ -12,6 +12,11 @@ final (regla 9.1 del CLAUDE.md).
 Las correcciones no escriben en la bitácora: lo hace el disparador de la base de
 datos, que toma el autor de `registrado_por`. Por eso todo UPDATE de un estado
 asigna `registrado_por` (regla 9.3).
+
+Casillas (RF-18). El formulario muestra cuatro casillas por alumno, pero cada
+registro guarda un solo estado. Las reglas de las casillas están en
+`estado_de_casillas`: el navegador las aplica al marcar y este módulo las vuelve a
+comprobar, porque no se confía en lo que llega en el envío.
 """
 
 from dataclasses import dataclass
@@ -23,6 +28,13 @@ from django.utils import timezone
 from ..models import Alumno, Asistencia, BitacoraCambio, Sesion
 
 ESTADOS_VALIDOS = frozenset(Asistencia.Estado.values)
+
+# Las cuatro casillas del pase de lista; llevan el nombre de los estados.
+PRESENTE = Asistencia.Estado.PRESENTE
+RETARDO = Asistencia.Estado.RETARDO
+AUSENTE = Asistencia.Estado.AUSENTE
+JUSTIFICADO = Asistencia.Estado.JUSTIFICADO
+CASILLAS = frozenset({PRESENTE, RETARDO, AUSENTE, JUSTIFICADO})
 
 
 class ErrorDePaseDeLista(Exception):
@@ -46,6 +58,10 @@ class DatosInvalidos(ErrorDePaseDeLista):
     """El envío trae un estado inexistente o no trae ningún alumno válido."""
 
 
+class CasillasIncompatibles(ErrorDePaseDeLista):
+    """Las casillas marcadas de un alumno no forman un estado válido (RF-18)."""
+
+
 class JustificanteImpideCambio(ErrorDePaseDeLista):
     """El registro tiene un justificante, que solo admite el estado justificado."""
 
@@ -55,6 +71,11 @@ class FilaDeLista:
     alumno: Alumno
     registro: Asistencia | None   # None: todavía no tiene registro en la sesión
     estado: str | None            # el que se preselecciona en el formulario
+
+    @property
+    def marcadas(self):
+        """Casillas que se muestran marcadas para el estado de la fila (RF-18)."""
+        return casillas_de_estado(self.estado)
 
 
 @dataclass
@@ -67,6 +88,74 @@ class ResultadoPase:
 class ResultadoCorreccion:
     cambiados: int    # registros cuyo estado cambió
     nuevos: int       # alumnos que no tenían registro y ahora sí
+
+
+def casillas_de_estado(estado):
+    """Casillas que se marcan en pantalla para un estado guardado (RF-18).
+
+    «justificado» es «ausente» con la casilla de justificado; un alumno sin
+    registro (None) no tiene ninguna marcada.
+    """
+    if estado is None:
+        return frozenset()
+    if estado == JUSTIFICADO:
+        return frozenset({AUSENTE, JUSTIFICADO})
+    return frozenset({estado})
+
+
+def estado_de_casillas(marcadas):
+    """El estado único que corresponde a las casillas marcadas, o None si no hay ninguna.
+
+    Reglas (RF-18):
+    - «Presente» o «Retardo» no se combinan con «Ausente» ni con «Justificado».
+    - «Ausente» no se combina con «Presente» ni con «Retardo».
+    - «Justificado» solo se puede marcar junto con «Ausente».
+    - «Presente» y «Retardo» juntos significan que llegó con retraso: se guarda «retardo».
+    - «Ausente» solo es «ausente»; con «Justificado» se guarda «justificado».
+
+    Lanza CasillasIncompatibles si la combinación no cumple las reglas y
+    DatosInvalidos si trae una casilla que no existe.
+    """
+    marcadas = frozenset(marcadas)
+    if not marcadas <= CASILLAS:
+        raise DatosInvalidos('El formulario trae una casilla que no existe. No se guardó nada.')
+    if not marcadas:
+        return None
+    if AUSENTE in marcadas:
+        if marcadas - {AUSENTE, JUSTIFICADO}:
+            raise CasillasIncompatibles('Presente o retardo no se combinan con ausente.')
+        return JUSTIFICADO if JUSTIFICADO in marcadas else AUSENTE
+    if JUSTIFICADO in marcadas:
+        raise CasillasIncompatibles('Justificado solo se puede marcar junto con ausente.')
+    return RETARDO if RETARDO in marcadas else PRESENTE
+
+
+def estados_desde_casillas(casillas_por_alumno, filas):
+    """{alumno_id: estado} a partir de {alumno_id: casillas marcadas} (RF-18).
+
+    Los alumnos que no están en la lista de la sesión se ignoran con todo y sus
+    casillas, y quien no marcó nada no aparece en el resultado (queda sin
+    registrar). Si alguna combinación no es válida se rechaza todo el envío, con
+    el nombre de cada alumno afectado en el mensaje.
+    """
+    nombres = {fila.alumno.pk: fila.alumno.nombre for fila in filas}
+    estados, incompatibles = {}, []
+    for alumno_id, marcadas in casillas_por_alumno.items():
+        if alumno_id not in nombres:
+            continue
+        try:
+            estado = estado_de_casillas(marcadas)
+        except CasillasIncompatibles:
+            incompatibles.append(nombres[alumno_id])
+            continue
+        if estado is not None:
+            estados[alumno_id] = estado
+    if incompatibles:
+        raise CasillasIncompatibles(
+            f"Revisa las casillas de: {', '.join(sorted(incompatibles))}. «Presente» y "
+            '«Retardo» no se combinan con «Ausente», y «Justificado» solo va con '
+            '«Ausente». No se guardó nada.')
+    return estados
 
 
 def lista_de_la_sesion(sesion):

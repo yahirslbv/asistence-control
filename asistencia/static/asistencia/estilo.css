@@ -827,68 +827,166 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .entrada-form .lema { color: var(--tinta-suave); margin-bottom: 1.5rem; }
 .entrada-form .pie-form { margin: 1.35rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--linea); color: var(--tinta-suave); font-size: .92rem; }
 
-/* ---------- 14. Pase de lista (pantalla crítica, RNF-01 y RNF-02) ---------- */
+/* ---------- 14. Pase de lista (pantalla crítica: RNF-01, RNF-02, RNF-10 y RF-18) ---------- */
 
-/* Cuatro botones de estado en una fila, también en 375 px de ancho. */
-.estados { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+/* Una fila por alumno: nombre a la izquierda y cuatro casillas a la derecha, para recorrer
+   la lista sin desplazarse de más. En 375 px caben el nombre (unos 130 px) y las cuatro
+   casillas de 44 px, el mínimo táctil. */
+.lista-pase {
+  --alto-casilla: 44px;
+  --ancho-casilla: 44px;
+  --hueco-casilla: 4px;
+  --control-borde: #7a8881;    /* borde de una casilla vacía: contraste 3.6:1 sobre blanco (mínimo 3:1) */
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra);
+}
 
-.estados .estado-btn {
+@media (min-width: 640px) {
+  .lista-pase { --ancho-casilla: 116px; --hueco-casilla: 6px; }
+}
+
+.lista-cabecera,
+.fila-lista {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(4, var(--ancho-casilla));
+  column-gap: var(--hueco-casilla);
+  align-items: center;
+  padding: .4rem .5rem;
+}
+
+/* El encabezado queda pegado bajo la barra superior mientras se recorre la lista. */
+.lista-cabecera {
+  position: sticky;
+  top: 3.8rem;
+  z-index: 5;
+  padding-block: .5rem;
+  background: var(--realce);
+  border-bottom: 1px solid var(--linea);
+  border-radius: var(--radio-grande) var(--radio-grande) 0 0;
+  color: var(--tinta-suave);
+  font-size: .72rem;
+  font-weight: 650;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+.cab-alumno { text-align: left; padding-left: .25rem; }
+.cab-largo { display: none; }
+
+@media (min-width: 640px) {
+  .lista-cabecera { font-size: .78rem; }
+  .cab-corto { display: none; }
+  .cab-largo { display: inline; }
+}
+
+.fila-lista {
+  position: relative;
+  min-height: 56px;
+  transition: box-shadow .15s ease, background-color .15s ease;
+}
+
+.fila-lista + .fila-lista { border-top: 1px solid var(--linea); }
+.fila-lista:last-child { border-radius: 0 0 var(--radio-grande) var(--radio-grande); }
+.fila-lista:hover { background: var(--pino-50); }
+
+.dato-alumno { min-width: 0; padding-left: .25rem; line-height: 1.25; }
+.dato-alumno .nombre { display: block; font-weight: 600; font-size: .95rem; overflow-wrap: anywhere; }
+.dato-alumno .matricula { font-size: .78rem; color: var(--tinta-suave); }
+
+/* «Sin registrar»: lo manda el servidor cuando el alumno no tiene registro, y también aparece
+   al quitar todas sus casillas. Son dos reglas aparte: si un navegador no entiende :has, la
+   primera sigue valiendo. */
+.etiqueta-sin-estado { display: none; margin-left: .4rem; font-size: .68rem; }
+.fila-lista.sin-registro .etiqueta-sin-estado { display: inline-block; }
+.fila-lista:not(:has(.btn-check:checked)) .etiqueta-sin-estado { display: inline-block; }
+
+.casilla .estado-btn {
   --bs-btn-color: var(--tinta-suave);
   --bs-btn-bg: var(--superficie);
-  --bs-btn-border-color: var(--linea-fuerte);
+  --bs-btn-border-color: var(--control-borde);
   --bs-btn-border-radius: var(--radio);
   --bs-btn-hover-color: var(--estado-tinta);
   --bs-btn-hover-bg: var(--estado-fondo);
-  --bs-btn-hover-border-color: var(--estado-borde);
+  --bs-btn-hover-border-color: var(--estado-solido);
   --bs-btn-active-color: #fff;
   --bs-btn-active-bg: var(--estado-solido);
   --bs-btn-active-border-color: var(--estado-solido);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: .5rem .1rem;
-  font-size: .75rem;
+  width: 100%;
+  min-height: var(--alto-casilla);
+  padding: 0 .1rem;
+  font-size: .9rem;
   font-weight: 500;
   line-height: 1.1;
   text-align: center;
 }
 
-.estados .btn-outline-success { --estado-tinta: var(--verde-texto);    --estado-fondo: var(--verde-fondo);    --estado-borde: #aed3bd; --estado-solido: #1b6b43; }
-.estados .btn-outline-warning { --estado-tinta: var(--ambar-texto);    --estado-fondo: var(--ambar-fondo);    --estado-borde: #e6cf86; --estado-solido: #8a5a00; }
-.estados .btn-outline-danger  { --estado-tinta: var(--rojo-texto);     --estado-fondo: var(--rojo-fondo);     --estado-borde: #e8bcbc; --estado-solido: #a12f2f; }
-.estados .btn-outline-info    { --estado-tinta: var(--turquesa-texto); --estado-fondo: var(--turquesa-fondo); --estado-borde: #a8d4d2; --estado-solido: #1a6478; }
+.casilla .btn-outline-success { --estado-tinta: var(--verde-texto);    --estado-fondo: var(--verde-fondo);    --estado-solido: #1b6b43; }
+.casilla .btn-outline-warning { --estado-tinta: var(--ambar-texto);    --estado-fondo: var(--ambar-fondo);    --estado-solido: #8a5a00; }
+.casilla .btn-outline-danger  { --estado-tinta: var(--rojo-texto);     --estado-fondo: var(--rojo-fondo);     --estado-solido: #a12f2f; }
+.casilla .btn-outline-info    { --estado-tinta: var(--turquesa-texto); --estado-fondo: var(--turquesa-fondo); --estado-solido: #1a6478; }
 
-.estados .btn-check:checked + .estado-btn { font-weight: 650; }
+.casilla .btn-check:checked + .estado-btn { font-weight: 650; }
 
-@media (min-width: 576px) {
-  .estados .estado-btn { min-height: 52px; font-size: 1rem; }
-
-  /* Marca de verificación dibujada con bordes: el estado elegido no depende solo del color. */
-  .estados .btn-check:checked + .estado-btn::before {
-    content: "";
-    width: .32em;
-    height: .62em;
-    margin-right: .6em;
-    border: solid currentColor;
-    border-width: 0 .14em .14em 0;
-    transform: rotate(45deg) translateY(-.08em);
-  }
+/* La palabra de cada casilla solo se ve cuando hay sitio; en el teléfono la dice el encabezado
+   (y la leen los lectores de pantalla, que la conservan fuera de la vista). */
+.estado-txt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* Consulta de un periodo inactivo (RF-17): los botones no se pueden tocar y solo se ve lo elegido. */
-.solo-lectura .estados .btn-check:disabled + .estado-btn { opacity: .45; pointer-events: none; }
-.solo-lectura .estados .btn-check:disabled:checked + .estado-btn { opacity: 1; }
+@media (min-width: 640px) {
+  .estado-txt { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; }
+  .casilla .estado-btn { font-size: 1rem; }
+}
 
-.fila-alumno {
-  --bs-card-border-radius: var(--radio-grande);
-  transition: box-shadow .15s ease;
+/* Marca de verificación dibujada con bordes: lo marcado no depende solo del color. */
+.casilla .btn-check:checked + .estado-btn::before {
+  content: "";
+  width: .34em;
+  height: .66em;
+  border: solid currentColor;
+  border-width: 0 .15em .15em 0;
+  transform: rotate(45deg) translateY(-.1em);
+}
+
+@media (min-width: 640px) {
+  .casilla .btn-check:checked + .estado-btn::before { margin-right: .6em; }
+}
+
+/* Una casilla bloqueada por las reglas del RF-18 se ve rayada y con borde punteado, no solo apagada. */
+.casilla .btn-check:disabled + .estado-btn {
+  opacity: 1;
+  color: var(--tinta-suave);
+  background: repeating-linear-gradient(135deg, transparent 0 4px, rgba(82, 96, 90, .18) 4px 5px), var(--realce);
+  border: 1px dashed var(--linea-fuerte);
+  cursor: not-allowed;
+}
+
+/* En consulta (periodo inactivo) todo está bloqueado, pero lo que se marcó se ve completo. */
+.casilla .btn-check:disabled:checked + .estado-btn {
+  color: #fff;
+  background: var(--estado-solido);
+  border: 1px solid var(--estado-solido);
 }
 
 /* Quien no está «presente» se distingue de un vistazo al recorrer la lista. */
-.fila-alumno:has(.btn-check:checked[value="retardo"])     { box-shadow: inset 4px 0 0 #8a5a00, var(--sombra); }
-.fila-alumno:has(.btn-check:checked[value="ausente"])     { box-shadow: inset 4px 0 0 #a12f2f, var(--sombra); }
-.fila-alumno:has(.btn-check:checked[value="justificado"]) { box-shadow: inset 4px 0 0 #1a6478, var(--sombra); }
+.fila-lista:has(.btn-check[data-casilla="retardo"]:checked)     { box-shadow: inset 4px 0 0 #8a5a00; }
+.fila-lista:has(.btn-check[data-casilla="ausente"]:checked)     { box-shadow: inset 4px 0 0 #a12f2f; }
+.fila-lista:has(.btn-check[data-casilla="justificado"]:checked) { box-shadow: inset 4px 0 0 #1a6478; }
+
+.fila-justificante { grid-column: 1 / -1; padding: 0 .25rem .2rem; font-size: .85rem; }
 
 .barra-guardar {
   background: rgba(241, 244, 241, .92);

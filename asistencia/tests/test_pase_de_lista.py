@@ -11,12 +11,12 @@ from django.urls import reverse
 
 from asistencia.models import Alumno, Asistencia, Inscripcion, Sesion
 from asistencia.services.asistencia import (
-    ConflictoDeSesion, registrar_pase_de_lista,
+    ConflictoDeSesion, DatosInvalidos, registrar_pase_de_lista,
 )
 
 from .utils import (
-    PASSWORD, RelojFijoMixin, crear_docente, crear_grupo, crear_sesion,
-    datos_del_pase, inscribir_alumnos,
+    PASSWORD, RelojFijoMixin, casillas_de_la_pantalla, crear_docente, crear_grupo,
+    crear_sesion, datos_del_pase, inscribir_alumnos, marcadas,
 )
 
 PRESENTE = Asistencia.Estado.PRESENTE
@@ -62,13 +62,15 @@ class PrimeraCapturaTests(RelojFijoMixin, TestCase):
         self.assertEqual([f.alumno.nombre for f in filas], [f'Alumno {i:02d}' for i in range(5)])
         self.assertTrue(all(f.estado == PRESENTE and f.registro is None for f in filas))
 
-    def test_cada_alumno_tiene_cuatro_botones_y_presente_viene_marcado(self):
+    def test_cada_alumno_tiene_cuatro_casillas_y_presente_viene_marcada(self):
         respuesta = self.client.get(self.url)
 
         self.assertContains(respuesta, 'class="btn-check"', count=5 * 4)
-        self.assertContains(respuesta, 'value="presente" checked', count=5)
+        pantalla = casillas_de_la_pantalla(respuesta)
+        self.assertEqual(len(pantalla), 5)
+        self.assertTrue(all(marcadas(casillas) == {'presente'} for casillas in pantalla.values()))
         for etiqueta in ('Presente', 'Retardo', 'Ausente', 'Justificado'):
-            self.assertContains(respuesta, f'>{etiqueta}</label>', count=5)
+            self.assertContains(respuesta, f'<span class="estado-txt">{etiqueta}</span>', count=5)
         self.assertContains(respuesta, 'Guardar pase de lista', count=1)
 
     def test_la_primera_captura_incluye_a_los_inscritos_aunque_su_alta_sea_posterior(self):
@@ -165,10 +167,13 @@ class PrimeraCapturaTests(RelojFijoMixin, TestCase):
     # --- Validación del envío ---
 
     def test_un_estado_inventado_rechaza_todo_el_envio(self):
-        respuesta = self.client.post(
-            self.url, datos_del_pase('captura', self.todos(a2='volando')), follow=True)
+        # El formulario ya no manda estados sueltos sino casillas (RF-18; sus combinaciones
+        # inválidas se prueban en test_casillas.py), pero el servicio sigue sin fiarse de
+        # los estados que recibe.
+        with self.assertRaises(DatosInvalidos):
+            registrar_pase_de_lista(
+                self.sesion.pk, self.todos(a2='volando'), self.docente)
 
-        self.assertContains(respuesta, 'un estado que no existe')
         self.assertFalse(Asistencia.objects.exists())
         self.sesion.refresh_from_db()
         self.assertEqual(self.sesion.estado, Sesion.Estado.PROGRAMADA)
@@ -176,24 +181,16 @@ class PrimeraCapturaTests(RelojFijoMixin, TestCase):
     def test_los_alumnos_ajenos_a_la_lista_se_ignoran(self):
         ajeno = Alumno.objects.create(matricula='8888888', nombre='No inscrito')
         datos = datos_del_pase('captura', self.todos())
-        datos[f'estado_{ajeno.pk}'] = AUSENTE
-        datos['estado_999999'] = AUSENTE      # ni siquiera existe
-        datos['estado_abc'] = AUSENTE         # clave mal formada
+        datos[f'ausente_{ajeno.pk}'] = 'on'
+        datos['ausente_999999'] = 'on'        # ni siquiera existe
+        datos['ausente_abc'] = 'on'           # clave mal formada
+        datos[f'estado_{self.alumnos[0].pk}'] = AUSENTE   # el campo del formulario anterior ya no cuenta
         datos['otro_campo'] = AUSENTE
 
         self.client.post(self.url, datos)
 
         self.assertEqual(Asistencia.objects.filter(sesion=self.sesion).count(), 5)
         self.assertFalse(Asistencia.objects.filter(alumno=ajeno).exists())
-
-    def test_un_estado_invalido_de_un_alumno_ajeno_se_ignora_con_el_alumno(self):
-        ajeno = Alumno.objects.create(matricula='8888888', nombre='No inscrito')
-        datos = datos_del_pase('captura', self.todos())
-        datos[f'estado_{ajeno.pk}'] = 'volando'
-
-        self.client.post(self.url, datos)
-
-        self.assertEqual(Asistencia.objects.filter(sesion=self.sesion).count(), 5)
 
     def test_los_alumnos_que_el_envio_no_trae_quedan_sin_registrar_y_se_avisa(self):
         estados = self.todos()

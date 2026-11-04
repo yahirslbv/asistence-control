@@ -1,5 +1,7 @@
-"""Pase de lista y corrección (RF-08 a RF-11). Las vistas solo coordinan: la
+"""Pase de lista y corrección (RF-08 a RF-11 y RF-18). Las vistas solo coordinan: la
 lógica está en services/asistencia.py."""
+
+import re
 
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -9,9 +11,9 @@ from django.views.generic import TemplateView
 from ..models import Asistencia, Sesion
 from ..permissions import SesionDelDocenteMixin, SoloDocenteMixin
 from ..services.asistencia import (
-    ConflictoDeSesion, DatosInvalidos, ErrorDePaseDeLista, corregir_pase_de_lista,
-    historial_de_cambios, lista_de_la_sesion, registrar_pase_de_lista,
-    sesion_es_futura,
+    CASILLAS, ConflictoDeSesion, DatosInvalidos, ErrorDePaseDeLista,
+    corregir_pase_de_lista, estados_desde_casillas, historial_de_cambios,
+    lista_de_la_sesion, registrar_pase_de_lista, sesion_es_futura,
 )
 from ..services.pendientes import sesiones_pendientes
 from ..services.periodos import de_periodo_cerrado, periodo_cerrado
@@ -19,7 +21,8 @@ from ..services.periodos import de_periodo_cerrado, periodo_cerrado
 MODO_CAPTURA = 'captura'
 MODO_CORRECCION = 'correccion'
 
-PREFIJO_DEL_CAMPO = 'estado_'
+# Cada casilla marcada llega como «<casilla>_<id del alumno>»; las que no se marcan no llegan.
+CAMPO_DE_CASILLA = re.compile(r'^(%s)_([0-9]+)$' % '|'.join(sorted(CASILLAS)))
 
 COLOR_POR_ESTADO = {
     Asistencia.Estado.PRESENTE: 'success',
@@ -28,9 +31,17 @@ COLOR_POR_ESTADO = {
     Asistencia.Estado.JUSTIFICADO: 'info',
 }
 
-# (valor, etiqueta, color de Bootstrap) en el orden en que se muestran.
+# Encabezado de columna en el teléfono, donde la casilla solo cabe como un cuadro.
+ABREVIATURA_POR_ESTADO = {
+    Asistencia.Estado.PRESENTE: 'Pres.',
+    Asistencia.Estado.RETARDO: 'Ret.',
+    Asistencia.Estado.AUSENTE: 'Aus.',
+    Asistencia.Estado.JUSTIFICADO: 'Just.',
+}
+
+# (valor, etiqueta, color de Bootstrap, abreviatura) en el orden en que se muestran.
 ESTADOS_EN_PANTALLA = [
-    (valor, etiqueta, COLOR_POR_ESTADO[valor])
+    (valor, etiqueta, COLOR_POR_ESTADO[valor], ABREVIATURA_POR_ESTADO[valor])
     for valor, etiqueta in Asistencia.Estado.choices
 ]
 
@@ -39,19 +50,16 @@ def _plural(cantidad, singular, plural):
     return f'{cantidad} {singular if cantidad == 1 else plural}'
 
 
-def _estados_del_envio(post):
-    """{alumno_id: estado} de los campos `estado_<id>` del formulario. Lo que
-    no tenga esa forma se ignora; la validación de fondo es del servicio."""
-    enviados = {}
+def _casillas_del_envio(post):
+    """{alumno_id: {casillas marcadas}} de los campos del formulario. Un campo
+    cuenta como marcado por estar presente, sea cual sea su valor. Lo que no tenga
+    la forma `<casilla>_<id>` se ignora; las reglas de fondo son del servicio."""
+    casillas = {}
     for clave in post:
-        if not clave.startswith(PREFIJO_DEL_CAMPO):
-            continue
-        try:
-            alumno_id = int(clave[len(PREFIJO_DEL_CAMPO):])
-        except ValueError:
-            continue
-        enviados[alumno_id] = post.get(clave)
-    return enviados
+        encontrado = CAMPO_DE_CASILLA.match(clave)
+        if encontrado:
+            casillas.setdefault(int(encontrado.group(2)), set()).add(encontrado.group(1))
+    return casillas
 
 
 class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
@@ -98,8 +106,13 @@ class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         modo = request.POST.get('modo')
-        enviados = _estados_del_envio(request.POST)
         try:
+            if modo not in (MODO_CAPTURA, MODO_CORRECCION):
+                raise DatosInvalidos('El formulario no es válido. No se guardó nada.')
+            # Las casillas se traducen a un estado por alumno; una combinación que
+            # rompa las reglas del RF-18 rechaza todo el envío.
+            enviados = estados_desde_casillas(
+                _casillas_del_envio(request.POST), lista_de_la_sesion(self.sesion))
             if modo == MODO_CAPTURA:
                 resultado = registrar_pase_de_lista(self.sesion.pk, enviados, request.user)
                 messages.success(
@@ -111,7 +124,7 @@ class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
                         request,
                         f"{_plural(resultado.sin_enviar, 'alumno', 'alumnos')} no venían "
                         'en el envío y quedaron sin registrar.')
-            elif modo == MODO_CORRECCION:
+            else:
                 resultado = corregir_pase_de_lista(self.sesion.pk, enviados, request.user)
                 if resultado.cambiados or resultado.nuevos:
                     partes = []
@@ -123,8 +136,6 @@ class PaseDeListaView(SesionDelDocenteMixin, TemplateView):
                     messages.success(request, f"Corrección guardada: {' y '.join(partes)}.")
                 else:
                     messages.info(request, 'No había cambios que guardar.')
-            else:
-                raise DatosInvalidos('El formulario no es válido. No se guardó nada.')
         except ConflictoDeSesion as error:
             messages.warning(request, str(error))
         except ErrorDePaseDeLista as error:
