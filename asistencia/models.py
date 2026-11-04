@@ -7,8 +7,9 @@ En versiones anteriores el argumento se llama `check=`.
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import Case, F, IntegerField, Q, Value, When
 
 
 class Usuario(AbstractUser):
@@ -45,6 +46,46 @@ class Alumno(models.Model):
 
     def __str__(self):
         return f'{self.matricula} - {self.nombre}'
+
+
+class Periodo(models.Model):
+    """Periodo escolar que el administrador crea, edita, activa y desactiva (RF-17).
+
+    Solo uno puede estar activo a la vez (lo garantiza la base de datos). Un
+    periodo inactivo congela sus grupos: quedan en solo lectura. `Grupo.periodo`
+    guarda la clave como texto, sin clave foránea: un grupo cuyo periodo no
+    tiene fila aquí no se congela. Un periodo no se borra, se desactiva.
+    """
+
+    id_periodo = models.AutoField(primary_key=True)
+    clave = models.CharField(
+        max_length=10, unique=True,
+        validators=[RegexValidator(r'^\d{4}-\d$', 'Usa el formato AAAA-N, por ejemplo 2026-2.')],
+        help_text='Formato AAAA-N. Ejemplo: 2026-2.',
+    )
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    activo = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'periodo'
+        ordering = ['-clave']
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(fecha_fin__gt=F('fecha_inicio')),
+                name='ck_periodo_fechas',
+            ),
+            # Un solo periodo activo: el índice único sobre una expresión que vale
+            # 1 solo cuando está activo (MySQL no tiene índices únicos parciales,
+            # y varios NULL sí caben en un índice único).
+            models.UniqueConstraint(
+                Case(When(activo=True, then=Value(1)), default=None, output_field=IntegerField()),
+                name='uq_periodo_un_activo',
+            ),
+        ]
+
+    def __str__(self):
+        return self.clave
 
 
 class Grupo(models.Model):
