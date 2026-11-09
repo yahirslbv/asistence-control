@@ -856,13 +856,16 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 /* ---------- 14. Pase de lista (pantalla crítica: RNF-01, RNF-02, RNF-10 y RF-18) ---------- */
 
 /* Una fila por alumno: nombre a la izquierda y cuatro casillas a la derecha, para recorrer
-   la lista sin desplazarse de más. En 375 px caben el nombre (unos 130 px) y las cuatro
-   casillas de 44 px, el mínimo táctil. */
+   la lista sin desplazarse de más. El nombre de cada estado aparece una sola vez, en el
+   encabezado; en las filas solo hay casillas con su marca de verificación. En 375 px caben
+   el nombre (unos 130 px) y las cuatro casillas de 44 px, el mínimo táctil. */
 .lista-pase {
   --alto-casilla: 44px;
   --ancho-casilla: 44px;
+  --ancho-columna: 44px;       /* ancho de cada columna: en pantalla ancha es mayor que la casilla, para que quepa el nombre del estado en el encabezado */
   --hueco-casilla: 4px;
   --control-borde: #7a8881;    /* borde de una casilla vacía: contraste 3.6:1 sobre blanco (mínimo 3:1) */
+  max-width: 56rem;            /* una fila muy ancha aleja el nombre de sus casillas */
   background: var(--superficie);
   border: 1px solid var(--linea);
   border-radius: var(--radio-grande);
@@ -870,13 +873,13 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 }
 
 @media (min-width: 640px) {
-  .lista-pase { --ancho-casilla: 116px; --hueco-casilla: 6px; }
+  .lista-pase { --ancho-casilla: 56px; --ancho-columna: 88px; }
 }
 
 .lista-cabecera,
 .fila-lista {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(4, var(--ancho-casilla));
+  grid-template-columns: minmax(0, 1fr) repeat(4, var(--ancho-columna));
   column-gap: var(--hueco-casilla);
   align-items: center;
   padding: .4rem .5rem;
@@ -928,6 +931,8 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .fila-lista.sin-registro .etiqueta-sin-estado { display: inline-block; }
 .fila-lista:not(:has(.btn-check:checked)) .etiqueta-sin-estado { display: inline-block; }
 
+.casilla { display: flex; justify-content: center; }
+
 .casilla .estado-btn {
   --bs-btn-color: var(--tinta-suave);
   --bs-btn-bg: var(--superficie);
@@ -942,10 +947,10 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: var(--ancho-casilla);
   min-height: var(--alto-casilla);
-  padding: 0 .1rem;
-  font-size: .9rem;
+  padding: 0;
+  font-size: 1.15rem;      /* la marca de verificación se dibuja en em */
   font-weight: 500;
   line-height: 1.1;
   text-align: center;
@@ -958,8 +963,8 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
 .casilla .btn-check:checked + .estado-btn { font-weight: 650; }
 
-/* La palabra de cada casilla solo se ve cuando hay sitio; en el teléfono la dice el encabezado
-   (y la leen los lectores de pantalla, que la conservan fuera de la vista). */
+/* La palabra de cada casilla no se ve: la dice el encabezado de la columna. Se conserva fuera de
+   la vista para los lectores de pantalla («Presente de Ana García»). */
 .estado-txt {
   position: absolute;
   width: 1px;
@@ -972,11 +977,6 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   border: 0;
 }
 
-@media (min-width: 640px) {
-  .estado-txt { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; }
-  .casilla .estado-btn { font-size: 1rem; }
-}
-
 /* Marca de verificación dibujada con bordes: lo marcado no depende solo del color. */
 .casilla .btn-check:checked + .estado-btn::before {
   content: "";
@@ -985,10 +985,6 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   border: solid currentColor;
   border-width: 0 .15em .15em 0;
   transform: rotate(45deg) translateY(-.1em);
-}
-
-@media (min-width: 640px) {
-  .casilla .btn-check:checked + .estado-btn::before { margin-right: .6em; }
 }
 
 /* Una casilla bloqueada por las reglas del RF-18 se ve rayada y con borde punteado, no solo apagada. */

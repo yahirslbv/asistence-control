@@ -95,7 +95,7 @@
               <input type="checkbox" class="btn-check" autocomplete="off"
                      name="{{ valor }}_{{ fila.alumno.pk }}" id="a{{ fila.alumno.pk }}-{{ valor }}"
                      value="1" data-casilla="{{ valor }}"{% if valor in fila.marcadas %} checked{% endif %}{% if solo_lectura %} disabled{% endif %}>
-              <label class="btn btn-outline-{{ color }} estado-btn" for="a{{ fila.alumno.pk }}-{{ valor }}"><span class="estado-txt">{{ etiqueta }}</span><span class="visually-hidden"> de {{ fila.alumno.nombre }}</span></label>
+              <label class="btn btn-outline-{{ color }} estado-btn" for="a{{ fila.alumno.pk }}-{{ valor }}" title="{{ etiqueta }}"><span class="estado-txt">{{ etiqueta }}</span><span class="visually-hidden"> de {{ fila.alumno.nombre }}</span></label>
             </div>
           {% endfor %}
           {# Justificante (RF-12): solo en registros ya guardados como «justificado». #}

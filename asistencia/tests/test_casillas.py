@@ -189,6 +189,12 @@ class PantallaConCasillasTests(RelojFijoMixin, TestCase):
         for etiqueta in ('Presente', 'Retardo', 'Ausente', 'Justificado'):
             self.assertContains(respuesta, f'<span class="cab-largo">{etiqueta}</span>', count=1)
 
+    def test_cada_casilla_dice_su_estado_al_pasar_el_cursor(self):
+        respuesta = self.client.get(self.url)
+
+        for etiqueta in ('Presente', 'Retardo', 'Ausente', 'Justificado'):
+            self.assertContains(respuesta, f'title="{etiqueta}"', count=4)
+
     def test_cada_casilla_tiene_nombre_accesible_con_el_alumno(self):
         respuesta = self.client.get(self.url)
 
@@ -376,9 +382,26 @@ class FilaCompactaTests(SimpleTestCase):
     def test_el_ancho_de_la_casilla_en_el_telefono_es_de_al_menos_44_px(self):
         self.assertGreaterEqual(int(self.valor('ancho-casilla').removesuffix('px')), 44)
 
-    def test_cuatro_casillas_y_el_nombre_caben_en_375_px(self):
+    def test_cuatro_columnas_y_el_nombre_caben_en_375_px(self):
         # 375 px de pantalla - 2 x 16 px de margen de la página - 2 x 8 px de relleno de la fila
-        ancho = int(self.valor('ancho-casilla').removesuffix('px'))
+        ancho = int(self.valor('ancho-columna').removesuffix('px'))
         hueco = int(self.valor('hueco-casilla').removesuffix('px'))
         quedan = 375 - 2 * 16 - 2 * 8 - 4 * ancho - 4 * hueco
         self.assertGreaterEqual(quedan, 130, 'Al nombre le deben quedar al menos 130 px')
+
+    def test_en_pantalla_ancha_la_columna_cabe_el_nombre_del_estado_mas_largo_del_encabezado(self):
+        # La primera medida es la del teléfono; la segunda, la de desde 640 px. «Justificado»
+        # en el encabezado (unos 12 caracteres a .78rem) necesita al menos 80 px.
+        columnas = [int(v) for v in re.findall(r'--ancho-columna:\s*(\d+)px', self.css)]
+        casillas = [int(v) for v in re.findall(r'--ancho-casilla:\s*(\d+)px', self.css)]
+        self.assertEqual(len(columnas), 2)
+        self.assertGreaterEqual(columnas[1], 80)
+        self.assertGreaterEqual(columnas[1], casillas[1])
+        self.assertGreaterEqual(casillas[1], 44)
+
+    def test_la_palabra_de_cada_casilla_nunca_se_ve_porque_la_dice_el_encabezado(self):
+        # Una sola regla para .estado-txt, fuera de la vista y sin sobreescribirla en pantalla ancha.
+        reglas = re.findall(r'\.estado-txt\s*\{([^}]*)\}', self.css)
+        self.assertEqual(len(reglas), 1)
+        self.assertIn('clip: rect(0, 0, 0, 0)', reglas[0])
+        self.assertIn('overflow: hidden', reglas[0])
