@@ -1,7 +1,7 @@
 # Seguimiento semanal del proyecto
 
 Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos de Software.
-**Corte: jueves 15/10/2026 (semana S3).** Fecha límite de entrega: viernes 27/11/2026.
+**Corte: lunes 9/11/2026 (semana S7).** Fecha límite de entrega: viernes 27/11/2026.
 
 | Recurso | Enlace |
 |---|---|
@@ -18,8 +18,8 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 - **Estado:** las actividades A a H están terminadas, la I (manuales) está en curso y la J (despliegue y entrega) está por hacer.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
-- **Calidad:** 507 pruebas automáticas en verde. El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
-- **Requisitos:** los 17 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
+- **Calidad:** 642 pruebas automáticas en verde (suite completa del 9/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
+- **Requisitos:** los 20 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11; RF-18 a RF-20, que salieron de las observaciones de los evaluadores, el 4/11). También están hechos el RNF-10 (pase de lista compacto) y el RNF-11 (paleta, confirmada el 9/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
 - **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y dos hallazgos menores de la fase H, H-02 y H-03 (sección 8).
 
 ### Avance contra el cronograma
@@ -56,7 +56,7 @@ python manage.py test --noinput
 ```
 
 - `seed_demo` crea 1 administrador, 2 docentes, 2 grupos y 40 alumnos. La contraseña de las cuentas de demostración está en `asistencia/management/commands/seed_demo.py`.
-- La suite completa debe terminar con `Ran 507 tests` y `OK`. En la última corrida (3/11/2026) tardó 391 s (unos seis minutos y medio).
+- La suite completa debe terminar con `Ran 642 tests` y `OK`. En la última corrida (9/11/2026) tardó 908 s (unos quince minutos, con otras tareas corriendo en la misma máquina); una corrida anterior, sin carga extra, tardó 504 s.
 - La carpeta [docs](.) contiene este seguimiento y el informe de pruebas.
 
 ## 3. Estado por semana
@@ -173,10 +173,26 @@ Extra de esta semana: **RF-17 · periodos escolares y tema del admin** (3/11, a 
 
 Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02 y H-03 (sección 8); el H-01 se corrigió con el diseño visual.
 
+### 4/11 y 9/11 · Observaciones de los evaluadores (RF-18, RNF-10, RF-19, RF-20) y rediseño
+- **Origen:** observaciones recibidas el 4/11/2026 sobre el pase de lista, el inicio de sesión y el panel del administrador. Se cargaron al tablero como RF-18, RNF-10, RF-19 y RF-20, y el rediseño pedido junto con ellas, como RNF-11 (paleta).
+- **Estado:** **terminadas.** RF-18, RNF-10, RF-19 y RF-20 el 4/11, con un ajuste del RNF-10 el 9/11 a petición de Victo; el RNF-11 (paleta «pino y ámbar») lo confirmó Victo el 9/11.
+
+| Requisito | Qué hace | Commit |
+|---|---|---|
+| RNF-02, RNF-11 | Rediseño completo «pino y ámbar»: hoja de estilos nueva, iconos propios, barra con avatar, inicio con resumen del día, tablas que se reacomodan en el teléfono, estados vacíos y páginas 403 y 404 | `1122ba8`, `aac5fa8` |
+| RNF-02 | Tema del admin de Django con la misma paleta (claro y oscuro) | `249a6fd` |
+| RF-18, RNF-10 | Pase de lista con casillas y reglas de bloqueo (en el navegador y en el servidor) y fila compacta con casillas de 44 px | `13e3315` |
+| RF-19, RF-20 | Registro de docentes (dominio permitido, aprobación del administrador, siempre docente) y panel del administrador; campo `usuario.aprobado` (migración 0004) | `9787a06` |
+| RNF-10 | Ajuste pedido por Victo: el nombre de cada estado una sola vez (encabezado) y casillas solo con la marca ✓ | `9d34556` |
+
+Pruebas nuevas: `test_casillas` (34), `test_resumen` (19), `test_registro` (54) y `test_panel_admin` (30). Se actualizaron `test_matriz_de_acceso` (ahora con una matriz propia para las rutas del administrador), `test_auth`, `test_usuarios`, `test_estilo`, `test_pase_de_lista`, `test_correccion` y `test_periodo_congelado`, porque cambiaron el formulario del pase de lista (RF-18) y la redirección del administrador (RF-20); cada cambio mantiene la comprobación original. Se rompió a propósito el código en 15 puntos (reglas de las casillas, seguridad del registro y del panel, medidas del diseño) y las pruebas fallaron en todos.
+
+Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horizontal a 320, 375, 640, 768 y 1180 px; casillas de 44 px de alto o más; fila de 65 px a 375 px y de 57 px a 768 y 1180 px (antes, unos 128 y 148 px). Detalle en [informe_pruebas.md](informe_pruebas.md), sección 8.
+
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 507 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
+- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 642 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
   - [ ] Definir el hosting y desplegar el sistema.
   - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
   - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
@@ -204,33 +220,38 @@ Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02
 | RF-15 · Exportar a PDF y Excel | Media | Hecho | `test_exportar` (34) | 14/10 |
 | RF-16 · Alta de usuarios con rol | Media | Hecho | `test_usuarios` (38) | 15/10 |
 | RF-17 · Periodos escolares | Media | Hecho | `test_periodos` (24), `test_periodo_congelado` (18), `test_grupo_periodo` (13), `test_periodos_admin` (28), `test_flujos` | 3/11 |
+| RF-18 · Casillas del pase de lista con reglas de bloqueo | Media | Hecho | `test_casillas` (34), `test_pase_de_lista`, `test_correccion` | 4/11 |
+| RF-19 · Registro de docentes con aprobación | Media | Hecho | `test_registro` (54), `test_panel_admin` (30) | 4/11 |
+| RF-20 · Panel del administrador | Media | Hecho | `test_panel_admin`, `test_matriz_de_acceso` (12) | 4/11 |
 
 ## 5. Requisitos no funcionales
 
 | Requisito | Estado | Evidencia |
 |---|---|---|
-| RNF-01 · Pase de 40 alumnos en 3 min | Diseñado y medido el costo de interacción | 5 excepciones = 5 toques y 1 envío; falta probarlo con docentes |
-| RNF-02 · Responsiva | Verificado a mano | Sin desbordes a 375, 768 y 1280 px; no hay prueba automática |
+| RNF-01 · Pase de 40 alumnos en 3 min | Diseñado y medido el costo de interacción | Con las casillas del RF-18, 5 excepciones = 9 toques y 1 envío; falta probarlo con docentes |
+| RNF-02 · Responsiva | Verificado a mano | Sin desbordes a 375, 768 y 1280 px (y el pase de lista, también a 320, 640 y 1180 px, medido en el navegador); no hay prueba automática de desbordamiento |
 | RNF-03 · Contraseñas cifradas | Hecho | `pbkdf2_sha256`, comprobado en `test_usuarios` |
-| RNF-04 · Cada docente ve solo sus grupos | Hecho | `test_aislamiento` (9), `test_matriz_de_acceso` (7) |
+| RNF-04 · Cada docente ve solo sus grupos | Hecho | `test_aislamiento` (9), `test_matriz_de_acceso` (12) |
 | RNF-05 · Integridad referencial | Hecho | Restricciones del Apéndice A, `test_integridad` |
 | RNF-06 · Correcciones con autor y fecha | Hecho | Disparador de la base de datos, `test_integridad`, `test_correccion` |
 | RNF-07 · Consultas en menos de 3 s | Medido | Peor caso 570 ms con 50 alumnos; `test_rendimiento` (7) |
 | RNF-08 · Respaldo diario | **Pendiente** | Fase J |
 | RNF-09 · Código versionado y documentación | Parcial | Código en GitHub y README listos; faltan los manuales (fase I) |
+| RNF-10 · Pase de lista compacto | Hecho | Fila de 57 a 65 px (antes, 128 a 148 px), casillas de 44 px o más y nombre de cada estado una sola vez; `test_casillas`, `test_estilo` |
+| RNF-11 · Paleta de colores final | Hecho | «Pino y ámbar», confirmada por Victo el 9/11; contraste comprobado en `test_estilo` |
 
 ## 6. Métricas del código
 
 | Medida | Valor |
 |---|---|
-| Commits | 87 (39 el 13/10, 10 el 14/10, 24 el 15/10, 5 el 19/10 y 9 el 3/11) |
-| Archivos versionados | 111 |
-| Código de la aplicación (Python, sin pruebas ni migraciones) | 3 568 líneas |
-| Pruebas (Python) | 7 279 líneas, 507 pruebas en 26 archivos |
-| Plantillas HTML | 29 archivos, 1 433 líneas |
-| Hojas de estilo | 2 archivos: `estilo.css` (521 líneas) y `admin.css` (613 líneas) |
-| Modelos / migraciones / rutas | 8 / 3 / 25 |
-| Servicios de negocio | 13 módulos en `asistencia/services/` |
+| Commits | 94 (39 el 13/10, 10 el 14/10, 24 el 15/10, 5 el 19/10, 10 el 3/11, 4 el 4/11 y 2 el 9/11, sin contar los de este seguimiento) |
+| Archivos versionados | 126 |
+| Código de la aplicación (Python, sin pruebas ni migraciones) | 4 339 líneas |
+| Pruebas (Python) | 8 920 líneas, 642 pruebas en 30 archivos |
+| Plantillas HTML | 33 archivos, 1 824 líneas |
+| Hojas de estilo y JavaScript | `estilo.css` (1 093 líneas), `admin.css` (635 líneas) y `pase_de_lista.js` (67 líneas) |
+| Modelos / migraciones / rutas | 8 / 4 / 29 (más las del admin de Django) |
+| Servicios de negocio | 15 módulos en `asistencia/services/` |
 
 Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 
@@ -250,6 +271,11 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 | Diseño visual (RNF-02) | 19/10 | 5 | `e323a33` a `9de20e9` |
 | Cifras y documentación del diseño visual | 3/11 | 4 | `b598ee9` a `aaf5d5b` |
 | RF-17 · Periodos y tema del admin | 3/11 | 5 | `f220dc9` a `8e2b97e` |
+| RF-17 · Documentación | 3/11 | 1 | `a1faf30` |
+| Rediseño «pino y ámbar» (RNF-02, RNF-11) | 4/11 | 3 | `1122ba8` a `249a6fd` |
+| RF-18 y RNF-10 · Casillas y fila compacta | 4/11 | 1 | `13e3315` |
+| RF-19 y RF-20 · Registro con aprobación y panel del administrador | 4/11 | 1 | `9787a06` |
+| RNF-10 · Nombre del estado una sola vez | 9/11 | 1 | `9d34556` |
 
 ## 8. Decisiones abiertas, hallazgos y riesgos
 
@@ -271,7 +297,8 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 - **Ruta crítica en J.** Es la única actividad pendiente de la ruta crítica y depende de una decisión que sigue abierta (el hosting).
 - **RNF-01 sin evidencia con personas.** El diseño no impone esperas, pero solo se puede confirmar con docentes.
 - **Repositorio público.** La contraseña de demostración de `seed_demo` está escrita en el código y cada commit lleva el correo del autor. Conviene cambiar esa contraseña antes de desplegar, o hacer el repositorio privado.
-- **Cambios después de la fase H.** Cada cambio exige repetir la suite (de siete a nueve minutos) y conviene actualizar el informe de pruebas.
+- **Registro público sin límite de intentos ni CAPTCHA (RF-19).** Cualquiera puede crear cuentas pendientes; el control es el filtro de dominio y la aprobación del administrador. Si se llega a abusar, hay que limitar las peticiones a `/registro/` en el proxy (ver [DESPLIEGUE.md](DESPLIEGUE.md)).
+- **Cambios después de la fase H.** Cada cambio exige repetir la suite (de nueve a quince minutos) y conviene actualizar el informe de pruebas.
 
 ## 9. Qué se anotó en Trello
 
@@ -281,3 +308,5 @@ El 15/10/2026 se actualizó el tablero con este avance:
 - Las tarjetas D, E, F, G y H pasaron a «Hecho» y se marcaron completas; la I pasó a «En curso».
 - Dos tarjetas nuevas en «Hecho» para requisitos que el cronograma no lista por separado: RF-12 (justificantes) y RF-16 (alta de usuarios).
 - Las tarjetas A, B y C no se tocaron.
+
+El 9/11/2026 se cerraron en «Hecho», con su descripción final y la evidencia (commits, pruebas y medidas), las tarjetas RF-18, RNF-10, RF-19, RF-20 y RNF-11, que se habían cargado el 4/11 a partir de las observaciones de los evaluadores.
