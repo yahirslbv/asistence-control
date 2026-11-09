@@ -38,7 +38,13 @@
     <div class="collapse navbar-collapse" id="menu">
       <ul class="navbar-nav me-auto">
         {% if user.rol == user.Rol.ADMINISTRADOR %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-escudo"/></svg>Administración</a></li>
+          <li class="nav-item">
+            <a class="nav-link{% if ruta|slice:':7' == '/panel/' %} active{% endif %}"
+               {% if ruta|slice:':7' == '/panel/' %}aria-current="page"{% endif %}
+               href="{% url 'panel_admin' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-escudo"/></svg>Panel</a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin:asistencia_usuario_changelist' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-alumno"/></svg>Usuarios</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin:asistencia_periodo_changelist' %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-calendario"/></svg>Periodos</a></li>
         {% else %}
           {# Sección activa: Reportes cuelga de /grupos/<id>/reporte/, y el pase de lista de /sesiones/<id>/asistencia/. #}
           <li class="nav-item">

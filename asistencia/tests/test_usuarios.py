@@ -137,7 +137,7 @@ class AltaDeUsuariosTests(BaseDelAdmin):
 
         self.assertTrue(self.client.login(username='jefa@asistencia.test', password=CLAVE_NUEVA))
         self.assertRedirects(
-            self.client.get(reverse('inicio')), reverse('admin:index'), fetch_redirect_response=False)
+            self.client.get(reverse('inicio')), reverse('panel_admin'), fetch_redirect_response=False)
 
     def test_los_campos_de_acceso_no_se_pueden_forzar_desde_el_formulario(self):
         """is_staff, is_superuser, grupos y permisos los decide el rol, no el envío."""

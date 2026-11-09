@@ -67,12 +67,12 @@ class AutenticacionTests(TestCase):
         self.assertContains(respuesta, 'Pase de lista')
         self.assertNotContains(respuesta, 'Usuarios')
 
-    def test_administrador_es_redirigido_al_admin(self):
+    def test_administrador_es_redirigido_a_su_panel(self):
         self.client.login(username='admin@asistencia.test', password=PASSWORD)
 
         respuesta = self.client.get(reverse('inicio'))
 
-        self.assertRedirects(respuesta, reverse('admin:index'), fetch_redirect_response=False)
+        self.assertRedirects(respuesta, reverse('panel_admin'), fetch_redirect_response=False)
 
     def test_inicio_exige_sesion(self):
         respuesta = self.client.get(reverse('inicio'))

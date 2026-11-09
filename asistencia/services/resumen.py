@@ -1,16 +1,18 @@
-"""Resumen del día para el inicio del docente.
+"""Resúmenes para las pantallas de inicio: el del docente y el panel del administrador (RF-20).
 
-Solo junta datos que ya existen (grupos, clases de hoy y pendientes de RF-10):
-no calcula nada nuevo de asistencia.
+Solo juntan datos que ya existen (grupos, clases de hoy, pendientes de RF-10, cuentas y
+periodos): no calculan nada nuevo de asistencia. El del administrador cuenta usuarios y
+periodos, no abre los grupos de los docentes: el administrador solo gestiona usuarios.
 """
 
 from dataclasses import dataclass, field
 
 from django.utils import timezone
 
-from ..models import Grupo, Inscripcion, Sesion
+from ..models import Grupo, Inscripcion, Periodo, Sesion, Usuario
 from .pendientes import sesiones_pendientes
 from .periodos import de_periodo_cerrado
+from .registro import cuentas_pendientes
 
 
 @dataclass
@@ -60,4 +62,35 @@ def resumen_del_docente(docente, ahora=None):
     return ResumenDelDocente(
         hoy=hoy, saludo=saludo_de(ahora.hour), sesiones_de_hoy=de_hoy,
         grupos=grupos.count(), alumnos=alumnos, pendientes=len(pendientes),
+    )
+
+
+@dataclass
+class ResumenDelAdministrador:
+    hoy: object                                   # fecha de hoy en Tijuana
+    saludo: str
+    pendientes: int = 0                           # cuentas que esperan aprobación (RF-19)
+    docentes: int = 0                             # docentes activos y aprobados
+    administradores: int = 0                      # administradores activos
+    desactivados: int = 0                         # cuentas dadas de baja (is_active=False)
+    periodo: object = None                        # el periodo activo, o None si no hay
+    grupos_del_periodo: int = 0                   # cuántos grupos tiene el periodo activo
+    periodos: int = 0                             # periodos registrados
+
+
+def resumen_del_administrador(ahora=None):
+    """Cifras del panel del administrador (RF-20). `ahora` solo sirve para fijar la hora en las pruebas."""
+    ahora = timezone.localtime(ahora)
+    cuentas = Usuario.objects.filter(is_active=True, aprobado=True)
+    periodo = Periodo.objects.filter(activo=True).first()
+    return ResumenDelAdministrador(
+        hoy=ahora.date(),
+        saludo=saludo_de(ahora.hour),
+        pendientes=cuentas_pendientes().count(),
+        docentes=cuentas.filter(rol=Usuario.Rol.DOCENTE).count(),
+        administradores=cuentas.filter(rol=Usuario.Rol.ADMINISTRADOR).count(),
+        desactivados=Usuario.objects.filter(is_active=False).count(),
+        periodo=periodo,
+        grupos_del_periodo=Grupo.objects.filter(periodo=periodo.clave).count() if periodo else 0,
+        periodos=Periodo.objects.count(),
     )

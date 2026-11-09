@@ -44,7 +44,9 @@ control_asistencia/
 │   ├── models.py            # Apéndice A (7 modelos)
 │   ├── migrations/
 │   │   ├── 0001_initial.py
-│   │   └── 0002_trigger_bitacora.py   # Apéndice B
+│   │   ├── 0002_trigger_bitacora.py   # Apéndice B
+│   │   ├── 0003_periodo.py            # RF-17
+│   │   └── 0004_usuario_aprobado.py   # RF-19
 │   ├── backends.py          # EmailBackend (login con correo)
 │   ├── permissions.py       # mixins: solo grupos del docente, solo administrador
 │   ├── forms.py
@@ -53,9 +55,10 @@ control_asistencia/
 │   │   ├── importar_alumnos.py   # CSV (RF-04)
 │   │   ├── generar_sesiones.py   # horario + periodo (RF-06)
 │   │   ├── periodos.py           # activar, desactivar y congelar periodos (RF-17)
-│   │   ├── resumen.py            # resumen del día para el inicio del docente
+│   │   ├── registro.py           # registro de docentes y aprobación de cuentas (RF-19)
+│   │   ├── resumen.py            # resúmenes de inicio: docente y panel del administrador (RF-20)
 │   │   └── reportes.py           # porcentajes, PDF, Excel (RF-13/14/15)
-│   ├── views/               # auth.py, usuarios.py, grupos.py, sesiones.py, asistencia.py, reportes.py
+│   ├── views/               # auth.py (acceso y registro), panel.py (administrador), grupos.py, sesiones.py, asistencia.py, reportes.py
 │   ├── templates/asistencia/
 │   ├── templatetags/diseno.py   # filtro `iniciales` para los avatares
 │   ├── static/              # asistencia/estilo.css (aplicación), admin.css (tema del admin) y pase_de_lista.js (reglas de las casillas, RF-18)
@@ -105,6 +108,8 @@ control_asistencia/
 | RF-16 | Autenticación | Media | El administrador da de alta usuarios y les asigna un rol |
 | RF-17 | Periodos | Media | El administrador crea, edita, activa y desactiva periodos escolares. Solo uno está activo; un periodo inactivo deja sus grupos en solo lectura. Agregado el 3/11/2026 a petición de Victo, fuera del documento de requisitos original |
 | RF-18 | Asistencia | Media | El pase de lista usa casillas (presente, retardo, ausente, justificado) con reglas de bloqueo: presente o retardo bloquean ausente y justificado; ausente bloquea presente y retardo; justificado solo con ausente. Cada registro sigue guardando un solo estado. Agregado el 4/11/2026 por observación de los evaluadores |
+| RF-19 | Autenticación | Media | Quien no tiene cuenta se registra desde la pantalla de acceso («Si no tienes cuenta, regístrate aquí»). Condiciones de Victo: correo de un dominio permitido (`uabc.edu.mx`, configurable), cuenta pendiente hasta que un administrador la apruebe, y rol docente siempre. Cambia la decisión de que solo el administrador da de alta usuarios. Agregado el 4/11/2026 por observación de los evaluadores |
+| RF-20 | Autenticación | Media | El administrador tiene un panel propio, con el diseño del inicio del docente: cuentas por aprobar (aprobar y rechazar), periodo activo, cifras y accesos a Usuarios y Periodos (que siguen siendo del admin de Django). Agregado el 4/11/2026 por observación de los evaluadores |
 
 ## 7. Requisitos no funcionales y cómo cumplirlos
 
@@ -123,7 +128,7 @@ control_asistencia/
 
 ## 8. Modelo de datos
 
-Ocho tablas: las siete del diseño original y `periodo` (RF-17, migración 0003). La separación entre `alumno` e `inscripcion` permite que un alumno esté en varios grupos sin duplicar sus datos. `grupo.periodo` sigue siendo texto: guarda la clave del periodo, sin clave foránea.
+Ocho tablas: las siete del diseño original y `periodo` (RF-17, migración 0003). La separación entre `alumno` e `inscripcion` permite que un alumno esté en varios grupos sin duplicar sus datos. `grupo.periodo` sigue siendo texto: guarda la clave del periodo, sin clave foránea. `usuario` ganó la columna `aprobado` (RF-19, migración 0004): una cuenta sin aprobar no puede iniciar sesión.
 
 ```
 Usuario 1──N Grupo (docente)            Grupo 1──N Sesion
@@ -215,6 +220,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] RF-16 · Alta de usuarios con rol, desde el admin de Django (cerrado después de la fase G)
 - [x] RF-17 · Periodos escolares: el administrador los crea, edita, activa y desactiva; uno inactivo congela sus grupos (3/11/2026)
 - [x] RF-18 y RNF-10 · Pase de lista con casillas y fila compacta (4/11/2026)
+- [x] RF-19 y RF-20 · Registro de docentes con aprobación y panel del administrador (4/11/2026)
 - [ ] I · Manuales
 - [x] H · Integración y pruebas (informe en `docs/informe_pruebas.md`; RNF-01 sin cronometrar con personas)
 - [ ] J · Despliegue y entrega
@@ -235,11 +241,14 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Almacenamiento y descarga del justificante.** El archivo se guarda como `<uuid4 hex>.<ext>`; el nombre original se descarta. Solo se descarga por la vista (adjunto, `justificante_<matrícula>_<AAAA-MM-DD>.<ext>`, tipo según la firma, `Cache-Control: private, no-store`) y solo para el docente dueño del grupo; no hay URL pública de `media/`. Adjuntar o quitar solo toca el campo `justificante`: no cambia el estado, `registrado_por` ni la bitácora.
 - **Justificante y corrección.** Un registro con justificante solo admite el estado `justificado`: para cambiarlo hay que quitar primero el justificante (la pantalla lo avisa), así no se choca con el `CHECK` de la base de datos.
 - **Justificante y eliminación de grupo.** La confirmación de eliminar un grupo cuenta los justificantes adjuntos y avisa que los archivos también se borran; se borran una vez confirmada la eliminación.
-- **Alta de usuarios (RF-16).** Solo en el admin de Django, donde el administrador ve «Usuarios» y, desde el RF-17, «Periodos» y nada más. El alta pide nombre, apellido, correo, rol, usuario y contraseña.
+- **Alta de usuarios (RF-16).** El administrador da de alta a cualquier usuario, con su rol, en el admin de Django, donde ve «Usuarios» y, desde el RF-17, «Periodos» y nada más (desde el RF-20 llega ahí por su panel). El alta pide nombre, apellido, correo, rol, usuario y contraseña. Desde el RF-19 los docentes también pueden registrarse solos, pero solo como docentes y con aprobación: ver más abajo.
 - **El rol manda sobre el acceso al admin.** Al guardar un usuario, `is_staff` y los permisos se ajustan al rol (`services/usuarios.py`): administrador con `is_staff` y solo ver/agregar/modificar usuario; docente sin `is_staff` y sin esos permisos. El admin no deja editar `is_staff`, superusuario, grupos ni permisos sueltos, para que nadie se dé más acceso. Quien gestiona usuarios no puede modificar a un superusuario. Un docente no entra al admin y un administrador no ve los grupos (403).
 - **Bajas de usuarios.** No hay borrado de usuarios en el admin (ni la acción masiva): se desactivan con «Activo» (regla 9.5). No se puede desactivar ni quitar el rol al último administrador activo, ni desactivarse a uno mismo; la comprobación bloquea las filas de los administradores activos para que dos cambios simultáneos no la burlen.
 - **`createsuperuser` y `seed_demo`.** `createsuperuser` sigue creando usuarios con rol docente; para tener un administrador de la aplicación se le cambia el rol desde el admin (README). `seed_demo` prepara el administrador de demo con las mismas reglas.
 
+- **Registro de docentes (RF-19, 4/11/2026).** Cambia la decisión de que solo el administrador da de alta usuarios. Condiciones fijadas por Victo: (1) **dominio permitido**: el correo debe ser de un dominio de `REGISTRO_DOMINIOS` (variable de entorno, separada por comas; por defecto `uabc.edu.mx`); el dominio es exacto (no valen subdominios ni `uabc.edu.mx.otro.com`) y, con la variable vacía, el registro se cierra: la ruta responde 404 y el enlace no aparece; (2) **aprobación del administrador**: la cuenta nace con `aprobado=False` y no puede iniciar sesión, ni en la aplicación ni en el admin, hasta que un administrador la apruebe desde su panel. `Usuario` ganó el campo `aprobado` (migración 0004, autorizada por Victo; valor por defecto verdadero: las cuentas que ya existían y las que da de alta el administrador nacen aprobadas; en el admin se ve y se filtra, pero no se edita); (3) **rol docente**: el formulario no pregunta el rol y no se puede forzar ni el rol, ni `is_staff`, ni la aprobación. El nombre de usuario es el correo y la contraseña pasa por `AUTH_PASSWORD_VALIDATORS`. Una cuenta pendiente que intenta entrar con su contraseña correcta ve «Tu cuenta está pendiente de aprobación»; con cualquier otra contraseña o correo, el mensaje genérico, para no poder sondear qué correos existen. **Rechazar** una cuenta la desactiva (regla 9.5: no se borra) y su correo sigue ocupado; reactivarla con «Activo» en el admin la devuelve a pendiente. Aprobar y rechazar quedan en el registro de acciones del admin con quién lo hizo. **No hay confirmación del correo**: la aplicación no envía mensajes y agregarlo sería una dependencia nueva; el control es la aprobación del administrador. **No hay límite de intentos ni CAPTCHA** (no estaban en el requisito): ver el riesgo en `docs/DESPLIEGUE.md`. Lógica en `services/registro.py`.
+- **Panel del administrador (RF-20, 4/11/2026).** Al iniciar sesión, el administrador llega a `/panel/` (antes iba directo al admin de Django), con el diseño del inicio del docente: cuentas por aprobar (Aprobar, y Rechazar con confirmación), cifras (cuentas por aprobar, docentes y administradores activos, periodo activo), el periodo activo con sus fechas y su número de grupos, y accesos a Usuarios, Agregar usuario y Periodos. **Las pantallas de Usuarios y Periodos siguen siendo las del admin de Django** (RF-16 y RF-17 no se rehicieron): el panel las enlaza y la barra superior del administrador trae Panel, Usuarios y Periodos. Un docente recibe 403 y quien no inició sesión va al acceso; el acceso es por el rol administrador (un superusuario con rol docente no entra hasta que se le cambie el rol). El panel no muestra los grupos ni los alumnos de los docentes: solo cuenta los grupos del periodo activo, igual que la lista de Periodos. Aprobar es solo por POST, y si otra persona ya atendió la cuenta el panel avisa en lugar de fallar. `test_matriz_de_acceso.py` tiene una matriz propia para las rutas del administrador y obliga a clasificar cualquier ruta nueva bajo `/panel/`.
+- **Paleta vigente (rediseño del 4/11/2026).** Variables de `estilo.css` (el admin las reutiliza, con su propio tema claro y oscuro): pino `#0b2e26` (barra y fondos de marca) y `#14523f` (botones y enlaces), ámbar `#f2b33d` (único acento: relleno, nunca texto sobre blanco), lienzo `#f1f4f1`, superficie `#ffffff`, tinta `#16201c` y `#52605a`; estados presente `#1b6b43`, retardo `#8a5a00`, ausente `#a12f2f` y justificado `#1a6478`. La aplicación es solo clara; el admin tiene claro y oscuro. **Victo confirmó esta paleta como la definitiva el 9/11/2026** (tarjeta RNF-11 del tablero, cerrada). Si algún día cambia, solo hay que editar las variables de `estilo.css`; `test_estilo.py` vuelve a comprobar el contraste.
 - **Pruebas de integración (fase H).** `test_flujos.py` encadena las pantallas por sus URL y formularios reales, con reloj fijo y cifras calculadas a mano. `test_matriz_de_acceso.py` toma las rutas de `urls.py`: una ruta nueva que no se clasifique rompe la primera prueba, a propósito, y obliga a decidir quién puede entrar. `test_rendimiento.py` protege contra un N+1 en las pantallas que no tenían prueba de conteo.
 - **RNF-07 medido.** Con 6 grupos de 50 alumnos y 48 sesiones (14 400 registros) en MySQL, el peor caso fue 570 ms (importar un CSV de 50 alumnos) contra el límite de 3 s; las demás vistas quedaron por debajo de 280 ms en su peor repetición. Método y tabla completos en `docs/informe_pruebas.md`.
 - **RNF-01 no se cronometra aquí.** Se mide el costo de interacción, no un tiempo humano. Con las casillas del RF-18, un retardo cuesta 1 toque, una falta 2 (quitar «Presente» y marcar «Ausente») y una falta justificada 3; guardar es un solo envío y su botón siempre está visible. Marcar 5 excepciones (2 ausentes, 2 retardos, 1 justificado) cuesta 9 toques más el envío. Verificarlo requiere probar con docentes.
@@ -588,6 +597,7 @@ DB_PASSWORD=
 DB_HOST=127.0.0.1
 DB_PORT=3306
 ASISTENCIA_MINIMA=80
+REGISTRO_DOMINIOS=uabc.edu.mx
 ```
 
 Claves de `config/settings.py` que no pueden faltar:
@@ -600,5 +610,6 @@ LOGIN_URL = 'login'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 ASISTENCIA_MINIMA = int(os.environ.get('ASISTENCIA_MINIMA', 80))
+REGISTRO_DOMINIOS = [d.strip().lower() for d in os.environ.get('REGISTRO_DOMINIOS', 'uabc.edu.mx').split(',') if d.strip()]
 # DATABASES: engine 'django.db.backends.mysql', datos tomados de las variables DB_*.
 ```

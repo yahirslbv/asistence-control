@@ -22,6 +22,13 @@ class Usuario(AbstractUser):
 
     email = models.EmailField('correo institucional', unique=True)
     rol = models.CharField(max_length=20, choices=Rol.choices, default=Rol.DOCENTE)
+    # RF-19: quien se registra solo nace sin aprobar y no puede iniciar sesión hasta que un
+    # administrador lo apruebe. Las cuentas que ya existen y las que da de alta el
+    # administrador nacen aprobadas (por eso el valor por defecto es True).
+    aprobado = models.BooleanField(
+        'cuenta aprobada', default=True,
+        help_text='Las cuentas que se registran solas esperan aquí la aprobación de un administrador.',
+    )
 
     class Meta:
         db_table = 'usuario'

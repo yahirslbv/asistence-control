@@ -1,0 +1,67 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Crear cuenta · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="entrada">
+  <section class="entrada-marca" aria-label="Sobre el registro">
+    <div>
+      <svg class="marca-grande" width="48" height="48" viewBox="0 0 24 24" aria-hidden="true">
+        <rect width="24" height="24" rx="6"/>
+        <path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="titulo-marca">Crea tu cuenta de docente</p>
+      <p>Un administrador revisa tu registro y lo aprueba antes de que puedas entrar.</p>
+    </div>
+    <ul>
+      <li><svg class="ico" aria-hidden="true"><use href="#i-usuario-mas"/></svg>Solo con correo {% for dominio in dominios %}@{{ dominio }}{% if not forloop.last %} o {% endif %}{% endfor %}.</li>
+      <li><svg class="ico" aria-hidden="true"><use href="#i-escudo"/></svg>Verás y modificarás solo tus propios grupos.</li>
+      <li><svg class="ico" aria-hidden="true"><use href="#i-reloj"/></svg>Si intentas entrar antes de la aprobación, te diremos que sigue pendiente.</li>
+    </ul>
+  </section>
+
+  <section class="entrada-form">
+    <h1 class="h2">Regístrate</h1>
+    <p class="lema">Usa tu correo institucional ({% for dominio in dominios %}@{{ dominio }}{% if not forloop.last %} o {% endif %}{% endfor %}).</p>
+
+    <form method="post" novalidate id="formulario-registro">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6">
+          <label class="form-label" for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+          {{ form.nombre }}
+          {% for error in form.nombre.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-sm-6">
+          <label class="form-label" for="{{ form.apellido.id_for_label }}">{{ form.apellido.label }}</label>
+          {{ form.apellido }}
+          {% for error in form.apellido.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+      </div>
+
+      {% include 'asistencia/_campo.html' with campo=form.correo %}
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.contrasena.id_for_label }}">{{ form.contrasena.label }}</label>
+        {{ form.contrasena }}
+        <ul class="form-text ps-3 mb-0">
+          {% for ayuda in ayuda_contrasena %}<li>{{ ayuda }}</li>{% endfor %}
+        </ul>
+        {% for error in form.contrasena.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+      </div>
+      {% include 'asistencia/_campo.html' with campo=form.confirmacion %}
+
+      <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Crear cuenta<svg class="ico" aria-hidden="true"><use href="#i-flecha"/></svg></button>
+    </form>
+
+    <p class="pie-form">¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+  </section>
+</div>
+{% endblock %}

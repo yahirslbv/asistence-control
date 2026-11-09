@@ -1,8 +1,9 @@
-"""Mixins de acceso para las vistas del docente (RNF-04).
+"""Mixins de acceso (RNF-04).
 
 Cada docente ve y modifica solo sus grupos. Un grupo o una sesión ajena
 responde 404, no 403, para no revelar que existe. Un administrador no tiene
-grupos: las pantallas del docente le responden 403.
+grupos: las pantallas del docente le responden 403. Y al revés: las pantallas
+del administrador (el panel de RF-20) le responden 403 a un docente.
 """
 
 from django.contrib import messages
@@ -12,6 +13,15 @@ from django.shortcuts import get_object_or_404, redirect
 
 from .models import Grupo, Sesion, Usuario
 from .services.periodos import PeriodoCerrado, asegurar_periodo_abierto
+
+
+class SoloAdministradorMixin(LoginRequiredMixin):
+    """Exige sesión iniciada y rol administrador (RF-20). Un docente recibe 403."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.rol != Usuario.Rol.ADMINISTRADOR:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
 
 class SoloDocenteMixin(LoginRequiredMixin):

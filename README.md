@@ -75,6 +75,7 @@ Si `mysqlclient` no se instala en tu equipo, usa `PyMySQL`: instálalo y agrega
 | `DJANGO_DEBUG` | `1` en desarrollo, `0` en producción |
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | Conexión a MySQL. Con Docker, `DB_PASSWORD` es también la contraseña de `root` del contenedor |
 | `ASISTENCIA_MINIMA` | Porcentaje mínimo de asistencia (por defecto 80) |
+| `REGISTRO_DOMINIOS` | Dominios de correo que pueden registrarse solos desde la pantalla de acceso (RF-19), separados por comas. Por defecto `uabc.edu.mx`. Vacía, cierra el registro |
 
 ## Usuarios
 
@@ -108,6 +109,35 @@ correo, rol, usuario y contraseña. Un administrador ve esa sección y la de **P
 `createsuperuser` crea el usuario con rol **docente** (y como superusuario sí entra
 al admin). Para que sea también administrador de la aplicación, entra al admin con
 ese usuario, abre su ficha y cambia el rol a Administrador.
+
+### Panel del administrador (RF-20)
+
+Al iniciar sesión, el administrador llega a su **Panel** (<http://127.0.0.1:8000/panel/>).
+Ahí ve cuántas cuentas esperan aprobación, cuántos docentes y administradores activos
+hay, el periodo activo, y tiene accesos directos a **Usuarios**, **Agregar usuario** y
+**Periodos** (las pantallas del admin de Django). El panel no muestra los grupos de los
+docentes. Un docente que abra esa dirección recibe un 403.
+
+### Registro de docentes y aprobación (RF-19)
+
+En la pantalla de acceso, «Si no tienes cuenta, regístrate aquí» lleva al registro
+(<http://127.0.0.1:8000/registro/>): nombre, apellido, correo y contraseña. Condiciones:
+
+- **Dominio permitido.** El correo debe ser de un dominio de `REGISTRO_DOMINIOS` (por
+  defecto `uabc.edu.mx`; el dominio es exacto, no valen subdominios). Con la variable
+  vacía el registro se cierra y el enlace desaparece.
+- **Aprobación del administrador.** La cuenta queda pendiente y no puede iniciar sesión.
+  Quien lo intenta con su contraseña correcta ve «Tu cuenta está pendiente de
+  aprobación». El administrador la **aprueba o la rechaza** desde su Panel.
+- **Siempre docente.** El formulario no pregunta el rol y no se puede forzar: un
+  administrador solo lo da de alta otro administrador (RF-16).
+- **Rechazar** desactiva la cuenta (no se borra). Si fue un error, se reactiva con
+  «Activo» en **Usuarios** y vuelve a aparecer en el Panel para aprobarla.
+- **Sin confirmación por correo:** la aplicación no envía correos; la aprobación del
+  administrador es el control que verifica a la persona.
+
+Para probarlo con los datos de demostración: regístrate con un correo `@uabc.edu.mx`,
+entra como `admin@asistencia.test` y aprueba la cuenta desde el Panel.
 
 ### Periodos escolares (RF-17)
 
@@ -144,7 +174,7 @@ python manage.py test
 ```
 
 El usuario de MySQL necesita permiso para crear la base `test_control_asistencia`
-(`root` en el contenedor ya lo tiene). La suite completa (507 pruebas) tarda unos siete minutos.
+(`root` en el contenedor ya lo tiene). La suite completa (642 pruebas) tarda entre nueve y quince minutos.
 
 Los resultados de las pruebas de la fase H (flujos de extremo a extremo, matriz de
 acceso, mediciones del RNF-07, revisión responsiva y hallazgos) están en
@@ -165,18 +195,21 @@ Se usan estos valores por defecto hasta que se confirmen:
 config/        configuración de Django (settings, urls, wsgi)
 asistencia/    única app del proyecto
   models.py        ocho modelos y sus restricciones
-  migrations/      0001 (esquema), 0002 (disparador de la bitácora) y 0003 (periodos)
-  backends.py      inicio de sesión con correo
-  permissions.py   mixins: cada docente ve solo sus grupos (404 ante uno ajeno)
+  migrations/      0001 (esquema), 0002 (disparador de la bitácora), 0003 (periodos) y 0004 (aprobación de cuentas)
+  backends.py      inicio de sesión con correo (una cuenta sin aprobar no entra)
+  permissions.py   mixins: cada docente ve solo sus grupos (404 ante uno ajeno); el panel es solo del administrador
   admin.py         usuarios con rol (RF-16) y periodos (RF-17)
-  forms.py         formularios
+  forms.py         formularios (acceso, registro, grupos, sesiones...)
   services/        lógica de negocio: importar CSV, inscripciones, sesiones,
-                   pase de lista y correcciones, justificantes, sesiones
-                   pendientes, periodos, usuarios y roles, reportes y
+                   pase de lista (con las reglas de las casillas) y correcciones,
+                   justificantes, sesiones pendientes, periodos, usuarios y roles,
+                   registro y aprobación de cuentas, resúmenes de inicio, reportes y
                    exportación a PDF y Excel
-  views/           vistas por módulo
+  views/           vistas por módulo (autenticación y registro, panel del administrador, grupos...)
   templates/       plantillas con Bootstrap 5
-  static/          estilo.css (aplicación) y admin.css (tema del admin), con la misma paleta
+  templatetags/    filtro `iniciales` para los avatares
+  static/          estilo.css (aplicación), admin.css (tema del admin, con la misma paleta)
+                   y pase_de_lista.js (reglas de las casillas del pase de lista)
   management/      comando seed_demo
   tests/           pruebas
 docs/          informe de pruebas (fase H) y seguimiento semanal contra el cronograma

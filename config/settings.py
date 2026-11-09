@@ -125,3 +125,11 @@ MESSAGE_TAGS = {mensajes.ERROR: 'danger'}
 
 # Porcentaje mínimo de asistencia (supuesto sin confirmar; ver README).
 ASISTENCIA_MINIMA = int(os.environ.get('ASISTENCIA_MINIMA', 80))
+
+# Dominios de correo que pueden registrarse solos (RF-19), separados por comas. Quien se
+# registra espera la aprobación de un administrador; el dominio solo filtra de entrada.
+REGISTRO_DOMINIOS = [
+    dominio.strip().lower()
+    for dominio in os.environ.get('REGISTRO_DOMINIOS', 'uabc.edu.mx').split(',')
+    if dominio.strip()
+]

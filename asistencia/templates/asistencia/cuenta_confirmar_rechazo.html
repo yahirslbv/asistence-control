@@ -1,0 +1,26 @@
+{% extends 'asistencia/base.html' %}
+
+{% block titulo %}Rechazar cuenta · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Rechazar la cuenta de {{ cuenta.get_full_name|default:cuenta.email }}</h1>
+
+    <div class="alert alert-warning" role="alert">
+      <p class="mb-2"><strong>{{ cuenta.email }}</strong> se registró el {{ cuenta.date_joined|date:"d/m/Y" }} y todavía no puede iniciar sesión.</p>
+      <p class="mb-0">
+        Al rechazarla, la cuenta queda desactivada y no podrá entrar. No se borra: si fue un
+        error, la puedes reactivar con «Activo» en <strong>Usuarios</strong> y volverá a
+        aparecer aquí para aprobarla.
+      </p>
+    </div>
+
+    <form method="post" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Sí, rechazar la cuenta</button>
+      <a class="btn btn-outline-secondary" href="{% url 'panel_admin' %}">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

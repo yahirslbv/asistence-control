@@ -1,8 +1,9 @@
 from django import forms
+from django.contrib.auth import password_validation
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.exceptions import NON_FIELD_ERRORS
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 
-from .models import Grupo, Sesion
+from .models import Grupo, Sesion, Usuario
 from .services.generar_sesiones import (
     DIAS_SEMANA, MAX_DIAS_PERIODO, fechas_de_clase,
 )
@@ -11,6 +12,10 @@ from .services.importar_alumnos import (
 )
 from .services.justificantes import ArchivoNoValido, validar_archivo
 from .services.periodos import periodo_activo
+from .services.registro import (
+    CorreoNoPermitido, CorreoYaRegistrado, correo_en_uso, cuenta_pendiente,
+    dominio_permitido, dominios_permitidos, normalizar_correo, registrar_docente,
+)
 
 
 class EstiloBootstrapMixin:
@@ -37,7 +42,73 @@ class LoginForm(AuthenticationForm):
     error_messages = {
         **AuthenticationForm.error_messages,
         'invalid_login': 'Correo o contraseña incorrectos.',
+        'pendiente': 'Tu cuenta está pendiente de aprobación. Podrás entrar cuando un '
+                     'administrador la apruebe.',
     }
+
+    def get_invalid_login_error(self):
+        # Solo quien sabe la contraseña de una cuenta pendiente se entera de que lo está;
+        # para cualquier otro intento el mensaje sigue siendo el mismo (RF-19).
+        if cuenta_pendiente(self.cleaned_data.get('username'), self.cleaned_data.get('password')):
+            return ValidationError(self.error_messages['pendiente'], code='pendiente')
+        return super().get_invalid_login_error()
+
+
+class RegistroForm(EstiloBootstrapMixin, forms.Form):
+    """Registro de un docente (RF-19): nombre, apellido, correo y contraseña.
+
+    No pregunta el rol ni la aprobación: la cuenta siempre es de docente y queda
+    pendiente hasta que un administrador la apruebe. El correo debe ser de un
+    dominio permitido (`REGISTRO_DOMINIOS`).
+    """
+
+    nombre = forms.CharField(label='Nombre', max_length=150,
+                             widget=forms.TextInput(attrs={'autocomplete': 'given-name', 'autofocus': True}))
+    apellido = forms.CharField(label='Apellido', max_length=150,
+                               widget=forms.TextInput(attrs={'autocomplete': 'family-name'}))
+    correo = forms.EmailField(label='Correo institucional', max_length=150,
+                              widget=forms.EmailInput(attrs={'autocomplete': 'email'}))
+    contrasena = forms.CharField(label='Contraseña', strip=False,
+                                 widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
+    confirmacion = forms.CharField(label='Repite la contraseña', strip=False,
+                                   widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
+
+    def clean_correo(self):
+        correo = normalizar_correo(self.cleaned_data['correo'])
+        if not dominio_permitido(correo):
+            raise ValidationError(
+                'Solo se admiten correos de ' + ' o '.join(f'@{d}' for d in dominios_permitidos()) + '.')
+        if correo_en_uso(correo):
+            raise ValidationError('Ya existe una cuenta con ese correo.')
+        return correo
+
+    def clean(self):
+        datos = super().clean()
+        contrasena, confirmacion = datos.get('contrasena'), datos.get('confirmacion')
+        if contrasena and confirmacion and contrasena != confirmacion:
+            self.add_error('confirmacion', 'Las contraseñas no coinciden.')
+        elif contrasena:
+            # Las reglas de contraseña del proyecto (AUTH_PASSWORD_VALIDATORS), con los datos
+            # del propio usuario para que no se parezca a su nombre o a su correo.
+            candidato = Usuario(email=datos.get('correo', ''), first_name=datos.get('nombre', ''),
+                                last_name=datos.get('apellido', ''))
+            try:
+                password_validation.validate_password(contrasena, candidato)
+            except ValidationError as error:
+                self.add_error('contrasena', error)
+        return datos
+
+    def guardar(self):
+        """Crea la cuenta pendiente. Un correo repetido (por un registro simultáneo) se
+        informa como error del campo, no como un fallo del servidor."""
+        datos = self.cleaned_data
+        try:
+            return registrar_docente(
+                nombre=datos['nombre'], apellido=datos['apellido'],
+                correo=datos['correo'], contrasena=datos['contrasena'])
+        except (CorreoYaRegistrado, CorreoNoPermitido) as error:
+            self.add_error('correo', str(error))
+            return None
 
 
 class GrupoForm(EstiloBootstrapMixin, forms.ModelForm):

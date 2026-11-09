@@ -669,6 +669,32 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   .clase-de-hoy .acciones .btn { flex: 1; }
 }
 
+/* Cuenta que espera aprobación en el panel del administrador (RF-19 y RF-20). */
+.cuenta-pendiente {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .85rem 1.1rem;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra);
+}
+
+.cuenta-pendiente + .cuenta-pendiente { margin-top: .6rem; }
+.cuenta-pendiente .datos { min-width: 0; }
+.cuenta-pendiente .titulo { font-weight: 600; line-height: 1.3; }
+.cuenta-pendiente .detalle { font-size: .85rem; color: var(--tinta-suave); overflow-wrap: anywhere; }
+.cuenta-pendiente .acciones { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
+
+@media (max-width: 575.98px) {
+  .cuenta-pendiente { flex-wrap: wrap; }
+  .cuenta-pendiente .datos { flex: 1 1 0; }
+  .cuenta-pendiente .acciones { margin-left: 0; width: 100%; }
+  .cuenta-pendiente .acciones > * { flex: 1; }
+  .cuenta-pendiente .acciones .btn { width: 100%; }
+}
+
 .accesos { display: grid; gap: .85rem; grid-template-columns: 1fr; }
 @media (min-width: 768px) { .accesos { grid-template-columns: 1.3fr 1fr 1fr; } }
 

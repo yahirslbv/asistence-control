@@ -1,9 +1,10 @@
-from .auth import IniciarSesionView, inicio
+from .auth import IniciarSesionView, RegistroView, inicio
 from .asistencia import PaseDeListaInicioView, PaseDeListaView
 from .grupos import (
     BajaAlumnoView, GrupoCrearView, GrupoDetalleView, GrupoEditarView,
     GrupoEliminarView, GrupoListView, ImportarAlumnosView, InscribirAlumnoView,
 )
+from .panel import AprobarCuentaView, PanelAdministradorView, RechazarCuentaView
 from .justificantes import (
     DescargarJustificanteView, JustificanteView, QuitarJustificanteView,
 )
@@ -16,7 +17,8 @@ from .sesiones import (
 )
 
 __all__ = [
-    'IniciarSesionView', 'inicio',
+    'IniciarSesionView', 'RegistroView', 'inicio',
+    'AprobarCuentaView', 'PanelAdministradorView', 'RechazarCuentaView',
     'BajaAlumnoView', 'GrupoCrearView', 'GrupoDetalleView', 'GrupoEditarView',
     'GrupoEliminarView', 'GrupoListView', 'ImportarAlumnosView',
     'InscribirAlumnoView',

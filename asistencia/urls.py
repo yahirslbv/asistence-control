@@ -7,6 +7,12 @@ urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('login/', views.IniciarSesionView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('registro/', views.RegistroView.as_view(), name='registro'),
+
+    # Panel del administrador (RF-20) y aprobación de cuentas (RF-19)
+    path('panel/', views.PanelAdministradorView.as_view(), name='panel_admin'),
+    path('panel/cuentas/<int:usuario_id>/aprobar/', views.AprobarCuentaView.as_view(), name='cuenta_aprobar'),
+    path('panel/cuentas/<int:usuario_id>/rechazar/', views.RechazarCuentaView.as_view(), name='cuenta_rechazar'),
 
     # Grupos (RF-03)
     path('grupos/', views.GrupoListView.as_view(), name='grupos'),

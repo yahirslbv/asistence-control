@@ -66,8 +66,8 @@ class UsuarioAdmin(UserAdmin):
     form = UsuarioChangeForm
     add_form = UsuarioCreationForm
 
-    list_display = ('email', 'username', 'first_name', 'last_name', 'rol', 'is_active')
-    list_filter = ('rol', 'is_active')
+    list_display = ('email', 'username', 'first_name', 'last_name', 'rol', 'is_active', 'aprobada')
+    list_filter = ('rol', 'is_active', 'aprobado')
     search_fields = ('email', 'username', 'first_name', 'last_name')
     ordering = ('email',)
 
@@ -75,8 +75,9 @@ class UsuarioAdmin(UserAdmin):
         (None, {'fields': ('username', 'password')}),
         ('Datos personales', {'fields': ('first_name', 'last_name', 'email')}),
         ('Rol y acceso', {
-            'fields': ('rol', 'is_active'),
-            'description': 'Un usuario no se borra: se desactiva con «Activo».',
+            'fields': ('rol', 'is_active', 'aprobado'),
+            'description': 'Un usuario no se borra: se desactiva con «Activo». Las cuentas que se '
+                           'registran solas se aprueban o se rechazan desde el Panel.',
         }),
         ('Fechas', {'fields': ('last_login', 'date_joined')}),
     )
@@ -88,7 +89,11 @@ class UsuarioAdmin(UserAdmin):
         ('Datos personales', {'classes': ('wide',), 'fields': ('first_name', 'last_name', 'email')}),
         ('Rol', {'classes': ('wide',), 'fields': ('rol',)}),
     )
-    readonly_fields = ('last_login', 'date_joined')
+    readonly_fields = ('aprobado', 'last_login', 'date_joined')
+
+    @admin.display(description='Aprobada', boolean=True, ordering='aprobado')
+    def aprobada(self, usuario):
+        return usuario.aprobado
 
     def get_form(self, request, obj=None, **kwargs):
         formulario = super().get_form(request, obj, **kwargs)

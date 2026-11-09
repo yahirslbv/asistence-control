@@ -1,0 +1,125 @@
+{% extends 'asistencia/base.html' %}
+{% load diseno %}
+
+{% block titulo %}Panel de administración · Control de asistencia{% endblock %}
+
+{% block contenido %}
+<section class="hero" aria-labelledby="saludo">
+  <div>
+    <span class="rol"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-escudo"/></svg>{{ user.get_rol_display }}</span>
+    <h1 id="saludo">{{ resumen.saludo }}, {{ user.first_name|default:user.email }}</h1>
+    <p>
+      {% if resumen.pendientes %}
+        {{ resumen.pendientes }} cuenta{{ resumen.pendientes|pluralize }} espera{{ resumen.pendientes|pluralize:",n" }} tu aprobación.
+      {% else %}
+        No hay cuentas esperando aprobación.
+      {% endif %}
+      {% if resumen.periodo %}El periodo activo es {{ resumen.periodo.clave }}.{% else %}No hay un periodo activo.{% endif %}
+    </p>
+  </div>
+  <div class="ficha-fecha" aria-hidden="true">
+    <span class="semana">{{ resumen.hoy|date:"l"|capfirst }}</span>
+    <span class="dia">{{ resumen.hoy|date:"j" }}</span>
+    <span class="mes">{{ resumen.hoy|date:"F"|capfirst }}</span>
+  </div>
+</section>
+
+<section class="seccion" aria-label="Resumen">
+  <div class="indicadores escalonado">
+    <div class="indicador{% if resumen.pendientes %} aviso{% endif %}">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-usuario-mas"/></svg></span>
+      <span class="cifra">{{ resumen.pendientes }}</span>
+      <span class="etiqueta-indicador">Cuenta{{ resumen.pendientes|pluralize }} por aprobar</span>
+    </div>
+    <div class="indicador">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
+      <span class="cifra">{{ resumen.docentes }}</span>
+      <span class="etiqueta-indicador">Docente{{ resumen.docentes|pluralize }} activo{{ resumen.docentes|pluralize }}</span>
+    </div>
+    <div class="indicador">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-escudo"/></svg></span>
+      <span class="cifra">{{ resumen.administradores }}</span>
+      <span class="etiqueta-indicador">Administrador{{ resumen.administradores|pluralize:",es" }}</span>
+    </div>
+    <div class="indicador{% if not resumen.periodo %} alerta{% endif %}">
+      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
+      <span class="cifra cifra-texto">{% if resumen.periodo %}{{ resumen.periodo.clave }}{% else %}Ninguno{% endif %}</span>
+      <span class="etiqueta-indicador">Periodo activo</span>
+    </div>
+  </div>
+</section>
+
+<section class="seccion" id="cuentas" aria-labelledby="titulo-cuentas">
+  <h2 id="titulo-cuentas">Cuentas por aprobar</h2>
+  {% for cuenta in cuentas %}
+    <article class="cuenta-pendiente">
+      <span class="avatar avatar-suave" aria-hidden="true" data-texto="{{ cuenta.get_full_name|default:cuenta.email|iniciales }}"></span>
+      <div class="datos">
+        <div class="titulo">{{ cuenta.get_full_name|default:cuenta.email }}</div>
+        <div class="detalle">{{ cuenta.email }} · Se registró el {{ cuenta.date_joined|date:"d/m/Y H:i" }}</div>
+      </div>
+      <div class="acciones">
+        <form method="post" action="{% url 'cuenta_aprobar' cuenta.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>Aprobar</button>
+        </form>
+        <a class="btn btn-outline-danger btn-sm" href="{% url 'cuenta_rechazar' cuenta.pk %}">Rechazar</a>
+      </div>
+    </article>
+  {% empty %}
+    <div class="vacio">
+      <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>
+      <h2>Todo al día</h2>
+      <p>Cuando alguien se registre desde la pantalla de acceso, su cuenta aparecerá aquí para que la apruebes o la rechaces.</p>
+    </div>
+  {% endfor %}
+</section>
+
+<section class="seccion" aria-labelledby="titulo-periodo">
+  <h2 id="titulo-periodo">Periodo activo</h2>
+  {% if resumen.periodo %}
+    <div class="clase-de-hoy">
+      <span class="hora">{{ resumen.periodo.clave }}</span>
+      <div>
+        <div class="titulo">Periodo {{ resumen.periodo.clave }}</div>
+        <div class="detalle">
+          Del {{ resumen.periodo.fecha_inicio|date:"d/m/Y" }} al {{ resumen.periodo.fecha_fin|date:"d/m/Y" }} ·
+          {{ resumen.grupos_del_periodo }} grupo{{ resumen.grupos_del_periodo|pluralize }}
+        </div>
+      </div>
+      <div class="acciones">
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'admin:asistencia_periodo_changelist' %}">Administrar periodos</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning mb-0" role="alert">
+      No hay un periodo activo: los docentes no pueden crear grupos nuevos.
+      <a class="alert-link" href="{% url 'admin:asistencia_periodo_changelist' %}">Activa o crea un periodo.</a>
+    </div>
+  {% endif %}
+</section>
+
+<section class="seccion" aria-labelledby="titulo-accesos">
+  <h2 id="titulo-accesos">Accesos</h2>
+  <div class="accesos escalonado">
+    <a class="acceso" href="{% url 'admin:asistencia_usuario_changelist' %}">
+      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-alumno"/></svg></span>
+      <strong>Usuarios</strong>
+      <span class="detalle">Consulta, edita y da de baja a docentes y administradores ({{ resumen.desactivados }} desactivado{{ resumen.desactivados|pluralize }}).</span>
+      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+    </a>
+    <a class="acceso" href="{% url 'admin:asistencia_usuario_add' %}">
+      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-usuario-mas"/></svg></span>
+      <strong>Agregar usuario</strong>
+      <span class="detalle">Da de alta a alguien con su rol, sin que tenga que registrarse.</span>
+      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+    </a>
+    <a class="acceso" href="{% url 'admin:asistencia_periodo_changelist' %}">
+      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-calendario"/></svg></span>
+      <strong>Periodos</strong>
+      <span class="detalle">Crea, edita, activa y desactiva los periodos escolares ({{ resumen.periodos }} registrado{{ resumen.periodos|pluralize }}).</span>
+      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+    </a>
+  </div>
+</section>
+{% endblock %}
