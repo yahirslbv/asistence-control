@@ -48,3 +48,42 @@ Un solo número de versión identifica al producto completo (repositorio único)
 | ECS-17 | Manual de usuario y manual de administrador | pendientes (fase I) | Documento | Documentador | LB-L | por definir (antes de 1.0.0) |
 
 **Todavía no existen** y entrarán a LB-L cuando se creen: el `Dockerfile`, `docker-compose.prod.yml`, `.env.prod.example` y `scripts/respaldo.sh` del plan de despliegue, y los manuales (ECS-17). La documentación previa (EDT, modelo entidad-relación, prototipo y cronograma) está fuera del repositorio.
+
+## 4. Convención de nombres
+
+| Qué | Formato | Ejemplo |
+|---|---|---|
+| Ramas | `<tipo>/<id>-<tema>` en minúsculas y con guiones. Tipos: `feature` (requisito o documentación), `cambio` (solicitud de cambio aprobada), `fix` (corrección) y `release` (preparación de una liberación) | `feature/rnf-09-gestion-configuracion`, `cambio/cr-001-pagina-500`, `release/v0.9.0` |
+| Commits | [Conventional Commits 1.0.0](https://www.conventionalcommits.org/es/v1.0.0/): `tipo(ámbito): descripción`. Tipos: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `style`, `build`, `ci` y `chore`. El ámbito es el requisito, hallazgo o solicitud de cambio en minúsculas, o `release`. La descripción va en español, en infinitivo, sin punto final y con el encabezado de 72 caracteres o menos. Un cambio incompatible lleva `!` antes de los dos puntos y una nota `BREAKING CHANGE:` | `feat(h-02): página 500 propia e independiente del contexto` |
+| Etiquetas | `vMAJOR.MINOR.PATCH`, o `vMAJOR.MINOR.PATCH-rc.N` para una candidata. Siempre anotadas (`git tag -a`) | `v0.9.0`, `v1.0.0-rc.1` |
+| Solicitudes de cambio | `CR-NNN`, en el archivo `docs/cambios/CR-NNN_tema.md` | `CR-001_pagina_500.md` |
+| Documentos | `docs/<tema>.md` en minúsculas, con guiones bajos y sin acentos. Los que ya existían conservan su nombre | `docs/plan_liberacion.md` |
+| Código y pruebas | Los de `CLAUDE.md` sección 5: identificadores en español, módulos en `snake_case` y pruebas en `test_<tema>.py` | `test_pagina_500.py` |
+| Migraciones | Las numera Django: `000N_descripcion.py` | `0004_usuario_aprobado.py` |
+
+La regla de `CLAUDE.md` sección 5 pide el requisito al inicio del commit (`RF-09: impedir registro duplicado`). Desde la versión 0.9.0 el requisito va como ámbito del tipo, para cumplir las dos cosas: `fix(rf-09): impedir registro duplicado`. Los commits anteriores conservan el formato antiguo y no se reescriben.
+
+## 5. Política de versionado semántico
+
+El sistema usa [Versionado Semántico 2.0.0](https://semver.org/lang/es/): `MAJOR.MINOR.PATCH`. La etiqueta anotada de Git es la fuente de verdad de la versión y `CHANGELOG.md` describe qué trae cada una.
+
+**API pública del sistema.** El versionado semántico exige declararla. Este sistema no ofrece una API a otros programas, así que se declara como tal lo que quien lo opera o lo integra espera que no cambie sin aviso:
+
+1. El esquema de la base de datos y sus migraciones.
+2. Las URL de la aplicación.
+3. El formato de las exportaciones a PDF y Excel.
+4. Las variables de entorno (`.env`) y los comandos de administración (`seed_demo`, `migrate`).
+
+| Incremento | Cuándo | Commit asociado | Ejemplo |
+|---|---|---|---|
+| MAJOR | Cambio incompatible en alguno de los cuatro puntos, que obliga a quien opera el sistema a intervenir: una migración que borra datos, renombrar una variable de entorno, cambiar una URL | `!` o `BREAKING CHANGE:` | Pasar de MySQL a otra base de datos |
+| MINOR | Funcionalidad nueva compatible: un requisito nuevo, una pantalla nueva, una migración que solo agrega | `feat` | RF-17, periodos escolares |
+| PATCH | Corrección que no cambia lo anterior | `fix` | Un cálculo de porcentaje mal redondeado |
+
+Reglas:
+
+- **Mientras el sistema no esté en producción es `0.y.z`** (desarrollo inicial: cualquier cosa puede cambiar). Se sube MINOR por cada hito funcional y PATCH por cada corrección. La línea base actual es `0.9.0`: funcionalmente completa, pero sin despliegue ni manuales.
+- **`1.0.0` se asigna cuando el sistema esté desplegado y aceptado** (acta de aceptación de la fase J). El FAQ de SemVer indica que un software que ya se usa en producción debería ser 1.0.0.
+- **Candidatas.** Antes de `1.0.0` puede haber `1.0.0-rc.1`, `1.0.0-rc.2`... Una versión con sufijo de pre-liberación tiene menor precedencia que la normal y avisa que es inestable.
+- **Una versión etiquetada no se modifica.** Cualquier corrección se libera como una versión nueva (SemVer, punto 3). Una corrección urgente sale de una rama `fix/...` creada desde la etiqueta que está en producción y se libera como PATCH.
+- **Relación con los commits:** `feat` sube MINOR, `fix` sube PATCH y un cambio incompatible sube MAJOR. Los demás tipos no cambian el número por sí solos.
