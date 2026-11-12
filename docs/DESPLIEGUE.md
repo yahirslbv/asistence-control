@@ -145,7 +145,7 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
 9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
 10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
-11. La suite completa sigue pasando (645 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
+11. La suite completa sigue pasando (650 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
 12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
 ## 7. Lo que no puedes hacer tú (le toca a Victo)
