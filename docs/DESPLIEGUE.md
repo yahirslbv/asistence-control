@@ -15,7 +15,7 @@ Fecha límite de entrega del proyecto: viernes 27/11/2026. La fase J es la únic
 4. `docker-compose.prod.yml`: base de datos, aplicación y proxy.
 5. `media/` persistente y nunca expuesta por una URL pública.
 6. Respaldo diario de la base de datos y de `media/`, con restauración probada (RNF-08).
-7. Página 500 propia (hallazgo H-02).
+7. Página 500 propia (hallazgo H-02). **Hecha el 11/11/2026 con CR-001**: en B2 solo falta lo demás.
 8. Protección de la contraseña de demostración de `seed_demo`.
 9. Sección "Despliegue" en el README.
 
@@ -35,7 +35,7 @@ Esto sale del README y del seguimiento. **Verifícalo leyendo el código antes d
 - Los justificantes se guardan en `media/justificantes/` con nombre aleatorio y se descargan solo por una vista del docente dueño del grupo (RNF-04). No tienen URL pública. `config/urls.py` **no sirve `media/` en ningún caso**, ni con `DEBUG`: hay que mantenerlo así, no hay nada que quitar.
 - `.gitignore`: **ya corregido el 15/10/2026** (commit `a094f13`). Antes solo cubría `.env` exacto, y un `.env.prod` se habría subido a un repositorio público. Ahora cubre `.env.*` (menos `.env.example` y `.env.prod.example`) y `*.sql.gz`. Compruébalo con `git check-ignore -v .env.prod` antes de crear el archivo.
 - Casi todas las pruebas que renderizan una pantalla (las del admin y, desde el rediseño, cualquiera que use `base.html`) pasan por `{% static %}`: cualquier cambio del almacenamiento estático las afecta (ver B3).
-- Hoy no hay página 500 propia (solo `403.html` y `404.html`), y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
+- Hasta el 11/11/2026 no había página 500 propia (solo `403.html` y `404.html`; la 500 ya existe, CR-001), y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
 - 642 pruebas en verde (`python manage.py test --noinput`, de 9 a 15 minutos, necesita MySQL arriba).
 
 Qué confirmar antes de empezar, por si algo cambió desde el 15/10/2026: `config/settings.py`, `config/urls.py`, `docker-compose.yml`, `.env.example`, `.gitignore` y la plantilla base.
@@ -76,7 +76,7 @@ En `settings.py`, todo por variables de entorno, sin romper el desarrollo:
 - `DJANGO_ALLOWED_HOSTS` **ya existe**; agrega `DJANGO_CSRF_TRUSTED_ORIGINS` (con esquema, por ejemplo `https://midominio.com`). Las dos son listas separadas por comas.
 - Variable `DJANGO_HTTPS` (`1` en un servidor con HTTPS, `0` en demo local por HTTP). Con `1`: `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')` porque detrás del proxy Django ve HTTP. HSTS empieza con un valor bajo (`SECURE_HSTS_SECONDS` de 3600) y se sube después; uno largo en un dominio de prueba es difícil de revertir.
 - Conserva `time_zone='+00:00'` y `sql_mode` del `init_command` de la conexión.
-- Página 500: `templates/500.html` **independiente**, sin `{% extends %}` ni `{% url %}` ni `request.user`, porque Django la renderiza sin contexto y el error puede venir de la propia base de datos. En español, con un enlace simple al inicio (ruta fija).
+- Página 500 (**hecha con CR-001**, `asistencia/templates/500.html` y `test_pagina_500.py`): `templates/500.html` **independiente**, sin `{% extends %}` ni `{% url %}` ni `request.user`, porque Django la renderiza sin contexto y el error puede venir de la propia base de datos. En español, con un enlace simple al inicio (ruta fija).
 - Prueba de la página 500 con `DEBUG=False`: una vista que lance una excepción y `Client(raise_request_exception=False)`; comprueba el código 500 y el contenido de la plantilla.
 
 Criterio: `python manage.py check --deploy` con las variables de producción no muestra advertencias, o las que queden están anotadas y justificadas en el README. **Línea base medida el 15/10/2026** con `DEBUG=0` y una clave larga, antes de cualquier cambio: 4 advertencias (`W004` HSTS, `W008` redirección SSL, `W012` cookie de sesión, `W016` cookie CSRF). Con `DJANGO_HTTPS=1` deberían desaparecer `W004`, `W012` y `W016`. `W008` (`SECURE_SSL_REDIRECT`) se queda porque la redirección a HTTPS la hace Caddy: anótala y justifícala en el README. Suite completa en verde.

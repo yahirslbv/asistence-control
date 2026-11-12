@@ -235,13 +235,13 @@ No se encontró ningún defecto crítico ni mayor.
 | Id | Severidad | Descripción | Estado |
 |---|---|---|---|
 | H-01 | Menor | Los botones secundarios (`btn-sm`) miden unos 31 px de alto en el teléfono: «Abrir» (lista de grupos), «Agregar alumno» y «Cargar lista (CSV)» (detalle del grupo), «Ver asistencia» (sesiones) y «Reporte» (reportes). En tableta y escritorio también «Cerrar sesión» y «Dar de baja». El RNF-02 pide botones grandes en el pase de lista, y esos miden 48 px | **Corregido el 19/10/2026** con el rediseño visual (`estilo.css`). Medido con el navegador a 375 px en 7 pantallas (grupos, detalle del grupo, sesiones, lista de pase de lista, pase de lista, reportes y reporte del grupo): todos los botones miden 44 px o más (los del pase de lista, 47-48 px) y ninguna pantalla desborda en horizontal |
-| H-02 | Observación | No hay página 500 propia: con `DEBUG` desactivado, Django muestra su texto mínimo | Para la fase J |
+| H-02 | Observación | No hay página 500 propia: con `DEBUG` desactivado, Django muestra su texto mínimo | **Corregido el 11/11/2026** con la solicitud de cambio CR-001: `500.html` independiente del contexto y `test_pagina_500.py` (5 pruebas, sin base de datos) |
 | H-03 | Menor | La importación de CSV hace unas cinco consultas por fila y tarda 0.4 s con 50 filas, 1.6 s con 200 y 3.8 s con 500 (hasta 5.0 s); el máximo que acepta la aplicación son 500 filas. Con 50 alumnos cumple el RNF-07, que es lo que el requisito acota (sección 7) | Sin corregir: decisión pendiente |
 
 ## 12. Mejoras sugeridas (no implementadas)
 
 - ~~Quitar `btn-sm` de los botones secundarios en pantallas de teléfono (H-01).~~ Hecho con otro método: en el teléfono todos los botones miden 44 px (`estilo.css`).
-- Agregar una página 500 propia y probarla con `DEBUG` desactivado (H-02).
+- ~~Agregar una página 500 propia y probarla con `DEBUG` desactivado (H-02).~~ Hecho el 11/11/2026 (CR-001).
 - Importar el CSV con una consulta por bloque de filas en lugar de por fila (H-03).
 - Una prueba automática de las etiquetas de ventana y los tamaños de botones, para que RNF-02 deje de depender de una revisión manual.
 

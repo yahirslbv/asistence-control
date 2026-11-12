@@ -64,4 +64,4 @@ En producción `DEBUG` está apagado. Un error del servidor (por ejemplo, una ba
 | **Rama** | `cambio/cr-001-pagina-500` |
 | **Pull request** | [#2](https://github.com/yahirslbv/asistence-control/pull/2) |
 | **Versión en la que entra** | 0.9.0 |
-| **Pruebas** | Se completa al terminar la implementación |
+| **Pruebas** | 5 pruebas nuevas en `test_pagina_500.py` (página propia, base de datos caída, sin filtrar detalles del error, sin menú ni hojas de estilo, plantilla sin herencia ni rutas). Suite completa en MySQL 8.0: 650 pruebas, todas correctas (645 de la v0.9.0 más las 5 nuevas), 176.7 s. Verificación inversa: sin `500.html` (plantilla estándar de Django) 3 de las 5 pruebas fallan, así que sí detectan la ausencia de la página propia |
