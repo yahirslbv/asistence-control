@@ -187,7 +187,7 @@ Se usan estos valores por defecto hasta que se confirmen:
 - **Asistencia mínima:** 80 %, configurable con `ASISTENCIA_MINIMA`.
 - **Administrador:** gestiona usuarios y periodos; no ve los grupos de los docentes.
 - **Hosting:** sin definir. Se resuelve en la actividad J (despliegue).
-- **Trabajo:** una sola persona, sin flujo de pull requests.
+- **Trabajo:** una sola persona. Los cambios se integran por pull request, con ramas cortas y versionado semántico (ver [docs/gestion_configuracion.md](docs/gestion_configuracion.md)).
 
 ## Estructura
 
@@ -212,5 +212,6 @@ asistencia/    única app del proyecto
                    y pase_de_lista.js (reglas de las casillas del pase de lista)
   management/      comando seed_demo
   tests/           pruebas
-docs/          informe de pruebas (fase H) y seguimiento semanal contra el cronograma
+docs/          informe de pruebas (fase H), seguimiento semanal, plan de despliegue y gestión de la configuración
+CHANGELOG.md   historial de versiones (formato Keep a Changelog)
 ```

@@ -67,7 +67,10 @@ control_asistencia/
 ├── docs/
 │   ├── informe_pruebas.md      # informe de la fase H
 │   ├── seguimiento_semanal.md  # avance contra el cronograma y el tablero de Trello
-│   └── DESPLIEGUE.md           # plan técnico de la fase J (Docker, respaldo, producción)
+│   ├── DESPLIEGUE.md           # plan técnico de la fase J (Docker, respaldo, producción)
+│   ├── gestion_configuracion.md # elementos de configuración, versionado, ramas y control de cambios (RNF-09)
+│   └── cambios/                # solicitudes de cambio (CR-NNN) y su plantilla
+├── CHANGELOG.md             # historial de versiones (Keep a Changelog)
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
@@ -81,7 +84,7 @@ control_asistencia/
 - `AUTH_USER_MODEL = 'asistencia.Usuario'` debe estar definido **antes del primer `migrate`**. Cambiarlo después obliga a rehacer la base de datos.
 - Toda lógica de negocio va en `services/`, no en las vistas ni en las plantillas.
 - Cada requisito de prioridad Alta lleva al menos una prueba.
-- Commits pequeños y en español, con el requisito al inicio: `RF-09: impedir registro duplicado`.
+- Commits pequeños y en español. Desde la v0.9.0 siguen Conventional Commits con el requisito como ámbito: `fix(rf-09): impedir registro duplicado`. Ramas, versionado y cambios: `docs/gestion_configuracion.md`.
 - Agrega cada dependencia a `requirements.txt` al instalarla.
 - Nunca subas `.env`, la base de datos ni `media/`.
 - Implementa solo lo que pide un RF o RNF. No agregues funciones extra.
