@@ -117,7 +117,7 @@ Todo cambio a un elemento que ya pertenece a una línea base (ECS-01 a ECS-03 si
 
 | Solicitud | Descripción | Fecha | Decisión | Rama | Versión |
 |---|---|---|---|---|---|
-| (aún no hay solicitudes registradas) | | | | | |
+| [CR-001](cambios/CR-001_pagina_500.md) | Página 500 propia (hallazgo H-02) | 2026-11-11 | Aprobada | `cambio/cr-001-pagina-500` | 0.9.0 |
 
 ## 8. Auditoría de configuración
 

@@ -211,7 +211,26 @@ Este borrador se completa al etiquetar. El texto definitivo va en `CHANGELOG.md`
 
 La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), sección 8. Se anota aquí el resultado de cada etiqueta.
 
-*(El registro de `v0.9.0` se completa al etiquetar; el de `v1.0.0`, el 26/11/2026.)*
+### Registro de `v0.9.0` (11/11/2026)
+
+**Qué se auditó.** El commit `041705e` de la rama `cambio/cr-001-pagina-500` (árbol `e3772eba0c9472adf38aeb69532a189c232591b0`): el resultado de integrar `main`, que ya traía la liberación del PR #3, con la solicitud de cambio CR-001. Al fusionar el PR #2 con un commit de fusión, `main` queda con ese mismo árbol, más una sola diferencia: el commit siguiente agrega este registro y no toca ningún otro archivo (la evidencia de la etiqueta lo muestra con `git diff --stat`).
+
+| # | Comprobación | Tipo | Comando | Resultado |
+|---|---|---|---|---|
+| 1 | La suite completa pasa en una base MySQL 8 limpia | Funcional | `python manage.py test --noinput` (MySQL 8.0 en Docker; el ejecutor crea y borra la base de pruebas) | **Pasa.** `Ran 650 tests in 575.198s` y `OK`, sobre el commit de integración `e2dbceb`. El commit auditado solo difiere de ese en `README.md`, `docs/DESPLIEGUE.md` y `docs/seguimiento_semanal.md` |
+| 2 | Cada requisito de prioridad Alta tiene prueba | Funcional | `grep -lE "RF-NN" asistencia/tests/*.py` para RF-01, 02, 03, 04, 06, 08, 09, 10, 11, 13 y 14 | **Pasa, con límite.** Los 11 requisitos aparecen nombrados en al menos un archivo de pruebas. Es trazabilidad por nombre, no una medición de cobertura |
+| 3 | Los hallazgos abiertos están revisados | Funcional | Sección de hallazgos de `docs/informe_pruebas.md` | **Pasa.** H-01 y H-02 están corregidos (el H-02 con CR-001). Queda abierto el H-03 (menor), que la sección 1 de este plan deja como opcional |
+| 4 | `git status` sin cambios | Física | `git status --porcelain` | **Pasa.** La salida está vacía |
+| 5 | Los archivos versionados coinciden con la estructura de `CLAUDE.md`, sección 4 | Física | Script que compara `git ls-files` con el bloque de estructura (`comparar_estructura.py`, fuera del repositorio) | **Pasa con observación.** Los 38 elementos que documenta la sección 4 existen. De los 133 archivos versionados, 25 no aparecen en ella: módulos de `services/`, archivos `__init__.py`, `apps.py`, `urls.py`, plantillas de error y de administración, `CLAUDE.md` y `docker-compose.yml`. La sección 4 es un resumen, no un inventario; ninguno de los 25 es un secreto ni un archivo generado |
+| 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` está versionado | Física | `git check-ignore -v .env .env.prod respaldos/x media/x dump.sql.gz` y `git ls-files` filtrado por esos nombres | **Pasa.** Los cinco quedan ignorados (líneas 3, 4, 14, 15 y 17 de `.gitignore`) y no hay ninguno versionado |
+| 7 | El número de la etiqueta coincide con el del CHANGELOG | Física | `grep -m1 -E '^## \[[0-9]' CHANGELOG.md` | **Pasa.** El primer encabezado es `## [0.9.0] - 2026-11-11` |
+| 8 | La etiqueta apunta a lo que se auditó | Física | `git rev-parse v0.9.0^{tree}` contra el árbol auditado | **Pendiente.** Se comprueba al crear la etiqueta, después de fusionar el PR #2; el resultado queda en la evidencia de la etiqueta |
+
+**Observación abierta (menor).** La sección 4 de `CLAUDE.md` no lista `docker-compose.yml` ni los módulos de `services/` que se agregaron después. No impide fijar `v0.9.0`; se corrige con una solicitud de cambio posterior y se vuelve a comprobar en la auditoría de `1.0.0`.
+
+**Lo que esta auditoría no cubre.** El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas y sigue sin verificarse. Los comandos los ejecutó el asistente de IA sobre una copia del repositorio en la máquina del proyecto; la decisión de fusionar y de etiquetar la toma el responsable del repositorio.
+
+*(El registro de `v1.0.0` se completa el 26/11/2026.)*
 
 ## 11. Dictamen go/no-go
 

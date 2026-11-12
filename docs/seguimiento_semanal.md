@@ -18,9 +18,9 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 - **Estado:** las actividades A a H están terminadas, la I (manuales) está en curso y la J (despliegue y entrega) está por hacer.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
-- **Calidad:** 645 pruebas automáticas en verde (suite completa del 11/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
+- **Calidad:** 650 pruebas automáticas en verde (suite completa del 11/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
 - **Requisitos:** los 20 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11; RF-18 a RF-20, que salieron de las observaciones de los evaluadores, el 4/11). También están hechos el RNF-10 (pase de lista compacto) y el RNF-11 (paleta, confirmada el 9/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
-- **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y dos hallazgos menores de la fase H, H-02 y H-03 (sección 8).
+- **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y un hallazgo menor de la fase H, el H-03 (sección 8); el H-02 se corrigió el 11/11 con CR-001.
 
 ### Avance contra el cronograma
 
@@ -56,7 +56,7 @@ python manage.py test --noinput
 ```
 
 - `seed_demo` crea 1 administrador, 2 docentes, 2 grupos y 40 alumnos. La contraseña de las cuentas de demostración está en `asistencia/management/commands/seed_demo.py`.
-- La suite completa debe terminar con `Ran 645 tests` y `OK`. En la corrida del 11/11/2026, en un entorno de pruebas aparte, tardó 188 s. Las del 9/11/2026 (642 pruebas) tardaron 908 s, con otras tareas corriendo en la misma máquina, y 504 s sin carga extra.
+- La suite completa debe terminar con `Ran 650 tests` y `OK`. En las corridas del 11/11/2026 en la máquina del proyecto (MySQL 8.0 en Docker) tardó 671 s en la rama de CR-001 y 575 s en la rama integrada con `main`; una corrida anterior (645 pruebas) en un entorno de pruebas aparte tardó 188 s. Las del 9/11/2026 (642 pruebas) tardaron 908 s, con otras tareas corriendo en la misma máquina, y 504 s sin carga extra.
 - La carpeta [docs](.) contiene este seguimiento y el informe de pruebas.
 
 ## 3. Estado por semana
@@ -171,7 +171,7 @@ Extra de esta semana: **RF-17 · periodos escolares y tema del admin** (3/11, a 
 | Diseño visual (RNF-02, 19/10) | Hoja de estilos propia (`estilo.css`), inicio con accesos, pantalla de acceso, pase de lista con estados de color, menú con la sección activa y botones de 44 px en el teléfono. Medido a 375 px en 7 pantallas: ningún botón bajo 44 px y sin desbordes | `e323a33` a `9de20e9` |
 | Pruebas del diseño | `test_estilo.py`, 10 pruebas: contraste mínimo de 4.5:1 en 18 pares de color, hoja cargada también con el almacenamiento de producción y sección activa del menú. Se comprobó que fallan si se rompe el contraste o la regla del menú | `990437e` |
 
-Defectos: ninguno crítico ni mayor. Dos hallazgos menores siguen abiertos, H-02 y H-03 (sección 8); el H-01 se corrigió con el diseño visual.
+Defectos: ninguno crítico ni mayor. Un hallazgo menor sigue abierto, el H-03 (sección 8); el H-01 se corrigió con el diseño visual y el H-02 el 11/11/2026 (CR-001).
 
 ### 4/11 y 9/11 · Observaciones de los evaluadores (RF-18, RNF-10, RF-19, RF-20) y rediseño
 - **Origen:** observaciones recibidas el 4/11/2026 sobre el pase de lista, el inicio de sesión y el panel del administrador. Se cargaron al tablero como RF-18, RNF-10, RF-19 y RF-20, y el rediseño pedido junto con ellas, como RNF-11 (paleta).
@@ -192,11 +192,11 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 645 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
+- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 650 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
   - [ ] Definir el hosting y desplegar el sistema.
   - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
   - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
-  - [ ] Página 500 propia (hallazgo H-02).
+  - [x] Página 500 propia (hallazgo H-02), hecha el 11/11/2026 con CR-001.
   - [ ] Capacitación a los docentes.
   - [ ] Acta de aceptación firmada.
 
@@ -247,7 +247,7 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 | Commits | 94 (39 el 13/10, 10 el 14/10, 24 el 15/10, 5 el 19/10, 10 el 3/11, 4 el 4/11 y 2 el 9/11, sin contar los de este seguimiento) |
 | Archivos versionados | 126 |
 | Código de la aplicación (Python, sin pruebas ni migraciones) | 4 339 líneas |
-| Pruebas (Python) | 8 920 líneas, 645 pruebas en 30 archivos |
+| Pruebas (Python) | 9 003 líneas, 650 pruebas en 31 archivos |
 | Plantillas HTML | 33 archivos, 1 824 líneas |
 | Hojas de estilo y JavaScript | `estilo.css` (1 093 líneas), `admin.css` (635 líneas) y `pase_de_lista.js` (67 líneas) |
 | Modelos / migraciones / rutas | 8 / 4 / 29 (más las del admin de Django) |
@@ -290,7 +290,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 | Id | Hallazgo | Propuesta |
 |---|---|---|
 | H-01 | Los botones secundarios miden unos 31 px en el teléfono | **Corregido el 19/10/2026** con el rediseño visual: 44 px o más en 7 pantallas a 375 px |
-| H-02 | No hay página 500 propia | Agregarla y probarla con `DEBUG` desactivado |
+| H-02 | No hay página 500 propia | **Corregido el 11/11/2026** con CR-001: `500.html` independiente y 5 pruebas con `DEBUG` desactivado |
 | H-03 | Importar un CSV de 500 filas tarda 3.8 s (con 50 filas, 0.4 s) | Importar por bloques en lugar de por fila |
 
 **Riesgos**

@@ -26,6 +26,7 @@ Primera versión etiquetada. Fija como línea base lo construido del 13/10 al 11
 - Plan técnico de despliegue con Docker (`docs/DESPLIEGUE.md`), todavía sin ejecutar.
 - Gestión de la configuración: inventario de elementos y líneas base, convención de nombres, política de versionado, estrategia de ramas, control de cambios con plantilla de solicitud y auditoría previa a cada etiqueta (`docs/gestion_configuracion.md` y `docs/cambios/`).
 - Este `CHANGELOG.md`.
+- Página 500 propia, en español y sin depender del menú, las rutas ni los archivos estáticos, con 5 pruebas con `DEBUG` desactivado (H-02, solicitud de cambio [CR-001](docs/cambios/CR-001_pagina_500.md)).
 
 ### Changed
 
