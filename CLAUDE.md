@@ -67,7 +67,11 @@ control_asistencia/
 ├── docs/
 │   ├── informe_pruebas.md      # informe de la fase H
 │   ├── seguimiento_semanal.md  # avance contra el cronograma y el tablero de Trello
-│   └── DESPLIEGUE.md           # plan técnico de la fase J (Docker, respaldo, producción)
+│   ├── DESPLIEGUE.md           # plan técnico de la fase J (Docker, respaldo, producción)
+│   ├── gestion_configuracion.md # elementos de configuración, versionado, ramas y control de cambios (RNF-09)
+│   ├── plan_liberacion.md      # plan de liberación de la versión 1.0.0, dictamen go/no-go y auditoría de cada etiqueta
+│   └── cambios/                # solicitudes de cambio (CR-NNN) y su plantilla
+├── CHANGELOG.md             # historial de versiones (Keep a Changelog)
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
@@ -81,7 +85,7 @@ control_asistencia/
 - `AUTH_USER_MODEL = 'asistencia.Usuario'` debe estar definido **antes del primer `migrate`**. Cambiarlo después obliga a rehacer la base de datos.
 - Toda lógica de negocio va en `services/`, no en las vistas ni en las plantillas.
 - Cada requisito de prioridad Alta lleva al menos una prueba.
-- Commits pequeños y en español, con el requisito al inicio: `RF-09: impedir registro duplicado`.
+- Commits pequeños y en español. Desde la v0.9.0 siguen Conventional Commits con el requisito como ámbito: `fix(rf-09): impedir registro duplicado`. Ramas, versionado y cambios: `docs/gestion_configuracion.md`.
 - Agrega cada dependencia a `requirements.txt` al instalarla.
 - Nunca subas `.env`, la base de datos ni `media/`.
 - Implementa solo lo que pide un RF o RNF. No agregues funciones extra.
@@ -261,12 +265,13 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): ~~H-01 botones secundarios de unos 31 px~~ corregido con el rediseño (44 px en el teléfono); H-02 no hay página 500 propia; H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
 
 - **Plan de despliegue (fase J).** `docs/DESPLIEGUE.md` describe lo técnico de la fase J. Se revisó el 15/10/2026 contra el código y con pruebas desechables, y sus correcciones están en el historial de Git de ese archivo. `.gitignore` ya cubre `.env.*` (menos los ejemplos) y `*.sql.gz`: antes `.env.prod` se habría subido a un repositorio público. El plan aún no se ejecuta; la fase J sigue pendiente.
+- **Gestión de la configuración y línea base (RNF-09, 11/11/2026).** `docs/gestion_configuracion.md` fija los elementos de configuración, las líneas base, la convención de nombres, el versionado semántico, la estrategia de ramas (una rama `main` estable, ramas cortas y pull request) y el control de cambios con solicitudes `CR-NNN`. La primera etiqueta es `v0.9.0`: línea base funcionalmente completa, **no es una versión de producción**. `docs/plan_liberacion.md` es el plan de la `1.0.0` (27/11/2026) con su dictamen: **no-go para liberarla hoy** porque faltan los manuales (fase I) y el despliegue (fase J); condiciones y calendario en ese documento.
 - **Normas de trabajo de Victo.** Planificar antes de actuar; ejecutar e iterar en Git (un commit por paso verificable y `git push` al cerrar un bloque); validar con pruebas (automáticas cuando se puede, o comprobaciones reproducibles cuyo resultado se anota).
 
 ### Decisiones abiertas
 
 - **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
-- **Hallazgos H-02 y H-03.** Decidir si se corrigen antes de la entrega (el informe propone cómo) o se dejan como mejoras. El H-01 ya se corrigió.
+- **Hallazgos H-02 y H-03.** El plan de liberación (`docs/plan_liberacion.md`) trata el H-02 dentro del bloque B2 de la fase J y deja el H-03 como opcional. El H-01 ya se corrigió.
 - **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
 - **Hosting (actividad J).** Sin definir.
 

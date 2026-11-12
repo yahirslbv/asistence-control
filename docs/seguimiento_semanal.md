@@ -18,7 +18,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 - **Estado:** las actividades A a H están terminadas, la I (manuales) está en curso y la J (despliegue y entrega) está por hacer.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
-- **Calidad:** 642 pruebas automáticas en verde (suite completa del 9/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
+- **Calidad:** 645 pruebas automáticas en verde (suite completa del 11/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
 - **Requisitos:** los 20 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11; RF-18 a RF-20, que salieron de las observaciones de los evaluadores, el 4/11). También están hechos el RNF-10 (pase de lista compacto) y el RNF-11 (paleta, confirmada el 9/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
 - **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y dos hallazgos menores de la fase H, H-02 y H-03 (sección 8).
 
@@ -56,7 +56,7 @@ python manage.py test --noinput
 ```
 
 - `seed_demo` crea 1 administrador, 2 docentes, 2 grupos y 40 alumnos. La contraseña de las cuentas de demostración está en `asistencia/management/commands/seed_demo.py`.
-- La suite completa debe terminar con `Ran 642 tests` y `OK`. En la última corrida (9/11/2026) tardó 908 s (unos quince minutos, con otras tareas corriendo en la misma máquina); una corrida anterior, sin carga extra, tardó 504 s.
+- La suite completa debe terminar con `Ran 645 tests` y `OK`. En la corrida del 11/11/2026, en un entorno de pruebas aparte, tardó 188 s. Las del 9/11/2026 (642 pruebas) tardaron 908 s, con otras tareas corriendo en la misma máquina, y 504 s sin carga extra.
 - La carpeta [docs](.) contiene este seguimiento y el informe de pruebas.
 
 ## 3. Estado por semana
@@ -192,7 +192,7 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 642 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
+- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 645 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
   - [ ] Definir el hosting y desplegar el sistema.
   - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
   - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
@@ -247,7 +247,7 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 | Commits | 94 (39 el 13/10, 10 el 14/10, 24 el 15/10, 5 el 19/10, 10 el 3/11, 4 el 4/11 y 2 el 9/11, sin contar los de este seguimiento) |
 | Archivos versionados | 126 |
 | Código de la aplicación (Python, sin pruebas ni migraciones) | 4 339 líneas |
-| Pruebas (Python) | 8 920 líneas, 642 pruebas en 30 archivos |
+| Pruebas (Python) | 8 920 líneas, 645 pruebas en 30 archivos |
 | Plantillas HTML | 33 archivos, 1 824 líneas |
 | Hojas de estilo y JavaScript | `estilo.css` (1 093 líneas), `admin.css` (635 líneas) y `pase_de_lista.js` (67 líneas) |
 | Modelos / migraciones / rutas | 8 / 4 / 29 (más las del admin de Django) |
