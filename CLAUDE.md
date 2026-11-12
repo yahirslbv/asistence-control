@@ -271,7 +271,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 ### Decisiones abiertas
 
 - **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
-- **Hallazgos H-02 y H-03.** Decidir si se corrigen antes de la entrega (el informe propone cómo) o se dejan como mejoras. El H-01 ya se corrigió.
+- **Hallazgos H-02 y H-03.** El plan de liberación (`docs/plan_liberacion.md`) trata el H-02 dentro del bloque B2 de la fase J y deja el H-03 como opcional. El H-01 ya se corrigió.
 - **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
 - **Hosting (actividad J).** Sin definir.
 
