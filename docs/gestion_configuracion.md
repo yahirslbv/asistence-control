@@ -87,3 +87,41 @@ Reglas:
 - **Candidatas.** Antes de `1.0.0` puede haber `1.0.0-rc.1`, `1.0.0-rc.2`... Una versión con sufijo de pre-liberación tiene menor precedencia que la normal y avisa que es inestable.
 - **Una versión etiquetada no se modifica.** Cualquier corrección se libera como una versión nueva (SemVer, punto 3). Una corrección urgente sale de una rama `fix/...` creada desde la etiqueta que está en producción y se libera como PATCH.
 - **Relación con los commits:** `feat` sube MINOR, `fix` sube PATCH y un cambio incompatible sube MAJOR. Los demás tipos no cambian el número por sí solos.
+
+## 6. Estrategia de ramas
+
+Se usa **desarrollo basado en tronco con ramas cortas y pull request** (a veces llamado GitHub Flow):
+
+- `main` es la única rama permanente. Siempre está en un estado que se puede desplegar.
+- Cada cambio se hace en una rama corta (de unas horas a pocos días) creada desde `main`, con el nombre de la sección 4.
+- Una rama entra a `main` solo por **pull request**, con la revisión de la lista de la sección 7 y la suite de pruebas en verde. La fusión se hace con commit de fusión (`--no-ff`), para que cada pull request quede visible en el historial.
+- Una liberación se prepara en una rama `release/vX.Y.Z` que solo ajusta el `CHANGELOG`, la documentación de la liberación y el estado en `CLAUDE.md`. La etiqueta se pone sobre `main`, **después** de fusionarla y de pasar la auditoría de la sección 8.
+- Una corrección urgente de producción sale de `fix/<tema>` creada desde la etiqueta en producción, y se libera como PATCH sin llevarse nada que esté a medias.
+
+**Por qué se ajusta a este proyecto.** El proyecto lo desarrolla una persona, tiene un solo entorno de producción, una sola versión en producción a la vez y una fecha límite (27/11/2026) a 16 días. GitFlow (con una rama `develop` permanente, ramas de liberación y de corrección de larga vida) existe para coordinar equipos y varias versiones en paralelo; aquí agregaría sincronizaciones entre ramas sin dar ningún beneficio. Con `main` siempre estable, además, no puede ocurrir que la rama de desarrollo acumule funciones sin probar justo antes de liberar: lo que no pasó la revisión y las pruebas no está en `main`. Si algún día hubiera varias versiones soportadas a la vez, se revisaría la decisión.
+
+## 7. Control de cambios
+
+Todo cambio a un elemento que ya pertenece a una línea base (ECS-01 a ECS-03 siempre; los demás cuando cambian el comportamiento del sistema) pasa por una **solicitud de cambio**:
+
+1. **Solicitud.** Se redacta con `docs/cambios/CR-000_plantilla.md` como `docs/cambios/CR-NNN_tema.md`: quién la pide, qué cambia, por qué y qué elementos toca.
+2. **Evaluación de impacto.** Alcance, base de datos, pruebas, documentación, riesgo y esfuerzo, y las alternativas que se descartan.
+3. **Decisión del CCB.** Aceptar, modificar, rechazar o diferir, con la fecha y la razón. Se anota en el registro de decisiones de esta sección.
+4. **Implementación** en una rama `cambio/cr-nnn-tema`, con commits cuyo ámbito es `cr-nnn` (o el requisito afectado).
+5. **Revisión y pruebas.** Pull request con la lista de revisión y la suite completa en verde.
+6. **Cierre.** Fusión a `main`, línea nueva en el `CHANGELOG` y actualización de los documentos que cita la solicitud.
+
+**Lista de revisión de un pull request:** (a) el título y los commits siguen la convención de la sección 4; (b) no hay secretos ni archivos de `.gitignore` en el cambio; (c) cada cambio de código tiene su prueba y la suite pasa; (d) no se tocó `models.py` ni una migración sin una solicitud de cambio aprobada; (e) el `CHANGELOG` y los documentos afectados están actualizados; (f) el cambio hace solo lo que dice la solicitud.
+
+**Registro de decisiones del comité**
+
+| Solicitud | Descripción | Fecha | Decisión | Rama | Versión |
+|---|---|---|---|---|---|
+| (aún no hay solicitudes registradas) | | | | | |
+
+## 8. Auditoría de configuración
+
+Antes de cada etiqueta se hace una auditoría ligera, en las dos formas que describe SWEBOK. Su resultado se anota en el plan de liberación.
+
+- **Funcional** (el producto cumple su especificación): la suite completa pasa en una base MySQL 8 limpia; cada requisito de prioridad Alta tiene prueba; los hallazgos abiertos están revisados y los que quedan, anotados.
+- **Física** (lo que se entrega es lo que se documentó): `git status` sin cambios; los archivos versionados (`git ls-files`) coinciden con la estructura de `CLAUDE.md` sección 4; ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado (`git check-ignore -v`); el número de la etiqueta coincide con el del `CHANGELOG`; y la etiqueta apunta al commit de `main` que se auditó (`git rev-parse vX.Y.Z^{}`).
