@@ -36,7 +36,7 @@ Esto sale del README y del seguimiento. **Verifícalo leyendo el código antes d
 - `.gitignore`: **ya corregido el 15/10/2026** (commit `a094f13`). Antes solo cubría `.env` exacto, y un `.env.prod` se habría subido a un repositorio público. Ahora cubre `.env.*` (menos `.env.example` y `.env.prod.example`) y `*.sql.gz`. Compruébalo con `git check-ignore -v .env.prod` antes de crear el archivo.
 - Casi todas las pruebas que renderizan una pantalla (las del admin y, desde el rediseño, cualquiera que use `base.html`) pasan por `{% static %}`: cualquier cambio del almacenamiento estático las afecta (ver B3).
 - Hasta el 11/11/2026 no había página 500 propia (solo `403.html` y `404.html`; la 500 ya existe, CR-001), y la contraseña de `seed_demo` está en el código (`PASSWORD_DEMO`) de un repositorio público.
-- 642 pruebas en verde (`python manage.py test --noinput`, de 9 a 15 minutos, necesita MySQL arriba).
+- 650 pruebas en verde (`python manage.py test --noinput`, de 9 a 15 minutos, necesita MySQL arriba).
 
 Qué confirmar antes de empezar, por si algo cambió desde el 15/10/2026: `config/settings.py`, `config/urls.py`, `docker-compose.yml`, `.env.example`, `.gitignore` y la plantilla base.
 
@@ -145,7 +145,7 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
 9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
 10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
-11. La suite completa sigue pasando (642 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
+11. La suite completa sigue pasando (645 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
 12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
 ## 7. Lo que no puedes hacer tú (le toca a Victo)

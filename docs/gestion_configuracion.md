@@ -2,7 +2,7 @@
 
 Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos de Software.
 
-Este documento define cómo se identifica, versiona, cambia y libera cada componente del sistema. Aplica las técnicas de configuración de IEEE 828 y de la guía SWEBOK (identificación de elementos, líneas base, control de versiones, control de cambios y auditoría). [CLAUDE.md](../CLAUDE.md) sigue siendo la fuente de verdad del proyecto; este archivo solo describe cómo se controlan sus cambios.
+Este documento define cómo se identifica, versiona, cambia y libera cada componente del sistema. Sigue los temas de la administración de la configuración de la guía SWEBOK (identificación de elementos, líneas base, control de versiones, control de cambios y auditoría). El estándar IEEE 828 trata el mismo campo, pero este documento no lo aplica cláusula por cláusula. [CLAUDE.md](../CLAUDE.md) sigue siendo la fuente de verdad del proyecto; este archivo solo describe cómo se controlan sus cambios.
 
 ## 1. Alcance y roles
 
