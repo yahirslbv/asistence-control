@@ -75,6 +75,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise sirve los archivos estáticos (solo STATIC_ROOT, nunca media/).
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -149,7 +151,30 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
+# `collectstatic` reúne aquí los archivos estáticos y WhiteNoise los sirve.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# La carpeta existe aunque esté vacía (desarrollo y pruebas): sin ella,
+# WhiteNoise avisa «No directory at» en cada arranque.
+STATIC_ROOT.mkdir(exist_ok=True)
 
+# Con DJANGO_STATIC_MANIFEST=1 los archivos estáticos llevan una huella en el
+# nombre (estilo.3153bc6eb70d.css) y se sirven comprimidos. La variable la fija
+# la imagen de Docker, que ejecuta `collectstatic` al construirse. No se activa
+# por defecto: sin `collectstatic` previo ninguna pantalla se podría mostrar,
+# y así desarrollo y pruebas siguen funcionando sin ese paso.
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': (
+            'whitenoise.storage.CompressedManifestStaticFilesStorage'
+            if os.environ.get('DJANGO_STATIC_MANIFEST') == '1'
+            else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        ),
+    },
+}
+
+# Los justificantes no tienen URL pública: `config/urls.py` no sirve MEDIA_URL
+# y WhiteNoise solo conoce STATIC_ROOT. Se descargan por la vista del docente.
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
