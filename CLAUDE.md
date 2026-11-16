@@ -21,7 +21,8 @@ Léelo completo antes de escribir código. Este archivo es la fuente de verdad d
 | Interfaz | Plantillas de Django + Bootstrap 5 (responsiva) + JavaScript mínimo |
 | Excel / PDF | `openpyxl` / `reportlab` (se instalan solo con pip) |
 | Pruebas | Ejecutor de pruebas de Django (`python manage.py test`) |
-| Configuración | Variables de entorno en `.env` (con `python-dotenv`) |
+| Configuración | Variables de entorno en `.env` (con `python-dotenv`); en producción, `.env.prod` |
+| Despliegue | Docker Compose: MySQL 8, la aplicación con `gunicorn` y `whitenoise`, y Caddy como proxy |
 
 ## 3. Antes de empezar: pregunta a Victo
 
@@ -30,7 +31,7 @@ Léelo completo antes de escribir código. Este archivo es la fuente de verdad d
 3. ¿Trabaja solo o en equipo? El cronograma asigna roles (analista, base de datos, interfaz, backend, frontend, pruebas, documentador, líder), pero no hay nombres.
 4. ¿Qué porcentaje mínimo de asistencia se usa? 80, **confirmado por Victo el 16/11/2026**, configurable en `ASISTENCIA_MINIMA`.
 5. ¿El administrador solo gestiona usuarios o también ve todos los grupos? Por defecto: solo gestiona usuarios.
-6. ¿Dónde se va a desplegar? El hosting no está definido (actividad J).
+6. ¿Dónde se va a desplegar? **Decidido por Victo el 16/11/2026:** demostración local con Docker en su equipo (`http://localhost`). La misma pila sirve en un servidor con dominio; ese caso no se ha ejecutado.
 
 Si no responde, usa los valores por defecto y anótalos en el README.
 
@@ -64,6 +65,8 @@ control_asistencia/
 │   ├── static/              # asistencia/estilo.css (aplicación), admin.css (tema del admin) y pase_de_lista.js (reglas de las casillas, RF-18)
 │   ├── management/commands/seed_demo.py
 │   └── tests/
+├── docker/                  # arranque del contenedor web (entrypoint.sh), comprobación de salud (healthcheck.py) y proxy (Caddyfile)
+├── scripts/                 # demo.ps1 (demostración local), respaldo.sh y respaldo.ps1 (RNF-08) y probar_restauracion.sh
 ├── docs/
 │   ├── manual_usuario.md       # manual del docente, con capturas en docs/img/manual_usuario/ (fase I)
 │   ├── informe_pruebas.md      # informe de la fase H
@@ -73,10 +76,16 @@ control_asistencia/
 │   ├── plan_liberacion.md      # plan de liberación de la versión 1.0.0, dictamen go/no-go y auditoría de cada etiqueta
 │   └── cambios/                # solicitudes de cambio (CR-NNN) y su plantilla
 ├── CHANGELOG.md             # historial de versiones (Keep a Changelog)
-├── requirements.txt
+├── Dockerfile               # imagen de la aplicación: dos etapas, usuario sin privilegios, collectstatic al construir
+├── docker-compose.prod.yml  # pila de producción (db, web y proxy), proyecto control_asistencia_prod
+├── docker-compose.yml       # MySQL 8 de desarrollo
+├── requirements.txt         # versiones exactas (CR-002)
 ├── .env.example
+├── .env.prod.example        # plantilla de la configuración de producción (marcadores CAMBIA-ESTO)
+├── .dockerignore
+├── .gitattributes           # LF en los archivos que corren en Linux
 ├── .gitignore
-└── README.md                # instalación (RNF-09)
+└── README.md                # instalación (RNF-09) y despliegue
 ```
 
 ## 5. Reglas de trabajo
@@ -127,7 +136,7 @@ control_asistencia/
 | RNF-05 | Integridad referencial y unicidad por alumno y sesión | Constraints del Apéndice A |
 | RNF-06 | Toda corrección registra autor y fecha | Disparador de la base de datos (sección 9.3) |
 | RNF-07 | Consultas en menos de 3 s con grupos de hasta 50 alumnos | Agregaciones con el ORM, `select_related` e índices. En `Meta.indexes` van `asistencia(alumno)`, `inscripcion(alumno)` y `bitacora_cambio(asistencia)`: cada uno es el único índice sobre esa clave foránea (MySQL no deja quitarlo, y sin él crearía uno equivalente sin nombre), así que no duplican nada. `sesion(grupo, fecha)` **no** se declara: es prefijo de `uq_sesion_grupo_fecha_hora` y MySQL ya lo usa. Comprobado con `SHOW INDEX` en MySQL 8.0 |
-| RNF-08 | Respaldo diario de la base de datos | Comando que ejecuta `mysqldump`, programado con cron. Se hace en la fase J |
+| RNF-08 | Respaldo diario de la base de datos | `scripts/respaldo.sh` (cron) y `scripts/respaldo.ps1` (Programador de tareas de Windows): `mysqldump` dentro del contenedor `db` y copia de `media/`, con retención de 14 copias. La restauración se prueba con `scripts/probar_restauracion.sh`. Hecho en la fase J (16/11/2026) |
 | RNF-09 | Código versionado y documentación de instalación | Git + README con pasos de instalación |
 | RNF-10 | Pase de lista compacto: nombre a la izquierda y controles a la derecha, para recorrer grupos grandes sin desplazarse de más. Agregado el 4/11/2026 por observación de los evaluadores | Una fila por alumno con cuatro casillas de al menos 44 px, encabezado de columnas fijo, sin desbordamiento horizontal desde 320 px, contraste de 4.5:1 en texto y 3:1 en el borde de las casillas, y estado que no depende solo del color |
 
@@ -228,7 +237,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] RF-19 y RF-20 · Registro de docentes con aprobación y panel del administrador (4/11/2026)
 - [ ] I · Manuales (el manual de usuario está hecho, 16/11/2026; falta el manual de administrador)
 - [x] H · Integración y pruebas (informe en `docs/informe_pruebas.md`; RNF-01 sin cronometrar con personas)
-- [ ] J · Despliegue y entrega
+- [ ] J · Despliegue y entrega. **Parte técnica hecha el 16/11/2026** (bloques B2 a B8 de `docs/DESPLIEGUE.md`): configuración de producción, archivos estáticos, imagen, pila de Docker, respaldo diario con restauración probada (RNF-08), `seed_demo` protegido y sección «Despliegue» del README; verificada en la pila real (registro de `v1.0.0-rc.1` en `docs/plan_liberacion.md`). **Pendiente:** que Victo apruebe y se etiquete `v1.0.0-rc.1`, la demostración y la entrega; la capacitación y el acta son opcionales
 
 ### Decisiones tomadas
 
@@ -265,17 +274,27 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Diseño del admin (3/11/2026).** Tema propio en `asistencia/static/asistencia/admin.css` con la paleta de la aplicación (pino y ámbar desde el 4/11/2026, con la barra superior en pino), claro y oscuro (respeta el interruptor del admin), y plantilla `admin/base_site.html` con la marca. Para que esa plantilla gane a la de Django, `asistencia` va antes que `django.contrib.admin` en `INSTALLED_APPS`. Sin barra lateral ni «Ver sitio». `test_estilo.py` comprueba el contraste de las dos paletas y que la oscura automática y la forzada no se desincronicen.
 - **Hallazgos de la fase H sin corregir** (ninguno crítico ni mayor, ver el informe): ~~H-01 botones secundarios de unos 31 px~~ corregido con el rediseño (44 px en el teléfono); ~~H-02 no hay página 500 propia~~ corregido el 11/11/2026 con la solicitud de cambio CR-001 (`asistencia/templates/500.html`, probada con `DEBUG=False` en `test_pagina_500.py`); H-03 la importación del CSV hace unas cinco consultas por fila (0.4 s con 50 filas, 3.8 s con las 500 que acepta como máximo; el RNF-07 solo acota grupos de 50).
 
-- **Plan de despliegue (fase J).** `docs/DESPLIEGUE.md` describe lo técnico de la fase J. Se revisó el 15/10/2026 contra el código y con pruebas desechables, y sus correcciones están en el historial de Git de ese archivo. `.gitignore` ya cubre `.env.*` (menos los ejemplos) y `*.sql.gz`: antes `.env.prod` se habría subido a un repositorio público. El plan aún no se ejecuta; la fase J sigue pendiente.
+- **Plan de despliegue (fase J).** `docs/DESPLIEGUE.md` describe lo técnico de la fase J. Se revisó el 15/10/2026 contra el código y con pruebas desechables, y sus correcciones están en el historial de Git de ese archivo. `.gitignore` ya cubre `.env.*` (menos los ejemplos) y `*.sql.gz`: antes `.env.prod` se habría subido a un repositorio público. El plan se ejecutó el 16/11/2026 (ver «Despliegue» más abajo y la sección 10 de ese documento).
 - **Gestión de la configuración y línea base (RNF-09, 11/11/2026).** `docs/gestion_configuracion.md` fija los elementos de configuración, las líneas base, la convención de nombres, el versionado semántico, la estrategia de ramas (una rama `main` estable, ramas cortas y pull request) y el control de cambios con solicitudes `CR-NNN`. La primera etiqueta es `v0.9.0`: línea base funcionalmente completa, **no es una versión de producción**. `docs/plan_liberacion.md` es el plan de la `1.0.0` (27/11/2026) con su dictamen: **no-go para liberarla hoy** porque faltan los manuales (fase I) y el despliegue (fase J); condiciones y calendario en ese documento.
 - **Normas de trabajo de Victo.** Planificar antes de actuar; ejecutar e iterar en Git (un commit por paso verificable y `git push` al cerrar un bloque); validar con pruebas (automáticas cuando se puede, o comprobaciones reproducibles cuyo resultado se anota).
 
 - **Mínimo de asistencia y cierre de la aceptación (16/11/2026).** Victo confirmó el mínimo de **80 %** (sin consultarlo con la profesora): deja de ser un supuesto, sigue siendo configurable con `ASISTENCIA_MINIMA` y se ve en pantalla y en las exportaciones. También decidió que el recorrido de aceptación (S7) y el RNF-01 se **simulen** en lugar de hacerse con una persona ajena al proyecto (`docs/aceptacion_simulada.md`: es una simulación y una estimación, no una medición con personas) y que la capacitación y el acta de aceptación son **opcionales** por ser un proyecto escolar.
+- **Despliegue (fase J, 16/11/2026).** Decisiones de Victo: **hosting = demostración local** con Docker en su equipo (`http://localhost`, HTTP, `DJANGO_HTTPS=0`); Bootstrap sigue por CDN (la demostración necesita internet); las copias de respaldo quedan solo en `respaldos/`; la imagen es Linux y, como la demostración corre en Windows, el respaldo tiene también versión en PowerShell. Lo que se construyó:
+  - **Pila** (`docker-compose.prod.yml`, proyecto `control_asistencia_prod`): `db` (MySQL 8.0, sin puertos publicados), `web` (la imagen, con `healthcheck` que manda un `Host` válido) y `proxy` (Caddy; responde 404 a `/media/*` sin pasarlo a Django). Todo sale de `.env.prod`, que no se versiona. La base y el usuario de la aplicación se crean desde las mismas variables `DB_*` que lee Django; `db` se niega a arrancar si una contraseña falta o sigue en `CAMBIA-ESTO`; `web` y `proxy` no reciben la contraseña de `root`. **Nunca `docker compose down -v`**: borra la base y los justificantes.
+  - **Clave obligatoria.** Con `DEBUG=0`, `settings.py` lanza `ImproperlyConfigured` si `DJANGO_SECRET_KEY` falta, está vacía o contiene `cambia-esto` (en cualquier combinación de mayúsculas). Por eso `collectstatic` lleva una clave desechable solo en esa línea del `Dockerfile`.
+  - **Estáticos.** WhiteNoise va después de `SecurityMiddleware`. El manifiesto con huella se activa solo con `DJANGO_STATIC_MANIFEST=1`, que fija la imagen; en desarrollo y en las pruebas no existe. `settings.py` crea la carpeta `staticfiles/` vacía para que WhiteNoise no avise en cada arranque.
+  - **`DJANGO_HTTPS=1`** (solo con un dominio real): cookies seguras, `SECURE_PROXY_SSL_HEADER` y HSTS de 3600 s. `check --deploy` deja entonces `W005`, `W008` y `W021`, justificados en el README (el plan esperaba solo `W008`; ver «Decisiones abiertas»). En la demostración por HTTP salen `W004`, `W008`, `W012` y `W016`.
+  - **Respaldo (RNF-08).** `mysqldump --single-transaction --routines --triggers --no-tablespaces` con el usuario de la aplicación y `tar` de `media/`; si falla, no borra copias. **Restauración:** se prueba como `root` en la base temporal `restauracion_prueba`. Dos hechos medidos: sobre la copia, el `UPDATE` falla con el **error 1142** si el dueño del disparador no tiene permisos en la base temporal (el script se los da y se los quita); y con un dueño (`DEFINER`) inexistente, todo `UPDATE` de asistencia falla con el **error 1449**, así que en un servidor nuevo se levanta primero la pila con el mismo `.env.prod` y se restaura después.
+  - **`seed_demo`.** Con `DEBUG=0` se niega si falta `SEED_PASSWORD` o si es la misma del código. En un sistema en uso no se ejecuta: el primer administrador se crea con `createsuperuser`.
+  - **Saltos de línea.** `.gitattributes` fija LF en `*.sh`, `Dockerfile` y `docker/Caddyfile`: con CRLF el contenedor no ejecuta el script de arranque.
 
 ### Decisiones abiertas
 
 - **Hallazgo H-03.** El plan de liberación (`docs/plan_liberacion.md`) lo deja como opcional. El H-01 y el H-02 ya se corrigieron (el H-02 con CR-001).
-- **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
-- **Hosting (actividad J).** Sin definir.
+- **Avisos de `check --deploy` (criterio S4).** El plan de liberación admite solo `W008`; medido el 16/11/2026, con `DJANGO_HTTPS=1` quedan también `W005` y `W021` (aparecen al activar HSTS). Hoy están apagados y justificados en el README. Falta que Victo decida: aceptar los tres y ajustar el texto de S4, o activar `SECURE_HSTS_INCLUDE_SUBDOMAINS` y `SECURE_HSTS_PRELOAD`.
+- **Errores del servidor sin registro.** Con `DEBUG=0`, la configuración de registro por defecto de Django no escribe los errores 500 en la salida del contenedor: en los registros de `web` solo se ve la línea de acceso con el código 500. Agregar un `LOGGING` propio sería un cambio de código (con su solicitud de cambio).
+- **Copias fuera del equipo.** Por decisión de Victo las copias de respaldo quedan solo en `respaldos/`; no protegen contra la pérdida del equipo (riesgo R11).
+- **Tarea programada del respaldo.** El README trae la línea de `cron` y el comando de `schtasks`; ninguno se ha instalado.
 
 ## 13. Comandos
 
@@ -289,6 +308,20 @@ python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 python manage.py test
+```
+
+Despliegue (pila de producción; el detalle está en el README, sección «Despliegue»):
+
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\demo.ps1    # demostración local en Windows
+cp .env.prod.example .env.prod                                         # en un servidor: cambiar los CAMBIA-ESTO
+docker compose -f docker-compose.prod.yml up -d --build                # levantar o actualizar
+docker compose -f docker-compose.prod.yml ps                           # estado
+docker compose -f docker-compose.prod.yml logs -f web                  # registros
+docker compose -f docker-compose.prod.yml down                         # apagar (NUNCA con -v)
+docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+scripts/respaldo.sh                                                    # en Windows: scripts\respaldo.ps1
+scripts/probar_restauracion.sh                                         # prueba de restauración (bash)
 ```
 
 Si MySQL rechaza el disparador con el error 1419 (privilegio SUPER con registro binario activo), en desarrollo ejecuta `SET GLOBAL log_bin_trust_function_creators = 1;`. Para correr las pruebas, el usuario de MySQL necesita permiso de crear la base `test_*`.
@@ -609,6 +642,8 @@ ASISTENCIA_MINIMA=80
 REGISTRO_DOMINIOS=uabc.edu.mx
 ```
 
+`.env.prod.example` (producción) agrega `DOMINIO`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_HTTPS`, `DJANGO_CSRF_TRUSTED_ORIGINS` y `MYSQL_ROOT_PASSWORD`, con `DJANGO_DEBUG=0`. `DJANGO_STATIC_MANIFEST=1` lo fija la imagen.
+
 Claves de `config/settings.py` que no pueden faltar:
 ```python
 AUTH_USER_MODEL = 'asistencia.Usuario'
@@ -621,4 +656,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 ASISTENCIA_MINIMA = int(os.environ.get('ASISTENCIA_MINIMA', 80))
 REGISTRO_DOMINIOS = [d.strip().lower() for d in os.environ.get('REGISTRO_DOMINIOS', 'uabc.edu.mx').split(',') if d.strip()]
 # DATABASES: engine 'django.db.backends.mysql', datos tomados de las variables DB_*.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# MIDDLEWARE: 'whitenoise.middleware.WhiteNoiseMiddleware' justo después de SecurityMiddleware.
+# SECRET_KEY: con DEBUG=0 es obligatoria y no puede ser la de un archivo de ejemplo.
 ```

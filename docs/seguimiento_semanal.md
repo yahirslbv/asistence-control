@@ -192,10 +192,13 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **por hacer.** Punto de partida: el código está publicado y las 650 pruebas pasan. El plan técnico está en [DESPLIEGUE.md](DESPLIEGUE.md), revisado el 15/10/2026 contra el código y con pruebas desechables; el `.gitignore` ya cubre `.env.*` para que `.env.prod` no se suba por error.
-  - [ ] Definir el hosting y desplegar el sistema.
-  - [ ] Respaldo diario con `mysqldump` y cron, incluyendo la carpeta `media/` (RNF-08).
-  - [ ] Cambiar la contraseña de demostración de `seed_demo` antes de desplegar (el repositorio es público).
+- **Estado:** **parte técnica hecha el 16/11/2026** (bloques B2 a B8 de [DESPLIEGUE.md](DESPLIEGUE.md)); falta la aprobación de la candidata `v1.0.0-rc.1`, la demostración y la entrega. El hosting quedó decidido: demostración local con Docker en el equipo del proyecto.
+  - **Qué se hizo:** configuración de producción (clave obligatoria, `DJANGO_HTTPS`), archivos estáticos con WhiteNoise, imagen de la aplicación, pila de tres servicios (`docker-compose.prod.yml`), respaldo diario con restauración probada, `seed_demo` protegido, demostración de un comando (`scripts/demo.ps1`) y sección «Despliegue» del README.
+  - **Evidencia:** los 12 puntos de la lista de verificación pasaron en la pila real; el detalle está en el registro de `v1.0.0-rc.1` de [plan_liberacion.md](plan_liberacion.md). Suite completa: `Ran 683 tests in 992.973s`, `OK` (commit `33c81f5`).
+  - **Sin ejecutar:** el despliegue con dominio y HTTPS (solo documentado) y la tarea programada del respaldo (el README trae la línea de `cron` y el comando de `schtasks`).
+  - [x] Definir el hosting (demostración local, 16/11/2026) y desplegar el sistema en la pila de producción local.
+  - [x] Respaldo diario con `mysqldump`, incluyendo la carpeta `media/` (RNF-08), con restauración probada. Falta programarlo (cron o Programador de tareas).
+  - [x] Proteger la contraseña de demostración: con `DEBUG=0`, `seed_demo` exige `SEED_PASSWORD` (el repositorio es público).
   - [x] Página 500 propia (hallazgo H-02), hecha el 11/11/2026 con CR-001.
   - [ ] Capacitación a los docentes.
   - [ ] Acta de aceptación firmada.
@@ -281,9 +284,11 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 
 **Decisiones abiertas** (también en la sección 12 de CLAUDE.md):
 1. **Mínimo de asistencia de 80 %.** Resuelta el 16/11/2026: Victo lo confirmó (`ASISTENCIA_MINIMA`).
-2. **Hosting.** Sin definir; la actividad J depende de esta decisión.
-3. **Respaldo de `media/`.** Los justificantes viven ahí y no se versionan; el respaldo diario debe incluirla.
+2. **Hosting.** Resuelta el 16/11/2026: demostración local con Docker (`http://localhost`). El despliegue con dominio queda documentado, sin ejecutar.
+3. **Respaldo de `media/`.** Resuelta el 16/11/2026: `scripts/respaldo.sh` y `scripts/respaldo.ps1` la incluyen. Las copias quedan solo en el equipo.
 4. **El administrador solo gestiona usuarios.** Es el valor por defecto, sin confirmar.
+5. **Avisos de `check --deploy`.** Con `DJANGO_HTTPS=1` quedan `W005`, `W008` y `W021`; el criterio S4 esperaba solo `W008`. Falta decidir si se aceptan los tres.
+6. **Errores del servidor sin registro.** Con `DEBUG=0` los errores 500 no se escriben en la salida del contenedor.
 
 **Hallazgos menores de la fase H** (ninguno crítico ni mayor):
 
@@ -294,7 +299,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 | H-03 | Importar un CSV de 500 filas tarda 3.8 s (con 50 filas, 0.4 s) | Importar por bloques en lugar de por fila |
 
 **Riesgos**
-- **Ruta crítica en J.** Es la única actividad pendiente de la ruta crítica y depende de una decisión que sigue abierta (el hosting).
+- **Ruta crítica en J.** Es la única actividad pendiente de la ruta crítica. La parte técnica quedó hecha el 16/11/2026; faltan la aprobación de la candidata y la entrega.
 - **RNF-01 sin evidencia con personas.** El diseño no impone esperas, pero solo se puede confirmar con docentes.
 - **Repositorio público.** La contraseña de demostración de `seed_demo` está escrita en el código y cada commit lleva el correo del autor. Conviene cambiar esa contraseña antes de desplegar, o hacer el repositorio privado.
 - **Registro público sin límite de intentos ni CAPTCHA (RF-19).** Cualquiera puede crear cuentas pendientes; el control es el filtro de dominio y la aprobación del administrador. Si se llega a abusar, hay que limitar las peticiones a `/registro/` en el proxy (ver [DESPLIEGUE.md](DESPLIEGUE.md)).
