@@ -4,22 +4,26 @@ Es idempotente: se puede ejecutar varias veces sin duplicar nada. Los 40
 alumnos se reparten en dos grupos de 25, con 10 inscritos en ambos, para
 mostrar que un alumno puede estar en varios grupos.
 
-Solo sirve para desarrollo y pruebas manuales.
+Solo sirve para desarrollo y pruebas manuales. Con DEBUG apagado no usa la
+contraseña de demostración de este archivo, que es pública: exige una propia
+en la variable de entorno SEED_PASSWORD.
 """
 
 import os
 from datetime import date
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from asistencia.models import Alumno, Grupo, Inscripcion, Periodo
 from asistencia.services.periodos import activar_periodo, periodo_activo
 from asistencia.services.usuarios import aplicar_rol, sincronizar_permisos
 
-# Contraseña de las cuentas de demostración. Se puede cambiar con la variable
-# de entorno SEED_PASSWORD.
+# Contraseña de las cuentas de demostración, solo para desarrollo (DEBUG=1).
+# Se cambia con la variable de entorno SEED_PASSWORD, que es obligatoria con
+# DEBUG=0: esta está en un repositorio público.
 PASSWORD_DEMO = 'Asistencia#2026'
 
 PERIODO = '2026-2'
@@ -43,9 +47,20 @@ MATRICULA_BASE = 1200000
 class Command(BaseCommand):
     help = 'Crea datos de demostración (administrador, docentes, grupos y alumnos).'
 
-    @transaction.atomic
     def handle(self, *args, **options):
-        password = os.environ.get('SEED_PASSWORD', PASSWORD_DEMO)
+        password = os.environ.get('SEED_PASSWORD', '')
+        if not settings.DEBUG and password in ('', PASSWORD_DEMO):
+            raise CommandError(
+                'seed_demo no crea cuentas con la contraseña de demostración cuando '
+                'DEBUG está apagado: esa contraseña es pública. Define una propia en '
+                'la variable de entorno SEED_PASSWORD y vuelve a ejecutarlo. En un '
+                'sistema en uso no se ejecuta seed_demo: el primer administrador se '
+                'crea con createsuperuser.'
+            )
+        self._sembrar(password or PASSWORD_DEMO)
+
+    @transaction.atomic
+    def _sembrar(self, password):
         Usuario = get_user_model()
 
         self._usuario(
