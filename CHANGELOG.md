@@ -8,6 +8,7 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ### Added
 
+- Manual del administrador, con capturas: el Panel, aprobar y rechazar cuentas, alta, baja y cambio de contraseña de usuarios, y periodos escolares (`docs/manual_administrador.md`, fase I).
 - Manual de usuario del docente, con capturas de cada pantalla: cuenta y acceso, grupos, alumnos y archivo CSV, sesiones, pase de lista con sus casillas, correcciones y justificantes, reportes y solo lectura (`docs/manual_usuario.md`, fase I).
 
 ## [0.9.0] - 2026-11-11

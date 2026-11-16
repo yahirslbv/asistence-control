@@ -66,6 +66,7 @@ control_asistencia/
 │   └── tests/
 ├── docs/
 │   ├── manual_usuario.md       # manual del docente, con capturas en docs/img/manual_usuario/ (fase I)
+│   ├── manual_administrador.md # manual del administrador, con capturas en docs/img/manual_administrador/ (fase I)
 │   ├── informe_pruebas.md      # informe de la fase H
 │   ├── seguimiento_semanal.md  # avance contra el cronograma y el tablero de Trello
 │   ├── DESPLIEGUE.md           # plan técnico de la fase J (Docker, respaldo, producción)
@@ -226,7 +227,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] RF-17 · Periodos escolares: el administrador los crea, edita, activa y desactiva; uno inactivo congela sus grupos (3/11/2026)
 - [x] RF-18 y RNF-10 · Pase de lista con casillas y fila compacta (4/11/2026)
 - [x] RF-19 y RF-20 · Registro de docentes con aprobación y panel del administrador (4/11/2026)
-- [ ] I · Manuales (el manual de usuario está hecho, 16/11/2026; falta el manual de administrador)
+- [x] I · Manuales (manual de usuario y manual de administrador, 16/11/2026; el README de instalación ya existía)
 - [x] H · Integración y pruebas (informe en `docs/informe_pruebas.md`; RNF-01 sin cronometrar con personas)
 - [ ] J · Despliegue y entrega
 
