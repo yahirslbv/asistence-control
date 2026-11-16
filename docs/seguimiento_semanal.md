@@ -20,7 +20,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
 - **Calidad:** 650 pruebas automáticas en verde (suite completa del 11/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
 - **Requisitos:** los 20 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11; RF-18 a RF-20, que salieron de las observaciones de los evaluadores, el 4/11). También están hechos el RNF-10 (pase de lista compacto) y el RNF-11 (paleta, confirmada el 9/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
-- **Pendiente de decisión:** hosting, mínimo de asistencia de 80 %, respaldo de `media/` y un hallazgo menor de la fase H, el H-03 (sección 8); el H-02 se corrigió el 11/11 con CR-001.
+- **Pendiente de decisión:** hosting, respaldo de `media/` y un hallazgo menor de la fase H, el H-03 (sección 8); el H-02 se corrigió el 11/11 con CR-001.
 
 ### Avance contra el cronograma
 
@@ -280,7 +280,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 ## 8. Decisiones abiertas, hallazgos y riesgos
 
 **Decisiones abiertas** (también en la sección 12 de CLAUDE.md):
-1. **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`).
+1. **Mínimo de asistencia de 80 %.** Resuelta el 16/11/2026: Victo lo confirmó (`ASISTENCIA_MINIMA`).
 2. **Hosting.** Sin definir; la actividad J depende de esta decisión.
 3. **Respaldo de `media/`.** Los justificantes viven ahí y no se versionan; el respaldo diario debe incluirla.
 4. **El administrador solo gestiona usuarios.** Es el valor por defecto, sin confirmar.
