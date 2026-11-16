@@ -315,3 +315,5 @@ El 15/10/2026 se actualizó el tablero con este avance:
 - Las tarjetas A, B y C no se tocaron.
 
 El 9/11/2026 se cerraron en «Hecho», con su descripción final y la evidencia (commits, pruebas y medidas), las tarjetas RF-18, RNF-10, RF-19, RF-20 y RNF-11, que se habían cargado el 4/11 a partir de las observaciones de los evaluadores.
+
+El 16/11/2026, al cerrar la parte técnica de la fase J, en la tarjeta J se marcaron tres subtareas (respaldo diario, contraseña de demostración y página 500) y se dejó un comentario con el resultado y la evidencia. La tarjeta sigue en «Por hacer» y quedan sin marcar «Definir el hosting y desplegar el sistema», la capacitación y el acta: el hosting ya está decidido y la pila corre en local, pero falta etiquetar la candidata y la versión final.
