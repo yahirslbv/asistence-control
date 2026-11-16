@@ -7,6 +7,8 @@ Módulos: autenticación y usuarios, grupos, sesiones, asistencia y reportes.
 El detalle de requisitos, reglas de negocio y plan por fases está en
 [CLAUDE.md](CLAUDE.md), que es la fuente de verdad del proyecto.
 
+**Si vas a usar el sistema como docente, empieza por el [manual de usuario](docs/manual_usuario.md).**
+
 ## Requisitos
 
 - Python 3.10 o superior (se probó con 3.11)
@@ -212,6 +214,7 @@ asistencia/    única app del proyecto
                    y pase_de_lista.js (reglas de las casillas del pase de lista)
   management/      comando seed_demo
   tests/           pruebas
-docs/          informe de pruebas (fase H), seguimiento semanal, plan de despliegue y gestión de la configuración
+docs/          manual de usuario (con sus capturas en img/), informe de pruebas (fase H), seguimiento semanal,
+               plan de despliegue y gestión de la configuración
 CHANGELOG.md   historial de versiones (formato Keep a Changelog)
 ```
