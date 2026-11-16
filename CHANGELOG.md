@@ -6,6 +6,10 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
+### Fixed
+
+- El texto del selector de rol del admin de Django ya no se recorta: el alto fijo que Django le da a los selectores chocaba con el relleno del tema.
+
 ## [0.9.0] - 2026-11-11
 
 Primera versión etiquetada. Fija como línea base lo construido del 13/10 al 11/11/2026: las fases D, E, F, G y H, los requisitos RF-16 a RF-20 y la gestión de la configuración. Todavía no es una versión de producción: faltan los manuales (fase I) y el despliegue (fase J).

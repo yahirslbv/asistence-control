@@ -156,6 +156,12 @@ class TemaDelAdminHojaTests(SimpleTestCase):
     def test_la_hoja_esta_en_los_estaticos(self):
         self.assertTrue(self.css, f'No se encontró {self.HOJA_ADMIN} en los estáticos')
 
+    def test_los_selectores_no_tienen_alto_fijo_que_recorte_su_texto(self):
+        # Django fija un alto a `select`; con el relleno del tema recortaba el texto del selector de rol.
+        regla = re.search(r'^select\s*\{([^}]*)\}', self.css, re.MULTILINE)
+        self.assertIsNotNone(regla, 'Falta una regla propia para `select`')
+        self.assertRegex(regla.group(1), r'height:\s*auto')
+
     def test_el_tema_oscuro_automatico_y_el_forzado_son_el_mismo(self):
         self.assertEqual(self.oscuro_automatico(), self.oscuro())
 
