@@ -1,0 +1,25 @@
+# Lo que nunca entra a la imagen: secretos, datos y lo que no hace falta para correr.
+.git
+.gitignore
+.gitattributes
+.claude
+.venv
+.env
+.env.*
+media
+respaldos
+staticfiles
+*.sql
+*.sql.gz
+**/__pycache__
+**/*.py[cod]
+.idea
+.vscode
+
+# Documentación y archivos de infraestructura (no los usa la aplicación).
+docs
+scripts
+*.md
+Dockerfile
+.dockerignore
+docker-compose*.yml
