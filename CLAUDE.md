@@ -584,13 +584,15 @@ class Migration(migrations.Migration):
 
 ## Apéndice C. Configuración base
 
-`requirements.txt`
+`requirements.txt` (dependencias directas; desde la CR-002 el archivo fija también las indirectas, todas con `==`, y es la fuente de verdad de las versiones)
 ```
-Django>=5.2,<5.3
-mysqlclient
-python-dotenv
-openpyxl
-reportlab
+Django==5.2.18
+mysqlclient==2.3.0
+python-dotenv==1.2.4
+openpyxl==3.1.5
+reportlab==5.0.1
+whitenoise==6.12.0
+gunicorn==27.0.1; sys_platform != "win32"
 ```
 
 `.env.example`
