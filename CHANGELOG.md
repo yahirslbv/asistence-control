@@ -6,6 +6,10 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
+### Added
+
+- Manual de usuario del docente, con capturas de cada pantalla: cuenta y acceso, grupos, alumnos y archivo CSV, sesiones, pase de lista con sus casillas, correcciones y justificantes, reportes y solo lectura (`docs/manual_usuario.md`, fase I).
+
 ### Fixed
 
 - El texto del selector de rol del admin de Django ya no se recorta: el alto fijo que Django le da a los selectores chocaba con el relleno del tema.
