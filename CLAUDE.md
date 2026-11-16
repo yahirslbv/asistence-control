@@ -28,7 +28,7 @@ Léelo completo antes de escribir código. Este archivo es la fuente de verdad d
 1. ¿Qué sistema operativo usa y tiene MySQL 8 instalado o Docker? Si `mysqlclient` no se instala en Windows, usar `PyMySQL` con `pymysql.install_as_MySQLdb()`.
 2. ¿Ya existe el repositorio en GitHub? ¿Cómo se llama?
 3. ¿Trabaja solo o en equipo? El cronograma asigna roles (analista, base de datos, interfaz, backend, frontend, pruebas, documentador, líder), pero no hay nombres.
-4. ¿Qué porcentaje mínimo de asistencia se usa? Por defecto 80 (**supuesto, sin confirmar**), configurable en `ASISTENCIA_MINIMA`.
+4. ¿Qué porcentaje mínimo de asistencia se usa? 80, **confirmado por Victo el 16/11/2026**, configurable en `ASISTENCIA_MINIMA`.
 5. ¿El administrador solo gestiona usuarios o también ve todos los grupos? Por defecto: solo gestiona usuarios.
 6. ¿Dónde se va a desplegar? El hosting no está definido (actividad J).
 
@@ -269,9 +269,10 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - **Gestión de la configuración y línea base (RNF-09, 11/11/2026).** `docs/gestion_configuracion.md` fija los elementos de configuración, las líneas base, la convención de nombres, el versionado semántico, la estrategia de ramas (una rama `main` estable, ramas cortas y pull request) y el control de cambios con solicitudes `CR-NNN`. La primera etiqueta es `v0.9.0`: línea base funcionalmente completa, **no es una versión de producción**. `docs/plan_liberacion.md` es el plan de la `1.0.0` (27/11/2026) con su dictamen: **no-go para liberarla hoy** porque faltan los manuales (fase I) y el despliegue (fase J); condiciones y calendario en ese documento.
 - **Normas de trabajo de Victo.** Planificar antes de actuar; ejecutar e iterar en Git (un commit por paso verificable y `git push` al cerrar un bloque); validar con pruebas (automáticas cuando se puede, o comprobaciones reproducibles cuyo resultado se anota).
 
+- **Mínimo de asistencia y cierre de la aceptación (16/11/2026).** Victo confirmó el mínimo de **80 %** (sin consultarlo con la profesora): deja de ser un supuesto, sigue siendo configurable con `ASISTENCIA_MINIMA` y se ve en pantalla y en las exportaciones. También decidió que el recorrido de aceptación (S7) y el RNF-01 se **simulen** en lugar de hacerse con una persona ajena al proyecto (`docs/aceptacion_simulada.md`: es una simulación y una estimación, no una medición con personas) y que la capacitación y el acta de aceptación son **opcionales** por ser un proyecto escolar.
+
 ### Decisiones abiertas
 
-- **Mínimo de asistencia de 80 %.** Sigue siendo un supuesto sin confirmar (`ASISTENCIA_MINIMA`). Se ve en pantalla y en las exportaciones.
 - **Hallazgo H-03.** El plan de liberación (`docs/plan_liberacion.md`) lo deja como opcional. El H-01 y el H-02 ya se corrigieron (el H-02 con CR-001).
 - **Respaldo de `media/` (fase J).** `media/` no se versiona y los justificantes viven ahí. El respaldo diario (RNF-08) debe incluir esa carpeta además de la base de datos.
 - **Hosting (actividad J).** Sin definir.
@@ -584,13 +585,15 @@ class Migration(migrations.Migration):
 
 ## Apéndice C. Configuración base
 
-`requirements.txt`
+`requirements.txt` (dependencias directas; desde la CR-002 el archivo fija también las indirectas, todas con `==`, y es la fuente de verdad de las versiones)
 ```
-Django>=5.2,<5.3
-mysqlclient
-python-dotenv
-openpyxl
-reportlab
+Django==5.2.18
+mysqlclient==2.3.0
+python-dotenv==1.2.4
+openpyxl==3.1.5
+reportlab==5.0.1
+whitenoise==6.12.0
+gunicorn==27.0.1; sys_platform != "win32"
 ```
 
 `.env.example`

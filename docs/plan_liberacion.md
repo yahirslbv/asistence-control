@@ -16,10 +16,10 @@ Este plan aplica la política de [gestion_configuracion.md](gestion_configuracio
 
 **Entra en `1.0.0`:**
 
-1. Todo lo de `0.9.0`: los 20 requisitos funcionales y 9 de los 10 no funcionales implementados. El RNF-08 (respaldo diario) entra con la fase J, y el RNF-01 (pase de lista de 40 alumnos en 3 minutos) está implementado pero sin cronometrar con personas (R9).
+1. Todo lo de `0.9.0`: los 20 requisitos funcionales y 9 de los 10 no funcionales implementados. El RNF-08 (respaldo diario) entra con la fase J, y el RNF-01 (pase de lista de 40 alumnos en 3 minutos) está implementado y se verificó por simulación el 16/11/2026 ([aceptacion_simulada.md](aceptacion_simulada.md), R9).
 2. Fase I: manual de usuario y manual de administrador (ECS-17).
 3. Fase J, parte técnica ([DESPLIEGUE.md](DESPLIEGUE.md), bloques B2 a B8): configuración de producción, archivos estáticos, imagen Docker, `docker-compose.prod.yml`, respaldo diario con restauración probada (RNF-08, que incluye `media/`), contraseña de demostración protegida y sección «Despliegue» del README.
-4. Capacitación a los docentes y acta de aceptación.
+4. Capacitación a los docentes y acta de aceptación: **opcionales**. Victo decidió el 16/11/2026 que no son necesarias por ser un proyecto escolar; si la profesora las pide, se hacen.
 
 **No entra** (y no cambia el número de versión): elegir y contratar el hosting, abrir el firewall y apuntar el dominio (le toca al líder de proyecto, [DESPLIEGUE.md](DESPLIEGUE.md) sección 7); el hallazgo H-03 (importación de CSV de 500 filas), que es opcional; cualquier función nueva.
 
@@ -54,7 +54,7 @@ La línea base de partida es la etiqueta `v0.9.0`. Los elementos son los del inv
 | E3 | La línea base `v0.9.0` está etiquetada y el `CHANGELOG` está al día | `git tag -l -n` y `CHANGELOG.md` |
 | E4 | No hay hallazgos críticos ni mayores abiertos | [informe_pruebas.md](informe_pruebas.md), sección 11 |
 | E5 | El hosting está decidido (internet con dominio, o demostración local) | Respuesta del líder a la pregunta 1 de [DESPLIEGUE.md](DESPLIEGUE.md) sección 3 |
-| E6 | El mínimo de asistencia está confirmado con la profesora | `ASISTENCIA_MINIMA` deja de ser un supuesto en `CLAUDE.md` |
+| E6 | El mínimo de asistencia está confirmado | **Cumplido el 16/11/2026:** Victo confirmó el 80 %, sin consultarlo con la profesora. `ASISTENCIA_MINIMA` deja de ser un supuesto en `CLAUDE.md` |
 
 ### Salida (go para etiquetar `v1.0.0`)
 
@@ -68,7 +68,7 @@ Se deben cumplir **todos** (S1 a S10). Un solo «no» es no-go.
 | S4 | `python manage.py check --deploy` sin advertencias, salvo `W008`, justificada | Salida del comando |
 | S5 | Ninguna URL pública sirve `media/` y el 3306 no está publicado | `/media/...` responde 404; `docker compose ps` sin mapeo para `db` |
 | S6 | Existen el manual de usuario y el de administrador | Archivos en el repositorio, enlazados desde el README |
-| S7 | Un docente y el administrador completan los flujos principales en la pila real (periodo, grupo, CSV, sesiones, pase de lista, corrección, justificante, reporte y exportación) | Recorrido de aceptación hecho por una persona que no programó el sistema (un docente o la profesora), con el resultado anotado |
+| S7 | Un docente y el administrador completan los flujos principales en la pila real (periodo, grupo, CSV, sesiones, pase de lista, corrección, justificante, reporte y exportación) | Recorrido de aceptación **simulado** (decisión de Victo del 16/11/2026, en lugar de una persona que no programó el sistema): [aceptacion_simulada.md](aceptacion_simulada.md). En B8 se repiten en la pila real los pasos de los puntos 2, 4 y 5 de la lista de verificación |
 | S8 | Auditoría funcional y física sin diferencias ([gestion_configuracion.md](gestion_configuracion.md), sección 8) | Sección 9 de este plan |
 | S9 | `git status` limpio y ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | `git check-ignore -v` |
 | S10 | `requirements.txt` tiene versiones exactas y la imagen se construye con ellas (CR-002 integrada) | Cada línea con `==`; `pip check` sin conflictos dentro de la imagen |
@@ -86,14 +86,14 @@ La fecha de hoy es el miércoles 11/11/2026. El lunes 16/11 es descanso obligato
 | mié 11/11 | Fusionar los PR, auditar y etiquetar `v0.9.0` | Línea base `0.9.0` | Líder de proyecto |
 | jue 12 y vie 13/11 | Fase I: manual de usuario y manual de administrador | ECS-17 | Documentador |
 | lun 16/11 | **Descanso obligatorio**: sin actividad | | |
-| mar 17/11 | Decidir el hosting (E5) y confirmar el mínimo de asistencia (E6); B2 configuración de producción | Decisiones anotadas en `CLAUDE.md`; `settings.py` de producción | Líder de proyecto y backend |
+| mar 17/11 | Decidir el hosting (E5) y confirmar el mínimo de asistencia (E6, hecho el 16/11); B2 configuración de producción | Decisiones anotadas en `CLAUDE.md`; `settings.py` de producción | Líder de proyecto y backend |
 | mié 18/11 | B3 estáticos y B4 imagen, con CR-002 (versiones exactas) | Imagen que arranca | Backend y frontend |
 | jue 19/11 | B5 pila de producción y B6 respaldo con restauración probada | Pila completa y respaldo verificado | Backend y base de datos |
 | vie 20/11 | B7 contraseña de demostración y README; B8 verificación en la pila real; congelamiento y etiqueta `v1.0.0-rc.1` | Informe de la lista de verificación | Pruebas |
-| lun 23 y mar 24/11 | Recorrido de aceptación (S7), medición del RNF-01 con personas y capacitación | Defectos encontrados, con su solicitud de cambio si hacen falta | Pruebas y líder de proyecto |
+| lun 23 y mar 24/11 | Recorrido de aceptación (S7) y RNF-01: simulados el 16/11 ([aceptacion_simulada.md](aceptacion_simulada.md)); capacitación opcional | Defectos encontrados, con su solicitud de cambio si hacen falta | Pruebas y líder de proyecto |
 | mié 25/11 | Correcciones y, si las hay, `v1.0.0-rc.2` | Candidata final | Backend |
 | jue 26/11 | Auditoría funcional y física, y decisión go/no-go final | Dictamen actualizado (sección 11) | Líder de proyecto |
-| vie 27/11 | Etiqueta `v1.0.0`, despliegue, acta de aceptación, publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
+| vie 27/11 | Etiqueta `v1.0.0`, despliegue, acta de aceptación (opcional), publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
 
 La ruta crítica es la de [CLAUDE.md](../CLAUDE.md) sección 11: la fase J no tiene holgura. Con el feriado, los bloques B2 a B8 quedan en cuatro días (17 al 20/11). Si B8 no termina el 20/11, pasa al 23/11 y el recorrido de aceptación se reduce a un solo día; el congelamiento y la fecha de entrega no se mueven.
 
@@ -141,8 +141,8 @@ Probabilidad e impacto en tres niveles (A alta, M media, B baja).
 | R5 | Olvidar `collectstatic` rompe todas las pantallas, no solo el admin | M | A | `collectstatic` en la construcción de la imagen (B4); el punto 3 de la lista de verificación comprueba que cargan las tres hojas de estilo | Pantallas sin estilo o error `Missing staticfiles manifest entry` |
 | R6 | Registro público sin límite de intentos ni CAPTCHA: cuentas pendientes que se acumulan | M | M | `REGISTRO_DOMINIOS` solo con dominios institucionales (o vacía); revisar el Panel; limitar `/registro/` en el proxy si hace falta | Más de 20 cuentas pendientes sin atender |
 | R7 | La contraseña de demostración está en el historial de un repositorio público | A | M | Ninguna cuenta de demostración existe en un entorno real; `seed_demo` se niega con `DEBUG=0` (B7); el líder decide si el repositorio sigue público | Cualquier acceso con la contraseña de `seed_demo` en producción |
-| R8 | El mínimo de asistencia (80 %) es un supuesto sin confirmar | M | M | Confirmarlo con la profesora (E6) el 17/11; es una variable de entorno (`ASISTENCIA_MINIMA`), cambiarla no requiere código | Respuesta distinta al 80 % |
-| R9 | El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas | M | M | Medirlo el 23 y 24/11 con docentes; el costo medido es de 9 toques para 5 excepciones y un solo envío | Más de 3 minutos en la medición |
+| R8 | **Cerrado el 16/11/2026:** el mínimo de asistencia (80 %) lo confirmó Victo | M | M | Confirmado (E6); es una variable de entorno (`ASISTENCIA_MINIMA`), cambiarla no requiere código | Respuesta distinta al 80 % |
+| R9 | El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas: se verificó por simulación el 16/11 (estimación, no medición, [aceptacion_simulada.md](aceptacion_simulada.md)) | M | M | Medirlo con docentes si la profesora lo pide; el costo medido es de 9 toques para 5 excepciones y un solo envío | Más de 3 minutos en la medición |
 | R10 | Solo cuatro días hábiles (17 al 20/11, por el feriado del 16) para los bloques B2 a B8, con un solo desarrollador y una fecha límite que no se mueve | A | A | Congelamiento el 20/11, criterios de salida cerrados desde hoy y regla de que lo Media se difiere antes de arriesgar la fecha ([CLAUDE.md](../CLAUDE.md) sección 11) | B8 sin terminar el 20/11 |
 | R11 | Las copias de respaldo viven en la misma máquina que la base: se pierden con ella | M | A | Decidir dónde se copian fuera del servidor (pregunta 4 de [DESPLIEGUE.md](DESPLIEGUE.md)); mientras tanto, aviso explícito en el README | Sin destino externo al 26/11 |
 | R12 | Bootstrap se carga desde un CDN: sin internet en el salón, las pantallas pierden el estilo base | B | M | Si la capacitación es sin internet, autoalojarlo con las precauciones de B3 | Capacitación sin red |
@@ -172,9 +172,9 @@ Probabilidad e impacto en tres niveles (A alta, M media, B baja).
 
 | A quién | Qué | Cuándo | Por qué medio |
 |---|---|---|---|
-| Profesora de la materia | Avance contra el cronograma y decisiones pendientes (hosting y mínimo de asistencia) | Cada semana y el 17/11 | Tablero de Trello y [seguimiento_semanal.md](seguimiento_semanal.md) |
-| Docentes que usarán el sistema | Fecha y contenido de la capacitación; qué cuenta crear (registro con correo institucional y espera de aprobación) | 20/11 | Mensaje del líder, con enlace al manual de usuario |
-| Administrador del sistema | Cómo aprobar cuentas, activar periodos y respaldar | 23/11, junto con la capacitación | Manual de administrador |
+| Profesora de la materia | Avance contra el cronograma y decisiones pendientes (hosting) | Cada semana y el 17/11 | Tablero de Trello y [seguimiento_semanal.md](seguimiento_semanal.md) |
+| Docentes que usarán el sistema (opcional) | Fecha y contenido de la capacitación; qué cuenta crear (registro con correo institucional y espera de aprobación) | 20/11 | Mensaje del líder, con enlace al manual de usuario |
+| Administrador del sistema | Cómo aprobar cuentas, activar periodos y respaldar | 23/11, si hay capacitación | Manual de administrador |
 | Quien revise el repositorio | Qué trae cada versión y cómo se desplegó | En cada etiqueta | `CHANGELOG.md`, notas de la etiqueta y este plan |
 | Todos | Aviso de liberación y de cualquier reversión, con la causa | El mismo día | Mensaje del líder y nota en `docs/cambios/` |
 
@@ -196,8 +196,8 @@ Este borrador se completa al etiquetar. El texto definitivo va en `CHANGELOG.md`
 
 **Problemas conocidos.**
 
-- El mínimo de asistencia (80 %) es un supuesto sin confirmar con la profesora; se cambia con `ASISTENCIA_MINIMA`.
-- El pase de lista de 40 alumnos en 3 minutos (RNF-01) no se ha cronometrado con personas; se mide el costo de interacción (9 toques para 5 excepciones, y un solo envío).
+- El mínimo de asistencia es de 80 % (confirmado por Victo el 16/11/2026); se cambia con `ASISTENCIA_MINIMA`.
+- El pase de lista de 40 alumnos en 3 minutos (RNF-01) se verificó por simulación, no con personas; se mide el costo de interacción (9 toques para 5 excepciones, y un solo envío).
 - La importación de un CSV de 500 filas tarda unos 3.8 s (hallazgo H-03); con grupos de 50 alumnos tarda 0.4 s.
 - El registro de docentes no tiene límite de intentos, CAPTCHA ni confirmación del correo: el control es la aprobación del administrador y el dominio permitido.
 - Bootstrap se carga desde un CDN: sin internet las pantallas pierden el estilo base.
@@ -243,4 +243,4 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
 
-**Limitación.** El proyecto es individual: quien lo programa también ejerce el comité de control de cambios y decide el go. No se puede crear un comité de varias personas; se compensa con dos condiciones: el criterio S7 lo ejecuta otra persona y el acta de aceptación debe estar firmada por la profesora antes de dar el go final.
+**Limitación.** El proyecto es individual: quien lo programa también ejerce el comité de control de cambios y decide el go. No se puede crear un comité de varias personas; se compensaba con dos condiciones: que el criterio S7 lo ejecutara otra persona y que la profesora firmara el acta de aceptación antes del go final. El 16/11/2026 Victo decidió, por ser un proyecto escolar, que el S7 se simule ([aceptacion_simulada.md](aceptacion_simulada.md)) y que el acta sea opcional; el go lo sigue decidiendo una sola persona.

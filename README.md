@@ -186,7 +186,6 @@ acceso, mediciones del RNF-07, revisión responsiva y hallazgos) están en
 
 Se usan estos valores por defecto hasta que se confirmen:
 
-- **Asistencia mínima:** 80 %, configurable con `ASISTENCIA_MINIMA`.
 - **Administrador:** gestiona usuarios y periodos; no ve los grupos de los docentes.
 - **Hosting:** sin definir. Se resuelve en la actividad J (despliegue).
 - **Trabajo:** una sola persona. Los cambios se integran por pull request, con ramas cortas y versionado semántico (ver [docs/gestion_configuracion.md](docs/gestion_configuracion.md)).
