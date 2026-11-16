@@ -1,5 +1,22 @@
-Django>=5.2,<5.3
-mysqlclient
-python-dotenv
-openpyxl
-reportlab
+# Versiones exactas (CR-002): son las del entorno con el que pasa la suite.
+# Para cambiar una, abre una solicitud de cambio y vuelve a correr la suite.
+
+# Dependencias directas
+Django==5.2.18
+mysqlclient==2.3.0
+python-dotenv==1.2.4
+openpyxl==3.1.5
+reportlab==5.0.1
+whitenoise==6.12.0
+# gunicorn no corre en Windows: solo se usa dentro del contenedor.
+gunicorn==27.0.1; sys_platform != "win32"
+
+# Dependencias indirectas (las instalan las de arriba). Sin fijarlas, la
+# imagen de Linux instalaba versiones distintas a las probadas.
+asgiref==3.12.1
+sqlparse==0.6.0
+tzdata==2026.5; sys_platform == "win32"
+et_xmlfile==2.0.0
+pillow==12.3.0
+charset-normalizer==3.5.2
+packaging==26.3; sys_platform != "win32"
