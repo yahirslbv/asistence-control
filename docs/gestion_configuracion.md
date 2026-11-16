@@ -118,6 +118,7 @@ Todo cambio a un elemento que ya pertenece a una línea base (ECS-01 a ECS-03 si
 | Solicitud | Descripción | Fecha | Decisión | Rama | Versión |
 |---|---|---|---|---|---|
 | [CR-001](cambios/CR-001_pagina_500.md) | Página 500 propia (hallazgo H-02) | 2026-11-11 | Aprobada | `cambio/cr-001-pagina-500` | 0.9.0 |
+| [CR-002](cambios/CR-002_versiones_exactas.md) | Versiones exactas de las dependencias, con `gunicorn` y `whitenoise` (riesgo R13) | 2026-11-16 | Aprobada | `cambio/cr-002-versiones-exactas` | 1.0.0 |
 
 ## 8. Auditoría de configuración
 
