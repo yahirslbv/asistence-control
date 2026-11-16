@@ -8,7 +8,7 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | **Línea base de partida** | `v0.9.0` (11/11/2026), etiqueta anotada sobre `main` |
 | **Fecha objetivo** | viernes 27/11/2026 (fecha límite de entrega del proyecto) |
 | **Responsable de la decisión** | Líder de proyecto, como comité de control de cambios ([gestión de la configuración](gestion_configuracion.md), sección 1) |
-| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`** |
+| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó el 16/11/2026 (sección 10) y espera la aprobación del líder para etiquetarse |
 
 Este plan aplica la política de [gestion_configuracion.md](gestion_configuracion.md): números de versión (sección 5), ramas (sección 6), control de cambios (sección 7) y auditoría previa a cada etiqueta (sección 8). El detalle técnico del despliegue está en [DESPLIEGUE.md](DESPLIEGUE.md); aquí se decide cuándo, quién, con qué criterios y cómo se da marcha atrás.
 
@@ -230,6 +230,51 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Lo que esta auditoría no cubre.** El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas y sigue sin verificarse. Los comandos los ejecutó el asistente de IA sobre una copia del repositorio en la máquina del proyecto; la decisión de fusionar y de etiquetar la toma el responsable del repositorio.
 
+### Registro de la candidata `v1.0.0-rc.1` (16/11/2026)
+
+**Qué se verificó.** El commit `33c81f5` de la rama `feature/rnf-08-despliegue`, que tiene el código final de los bloques B2 a B7 (los commits posteriores de esa rama solo agregan `scripts/demo.ps1`, que no entra a la imagen, y documentación). Se verificó en la pila real `control_asistencia_prod`, levantada con `docker-compose.prod.yml` en el equipo del proyecto (Windows 11, Docker 29.8.1, Compose v5.5.1), en `http://localhost` y con `DJANGO_HTTPS=0`, que es la demostración local decidida como hosting (E5). La etiqueta se pone cuando el líder la apruebe y la rama esté en `main`.
+
+**Lista de verificación de [DESPLIEGUE.md](DESPLIEGUE.md), sección 6**
+
+| # | Punto | Resultado | Evidencia |
+|---|---|---|---|
+| 1 | `up -d --build` desde cero deja los tres servicios sanos | **Pasa** | Una pila nueva con el código final levantó en 42 s y la pila real en 26 s: `db` y `web` sanos (`healthy`) y `proxy` arriba. `migrate` aplicó las migraciones 0001 a 0004 dentro del contenedor: `mysqlclient 2.3.0` compiló en `python:3.11-slim` (Debian 13) y se autentica contra MySQL 8.0.46 con `caching_sha2_password` (riesgo R3 cerrado) |
+| 2 | Docente y administrador entran; periodo, grupo y solo lectura (RF-17) | **Pasa** | Recorrido por HTTP a través del proxy, con sesión y token CSRF reales: 29 de 29 comprobaciones. El administrador llega a su panel, crea el periodo 2027-2 y lo activa con el botón de su fila; el docente crea un grupo, importa 5 alumnos por CSV y programa 4 sesiones; con su periodo inactivo el pase de lista se rechaza y la página avisa «solo lectura»; al reactivarlo vuelve a guardarse. En el navegador integrado: el docente llega a «Inicio» y el administrador a «Panel de administración», cada uno con su menú |
+| 3 | Cargan Bootstrap, `estilo.css` y `admin.css` con `DEBUG=0` | **Pasa** | En el navegador: Bootstrap 5.3.3 del CDN (1 298 reglas, con `integrity`), `estilo.fbbd6d027a0e.css` (222 reglas) y, en el admin, cinco hojas con huella, entre ellas `asistencia/admin.42609df61b19.css`; ningún recurso con error ni mensajes en la consola. `pase_de_lista.2a0fed160107.js` carga y bloquea las casillas |
+| 4 | Pase de lista y corrección: fila en la bitácora | **Pasa** | Pase de 5 registros con un envío y corrección de ausente a justificado. La base tiene la fila de `bitacora_cambio` (autor `docente1@asistencia.test`, `ausente` → `justificado`), escrita por el disparador con el usuario `asistencia@%`, que solo tiene permisos sobre su base |
+| 5 | Justificante, `down` (sin `-v`), `up -d` y sigue descargándose | **Pasa** | Tras `down`, 0 contenedores y los 4 volúmenes intactos; tras `up -d`, el PDF se descarga por la vista idéntico byte a byte. Sin sesión redirige al acceso y otro docente recibe 404 (RNF-04) |
+| 6 | Una URL directa a `/media/...` responde 404 | **Pasa** | `/media/`, `/media/justificantes/` y un archivo: 404 con `Server: Caddy` y 0 bytes. El registro de accesos de `web` no tiene ninguna petición a `/media` |
+| 7 | Una excepción muestra la página 500 propia | **Pasa** | Con `db` detenido, la pantalla de acceso abre (200) e iniciar sesión responde 500 con la página «Error del servidor · Control de asistencia», sin detalles del error |
+| 8 | El 3306 no está publicado | **Pasa** | `docker port`: `db` y `web` sin puertos; solo `proxy` publica 80 y 443 |
+| 9 | Respaldo, restauración como `root`, disparador y `UPDATE` con `ROLLBACK` | **Pasa** | `scripts/respaldo.sh` (sin terminal) y `scripts/respaldo.ps1` (PowerShell 5.1) generan los dos archivos. `scripts/probar_restauracion.sh`: las 8 tablas coinciden (usuario 3, periodo 3, grupo 4, alumno 50, inscripción 60, sesión 8, asistencia 20, bitácora 2), el disparador existe con su dueño y el `UPDATE` escribe 1 fila en la bitácora, deshecha con `ROLLBACK`. Además se restauró de verdad sobre la base y sobre `media/` con los comandos del README, y la aplicación siguió funcionando |
+| 10 | `check --deploy` limpio, o solo con `W008` justificada | **Pasa con observación** | Dentro del contenedor, con `DJANGO_HTTPS=1`: `W005`, `W008` y `W021`, los tres justificados en el README. Como está la demostración (`DJANGO_HTTPS=0`): `W004`, `W008`, `W012` y `W016`. Ver la observación 1 |
+| 11 | Suite completa sin `DJANGO_STATIC_MANIFEST` y `collectstatic` al construir | **Pasa** | `Ran 683 tests in 992.973s`, `OK`, sobre el commit `33c81f5`. Al construir: `130 static files copied, 390 post-processed`; sin la clave desechable, la construcción aborta con `ImproperlyConfigured` |
+| 12 | `git status` limpio, sin `.env*` ni `respaldos/`, y README actualizado | **Pasa** | `git check-ignore -v .env.prod` muestra `.gitignore:4`; `git ls-files` solo trae `.env.example` y `.env.prod.example`; `respaldos/` y `staticfiles/` quedan ignorados. `git status --porcelain` se vuelve a comprobar al etiquetar |
+
+**Criterios de salida de la sección 3**
+
+| # | Estado al 16/11/2026 | Nota |
+|---|---|---|
+| S1 | Cumplido, con la observación 1 | Los 12 puntos de arriba |
+| S2 | Cumplido | `Ran 683 tests in 992.973s`, `OK`: las 651 de `main` más 32 nuevas (configuración, estáticos y `seed_demo`) |
+| S3 | Cumplido | Punto 9. El error 1449 se reprodujo con un volcado cuyo dueño no existe, y la prueba de restauración lo detecta y falla |
+| S4 | **Pendiente de una decisión** | Observación 1 |
+| S5 | Cumplido | Puntos 6 y 8 |
+| S6 | No cumplido | Falta el manual de administrador (fase I, fuera de este registro) |
+| S7 | Simulado (decisión del 16/11) | Los pasos de los puntos 2, 4 y 5 se repitieron en la pila real, como pide el criterio |
+| S8 | Pendiente | Auditoría del 26/11/2026 |
+| S9 | Cumplido | Punto 12 |
+| S10 | Cumplido | Todas las líneas de `requirements.txt` llevan `==`; dentro de la imagen, `pip check` no encuentra conflictos y `pip freeze` devuelve exactamente las 13 versiones fijadas para Linux |
+
+**Observaciones**
+
+1. **`check --deploy` (S4 y punto 10).** El criterio admite solo `W008`, pero se escribió sin medir. Al activar HSTS con `DJANGO_HTTPS=1` aparecen `W005` (`SECURE_HSTS_INCLUDE_SUBDOMAINS`) y `W021` (`SECURE_HSTS_PRELOAD`). Se dejaron apagados a propósito y están justificados en el README. El líder decide: aceptar los tres avisos y ajustar el texto de S4, o activar los dos ajustes.
+2. **Restauración de prueba.** Al restaurar como `root` en una base temporal, el `UPDATE` falla con el error 1142 (`TRIGGER command denied`), no con el 1449: el dueño del disparador no tiene permisos sobre esa base. `scripts/probar_restauracion.sh` se los da durante la prueba y se los quita al terminar.
+3. **Errores del servidor sin registro.** Con `DEBUG=0`, Django no escribe los errores 500 en la salida del contenedor: en los registros de `web` solo queda la línea de acceso con el código 500. No impide ningún criterio; corregirlo es un cambio de código y necesita su solicitud de cambio.
+4. **El proxy solo atiende el nombre de `DOMINIO`.** Entrar por `http://127.0.0.1` da una página en blanco; el README lo avisa.
+
+**Lo que este registro no cubre.** El despliegue con un dominio real y HTTPS no se ejecutó: solo se comprobó que Caddy interpreta ese valor de `DOMINIO` como HTTPS automático y que, con `DJANGO_HTTPS=1` y la cabecera del proxy, la aplicación manda HSTS de 3600 s y cookies seguras. La tarea programada del respaldo (cron o Programador de tareas) no se instaló. `scripts/respaldo.sh` y `scripts/probar_restauracion.sh` se ejecutaron en Git Bash sobre Windows, no en un servidor Linux. Las comprobaciones en el navegador se hicieron leyendo el contenido de las páginas, sin capturas de pantalla. Los comandos los ejecutó el asistente de IA en el equipo del proyecto; la decisión de etiquetar la toma el líder.
+
 *(El registro de `v1.0.0` se completa el 26/11/2026.)*
 
 ## 11. Dictamen go/no-go
@@ -239,6 +284,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | Decisión | Dictamen | Razón |
 |---|---|---|
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
+| Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Por decidir** | Los puntos técnicos pasaron en la pila real (sección 10). Quedan a criterio del líder la observación sobre `check --deploy` (S4) y la aprobación de la etiqueta |
 | Liberar `v1.0.0` hoy | **No-go** | No se cumplen E5 ni E6, y los criterios de salida S1 a S8 dependen de cosas que todavía no existen: la fase J no se ha ejecutado, no hay manuales y no hay un servidor |
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
