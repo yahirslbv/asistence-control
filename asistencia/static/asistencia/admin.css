@@ -538,6 +538,9 @@ input[type="tel"], select, textarea, .vTextField, .vDateField, .vTimeField {
   font-size: .9375rem;
 }
 
+/* Django le fija un alto a los selectores; con el relleno de este tema recortaba el texto («Docente» salía a medias). */
+select { height: auto; min-height: 2.4rem; }
+
 input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus,
 input[type="number"]:focus, input[type="date"]:focus, input[type="time"]:focus,
 input[type="search"]:focus, select:focus, textarea:focus {
