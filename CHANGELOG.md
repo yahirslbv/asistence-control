@@ -6,6 +6,10 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-27
+
+Primera versión en producción. Agrega a la 0.9.0 los manuales de usuario y de administrador (fase I) y la parte técnica de la fase J: despliegue con Docker, configuración de producción y respaldo diario con restauración probada (RNF-08). Sin migraciones nuevas: el esquema es el de la 0.9.0. Se entrega como demostración local con Docker (`http://localhost`); la misma pila sirve en un servidor con dominio y HTTPS, pero ese caso no se ha ejecutado.
+
 ### Added
 
 - Manual del administrador, con capturas: el Panel, aprobar y rechazar cuentas, alta, baja y cambio de contraseña de usuarios, y periodos escolares (`docs/manual_administrador.md`, fase I).
@@ -18,13 +22,13 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 - Sección «Despliegue» en el README: demostración local, servidor, variables, actualización, respaldo y restauración.
 - `.gitattributes`: los archivos que corren en Linux conservan saltos de línea LF al clonar en Windows.
 
-### Fixed
-
-- El texto del selector de rol del admin de Django ya no se recorta: el alto fijo que Django le da a los selectores chocaba con el relleno del tema.
-
 ### Changed
 
 - `requirements.txt` fija la versión exacta de cada dependencia, directa e indirecta, y agrega `whitenoise` y `gunicorn` (este último solo fuera de Windows) para el despliegue (solicitud de cambio [CR-002](docs/cambios/CR-002_versiones_exactas.md)).
+
+### Fixed
+
+- El texto del selector de rol del admin de Django ya no se recorta: el alto fijo que Django le da a los selectores chocaba con el relleno del tema.
 
 ### Security
 
@@ -63,5 +67,6 @@ Primera versión etiquetada. Fija como línea base lo construido del 13/10 al 11
 - Contraseñas con el cifrado de Django (RNF-03); justificantes con nombre aleatorio, validados por extensión y firma del archivo, y servidos solo por una vista del docente dueño del grupo.
 - `.gitignore` cubre `.env.*`, `media/`, `respaldos/` y `*.sql.gz` para que ningún secreto ni dato de alumnos llegue al repositorio.
 
-[Unreleased]: https://github.com/yahirslbv/asistence-control/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/yahirslbv/asistence-control/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/yahirslbv/asistence-control/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/yahirslbv/asistence-control/releases/tag/v0.9.0
