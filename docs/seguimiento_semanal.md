@@ -1,7 +1,7 @@
 # Seguimiento semanal del proyecto
 
 Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos de Software.
-**Corte: lunes 9/11/2026 (semana S7).** Fecha límite de entrega: viernes 27/11/2026.
+**Corte: martes 17/11/2026 (semana S8).** Fecha límite de entrega: viernes 27/11/2026.
 
 | Recurso | Enlace |
 |---|---|
@@ -16,7 +16,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 ## 1. Resumen
 
-- **Estado:** las actividades A a I están terminadas (los manuales, el 16/11) y la J (despliegue y entrega) está por hacer.
+- **Estado:** las diez actividades (A a J) están terminadas. La versión `1.0.0` se publicó el 17/11/2026; queda la entrega en clase del viernes 27/11.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
 - **Calidad:** 650 pruebas automáticas en verde (suite completa del 11/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
 - **Requisitos:** los 20 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11; RF-18 a RF-20, que salieron de las observaciones de los evaluadores, el 4/11). También están hechos el RNF-10 (pase de lista compacto) y el RNF-11 (paleta, confirmada el 9/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
@@ -35,7 +35,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 | G · Reportes | S6 (02–06/11) | 06/11 | 14/10 | 23 días |
 | H · Integración y pruebas | S8 (16–20/11) | 20/11 | 15/10 | 36 días |
 | I · Manuales y documentación | S6 (02–06/11), holgura hasta S8 | 20/11 | 16/11 | 4 días |
-| J · Despliegue y entrega | S9 (23–27/11) | 27/11 | por hacer | |
+| J · Despliegue y entrega | S9 (23–27/11) | 27/11 | 17/11 (versión `1.0.0`; entrega en clase el 27/11) | 10 días |
 
 El código fuente tiene 63 commits entre el 13 y el 15/10/2026. Las actividades A, B y C vienen de la documentación previa (requisitos, modelo entidad-relación, prototipo de pantallas y cronograma) y su estado es el que marca el tablero.
 
@@ -192,7 +192,7 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **parte técnica hecha el 16/11/2026** (bloques B2 a B8 de [DESPLIEGUE.md](DESPLIEGUE.md)); la candidata `v1.0.0-rc.1` quedó etiquetada ese día sobre `main`. El 17/11/2026 se verificó y se etiquetó la `v1.0.0-rc.2`, con los dos manuales (S6 cumplido); la auditoría de la `1.0.0` se adelantó y pasó el 17/11/2026, y Victo adelantó la liberación a ese día; la versión `1.0.0` quedó publicada ese mismo día (etiqueta `v1.0.0`). Faltan la demostración y la entrega del 27/11. El hosting quedó decidido: demostración local con Docker en el equipo del proyecto.
+- **Estado:** **parte técnica hecha el 16/11/2026** (bloques B2 a B8 de [DESPLIEGUE.md](DESPLIEGUE.md)); la candidata `v1.0.0-rc.1` quedó etiquetada ese día sobre `main`. El 17/11/2026 se verificó y se etiquetó la `v1.0.0-rc.2`, con los dos manuales (S6 cumplido); la auditoría de la `1.0.0` se adelantó y pasó el 17/11/2026, y Victo adelantó la liberación a ese día; la versión `1.0.0` quedó publicada ese mismo día (etiqueta `v1.0.0`). Ese mismo día se publicó en GitHub con sus notas y la actividad J se cerró; quedan la demostración y la entrega en clase del 27/11. El hosting quedó decidido: demostración local con Docker en el equipo del proyecto.
   - **Qué se hizo:** configuración de producción (clave obligatoria, `DJANGO_HTTPS`), archivos estáticos con WhiteNoise, imagen de la aplicación, pila de tres servicios (`docker-compose.prod.yml`), respaldo diario con restauración probada, `seed_demo` protegido, demostración de un comando (`scripts/demo.ps1`) y sección «Despliegue» del README.
   - **Evidencia:** los 12 puntos de la lista de verificación pasaron en la pila real; el detalle está en el registro de `v1.0.0-rc.1` de [plan_liberacion.md](plan_liberacion.md). Suite completa: `Ran 683 tests in 992.973s`, `OK` (commit `33c81f5`).
   - **Sin ejecutar:** el despliegue con dominio y HTTPS (solo documentado) y la tarea programada del respaldo (el README trae la línea de `cron` y el comando de `schtasks`).
@@ -200,8 +200,8 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
   - [x] Respaldo diario con `mysqldump`, incluyendo la carpeta `media/` (RNF-08), con restauración probada. Falta programarlo (cron o Programador de tareas).
   - [x] Proteger la contraseña de demostración: con `DEBUG=0`, `seed_demo` exige `SEED_PASSWORD` (el repositorio es público).
   - [x] Página 500 propia (hallazgo H-02), hecha el 11/11/2026 con CR-001.
-  - [ ] Capacitación a los docentes.
-  - [ ] Acta de aceptación firmada.
+  - [ ] Capacitación a los docentes (opcional por decisión de Victo del 16/11; no se hizo).
+  - [ ] Acta de aceptación firmada (opcional por decisión de Victo del 16/11; no se hizo).
 
 ## 4. Requisitos funcionales
 
@@ -317,3 +317,5 @@ El 15/10/2026 se actualizó el tablero con este avance:
 El 9/11/2026 se cerraron en «Hecho», con su descripción final y la evidencia (commits, pruebas y medidas), las tarjetas RF-18, RNF-10, RF-19, RF-20 y RNF-11, que se habían cargado el 4/11 a partir de las observaciones de los evaluadores.
 
 El 16/11/2026, al cerrar la parte técnica de la fase J, en la tarjeta J se marcaron tres subtareas (respaldo diario, contraseña de demostración y página 500) y se dejó un comentario con el resultado y la evidencia. La tarjeta sigue en «Por hacer» y quedan sin marcar «Definir el hosting y desplegar el sistema», la capacitación y el acta: el hosting ya está decidido y la pila corre en local, pero falta la versión final (la candidata `v1.0.0-rc.1` se etiquetó ese mismo día, después de esta anotación).
+
+El 17/11/2026, al publicarse la versión `1.0.0`, se marcó la subtarea «Definir el hosting y desplegar el sistema» y la tarjeta J pasó a «Hecho» y se marcó completa, a petición de Victo y antes de la entrega en clase del 27/11. La capacitación y el acta quedaron sin marcar porque son opcionales.
