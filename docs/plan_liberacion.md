@@ -8,7 +8,7 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | **Línea base de partida** | `v0.9.0` (11/11/2026), etiqueta anotada sobre `main` |
 | **Fecha objetivo** | viernes 27/11/2026 (fecha límite de entrega del proyecto) |
 | **Responsable de la decisión** | Líder de proyecto, como comité de control de cambios ([gestión de la configuración](gestion_configuracion.md), sección 1) |
-| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó y se etiquetó el 16/11/2026; la `v1.0.0-rc.2` (con los manuales) se verificó el 17/11/2026 y espera el visto bueno del líder para etiquetarse (sección 10) |
+| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó y se etiquetó el 16/11/2026; la `v1.0.0-rc.2` (con los manuales) se verificó y se etiquetó el 17/11/2026 (sección 10) |
 
 Este plan aplica la política de [gestion_configuracion.md](gestion_configuracion.md): números de versión (sección 5), ramas (sección 6), control de cambios (sección 7) y auditoría previa a cada etiqueta (sección 8). El detalle técnico del despliegue está en [DESPLIEGUE.md](DESPLIEGUE.md); aquí se decide cuándo, quién, con qué criterios y cómo se da marcha atrás.
 
@@ -180,7 +180,7 @@ Probabilidad e impacto en tres niveles (A alta, M media, B baja).
 
 ## 9. Notas de versión (borrador de la 1.0.0)
 
-Este borrador se completa al etiquetar (actualizado el 17/11/2026). El texto definitivo va en `CHANGELOG.md` (sección `[1.0.0]`, en borrador en la rama `release/v1.0.0`) y en la publicación de la versión en GitHub.
+Este borrador se completa al etiquetar (actualizado el 17/11/2026). El texto definitivo va en `CHANGELOG.md` (sección `[1.0.0]`, ya en `main` desde el 17/11/2026 con el pull request #10) y en la publicación de la versión en GitHub.
 
 **Qué es.** Primera versión en producción del Sistema de Control de Asistencia: sustituye las listas de asistencia en papel por una aplicación web para docentes y administradores, con registro por sesión, correcciones con historial, justificantes y reportes exportables.
 
@@ -313,13 +313,22 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | S7 | Simulado (decisión del 16/11) | Los pasos de los puntos 2, 4 y 5 se repitieron otra vez en la pila real |
 | S8 | Pendiente | Auditoría del 26/11/2026 (plantilla al final de esta sección) |
 
-**Criterios de entrada.** Con S6, los seis criterios de entrada (E1 a E6) están cumplidos: E5 y E6 desde el 16/11/2026. Por eso se abre la rama `release/v1.0.0`, que según [gestion_configuracion.md](gestion_configuracion.md), sección 6, solo ajusta el `CHANGELOG`, la documentación de la liberación y el estado en `CLAUDE.md`; se fusiona después de la auditoría.
+**Criterios de entrada.** Con S6, los seis criterios de entrada (E1 a E6) están cumplidos: E5 y E6 desde el 16/11/2026. Por eso se abre la rama `release/v1.0.0`, que según [gestion_configuracion.md](gestion_configuracion.md), sección 6, solo ajusta el `CHANGELOG`, la documentación de la liberación y el estado en `CLAUDE.md`. El proceso la fusiona después de la auditoría; **el líder la fusionó el mismo 17/11/2026** (pull request #10), así que desde ese día el `CHANGELOG` de `main` muestra `## [1.0.0] - 2026-11-27` antes de que exista la etiqueta: su enlace del pie no abre hasta que se publique `v1.0.0`, y si la versión sale otro día hay que corregir la fecha con otro pull request.
 
-**Etiqueta.** `v1.0.0-rc.2` se pondrá sobre `500bf6b`, el commit verificado, cuando el líder dé el visto bueno. Antes de ponerla se comprueba que su árbol sea `4fe3e1c38ae9aacf944f0ff26ea4ccdcdfbf12f5`.
+**Etiqueta.** `v1.0.0-rc.2` es una etiqueta anotada sobre el commit `500bf6b` de `main`, creada y publicada el 17/11/2026 con el visto bueno del líder.
+
+| Comprobación | Comando | Resultado |
+|---|---|---|
+| La etiqueta apunta al commit verificado, que era la punta de `main` al crearla | `git ls-remote --tags origin` | `v1.0.0-rc.2^{}` da `500bf6b`. Minutos después entraron a `main` los pull requests #10 y #11 (`f244c9a`), solo de documentación |
+| El árbol etiquetado es el que se verificó | `git rev-parse v1.0.0-rc.2^{tree}` | `4fe3e1c38ae9aacf944f0ff26ea4ccdcdfbf12f5`, el mismo de la verificación |
+| Ningún archivo sensible versionado | `git ls-tree -r --name-only 500bf6b` filtrado por `.env`, `respaldos/`, `media/` y `*.sql` | Solo `.env.example` y `.env.prod.example` |
+| Versiones exactas | Líneas de `requirements.txt` sin `==` | 0 |
+
+`main` entró por pull request (#9), sin excepciones al proceso. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
 
 ### Registro de `v1.0.0` (plantilla: se llena el 26/11/2026)
 
-**Qué se audita.** El commit de `main` que resulte de fusionar `release/v1.0.0`. Si entre `rc.2` y ese commit cambió algún archivo que no sea documentación, la auditoría no sigue: hace falta una candidata nueva (`rc.3`) con su verificación.
+**Qué se audita.** La punta de `main` el día de la auditoría (`release/v1.0.0` ya se fusionó el 17/11/2026, pull request #10). Si entre `rc.2` y ese commit cambió algún archivo que no sea documentación, la auditoría no sigue: hace falta una candidata nueva (`rc.3`) con su verificación.
 
 Comandos, en una terminal de Git Bash en la carpeta del proyecto, con `main` al día (`git fetch origin` y `git switch main` y `git pull`), MySQL de desarrollo arriba y la pila de producción levantada:
 
@@ -373,7 +382,7 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 | 11 | La imagen es la verificada | Física | `d1f189ab588086a9`, mientras no cambie el código | *pendiente* |
 | S1 a S10 | Criterios de salida de la sección 3 | Ambos | Todos cumplidos (S7 simulado por decisión del líder) | *pendiente* |
 
-**Pasos para liberar, en orden:** (1) fusionar `release/v1.0.0` a `main`; (2) correr los comandos de arriba sobre `main` y llenar la columna «Resultado»; (3) dictamen go/no-go del líder (sección 11); (4) con go, `git tag -a v1.0.0 <commit auditado> -m "Versión 1.0.0"` y `git push origin v1.0.0`; (5) correr las comprobaciones 8 y 9; (6) publicar la versión en GitHub con las notas de la sección 9; (7) marcar la fase J en `CLAUDE.md` (sección 12) y mover la tarjeta J de Trello a «Hecho». Una etiqueta publicada no se mueve: un error se corrige con `1.0.1`.
+**Pasos para liberar, en orden:** (1) fusionar `release/v1.0.0` a `main` (**hecho el 17/11/2026**, pull request #10; si la fecha de la versión cambia, corregir el encabezado del `CHANGELOG` con un pull request); (2) correr los comandos de arriba sobre `main` y llenar la columna «Resultado»; (3) dictamen go/no-go del líder (sección 11); (4) con go, `git tag -a v1.0.0 <commit auditado> -m "Versión 1.0.0"` y `git push origin v1.0.0`; (5) correr las comprobaciones 8 y 9; (6) publicar la versión en GitHub con las notas de la sección 9; (7) marcar la fase J en `CLAUDE.md` (sección 12) y mover la tarjeta J de Trello a «Hecho». Una etiqueta publicada no se mueve: un error se corrige con `1.0.1`.
 
 
 ## 11. Dictamen go/no-go
@@ -384,7 +393,7 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 |---|---|---|
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
 | Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
-| Etiquetar la candidata `v1.0.0-rc.2` (17/11/2026) | **Propuesto: go**, falta el visto bueno del líder | Mismo código e imagen que `rc.1` más los dos manuales; la prueba de humo de los puntos 1, 2, 4 y 6 pasó en la pila real y S6 queda cumplido (sección 10) |
+| Etiquetar la candidata `v1.0.0-rc.2` (17/11/2026) | **Go** (visto bueno del líder el mismo día) | Mismo código e imagen que `rc.1` más los dos manuales; la prueba de humo de los puntos 1, 2, 4 y 6 pasó en la pila real y S6 queda cumplido (sección 10) |
 | Liberar `v1.0.0` hoy | **No-go** | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 están cumplidos E1 a E6 y los criterios de salida salvo S8: falta la auditoría del 26/11/2026 |
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
