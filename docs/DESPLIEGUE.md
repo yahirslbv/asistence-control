@@ -4,7 +4,7 @@ Léelo junto con `CLAUDE.md`, que sigue siendo la fuente de verdad. Aquí se des
 
 Fecha límite de entrega del proyecto: viernes 27/11/2026. La fase J es la única pendiente de la ruta crítica.
 
-**Ejecutado el 16/11/2026.** Los bloques B2 a B8 están hechos; el resultado, lo que cambió respecto a este texto y lo que se midió están en la sección 10. Las secciones 1 a 9 se conservan como se escribieron.
+**Ejecutado el 16/11/2026.** Los bloques B2 a B8 están hechos; el resultado, lo que cambió respecto a este texto y lo que se midió están en la sección 10. Las secciones 1 a 9 se conservan como se escribieron, salvo el punto 10 de la sección 6, que se ajustó ese mismo día.
 
 **Revisión del 15/10/2026.** Este documento se contrastó con el código y con pruebas desechables (sección 9). Las correcciones están en el historial de Git de este archivo: el primer commit es el texto original.
 
@@ -146,7 +146,7 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 7. Una excepción provocada muestra la página 500 propia con `DEBUG=0`.
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
 9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
-10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
+10. `python manage.py check --deploy`, con `DJANGO_HTTPS=1`, solo con `W005`, `W008` y `W021`, las tres justificadas en el README. La línea base era de 4 advertencias. *(Ajustado el 16/11/2026 por decisión de Victo: antes decía «limpio, o solo con `W008`»; al activar HSTS aparecen `W005` y `W021`, ver la sección 10.)*
 11. La suite completa sigue pasando (650 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
 12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
@@ -206,7 +206,7 @@ Los bloques B2 a B8 se ejecutaron en la rama `feature/rnf-08-despliegue`, con la
 | Variables de la base (B5) | `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` | `.env.prod` solo trae `DB_NAME`, `DB_USER` y `DB_PASSWORD`, las mismas que lee Django; el servicio `db` las traduce al arrancar. Así cada dato se escribe una vez. `db` se niega a arrancar si falta alguna o sigue en `CAMBIA-ESTO` |
 | Contraseña de `root` (B5) | No lo trataba | `web` y `proxy` cargan `.env.prod`, pero el compose les deja vacías las variables que no les tocan: ninguno recibe `MYSQL_ROOT_PASSWORD`, y `proxy` tampoco la clave de Django ni la contraseña de la base |
 | `healthcheck` de `web` (B5) | Pedir `/login/` con un `Host` válido | `docker/healthcheck.py`, que toma el primer nombre de `DJANGO_ALLOWED_HOSTS` |
-| `check --deploy` (B2) | Con `DJANGO_HTTPS=1` solo quedaría `W008` | Quedan `W005`, `W008` y `W021`: los dos nuevos aparecen al activar HSTS. Están apagados a propósito y justificados en el README; la decisión sobre el criterio S4 es del líder |
+| `check --deploy` (B2) | Con `DJANGO_HTTPS=1` solo quedaría `W008` | Quedan `W005`, `W008` y `W021`: los dos nuevos aparecen al activar HSTS. Están apagados a propósito y justificados en el README. Victo aceptó los tres avisos el 16/11/2026, y el criterio S4 y el punto 10 de la sección 6 se ajustaron |
 | Restauración de prueba (B6) | Un `UPDATE` con `ROLLBACK` sobre la copia, que no debe dar el error 1449 | Sobre una base temporal el `UPDATE` falla antes con el error 1142, porque el dueño del disparador no tiene permisos ahí. `scripts/probar_restauracion.sh` se los da durante la prueba y se los quita; además comprueba que el dueño existe, que es lo que evita el 1449 |
 | Carpeta de estáticos (B3) | No lo trataba | `settings.py` crea `staticfiles/` vacía: sin ella, WhiteNoise avisa «No directory at» en cada arranque de desarrollo y de las pruebas |
 | Saltos de línea | No lo trataba | `.gitattributes` fija LF en `*.sh`, `Dockerfile` y `docker/Caddyfile`. Git en Windows los entregaba con CRLF y el contenedor no puede ejecutar así el script de arranque |

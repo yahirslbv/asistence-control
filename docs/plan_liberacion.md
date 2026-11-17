@@ -65,7 +65,7 @@ Se deben cumplir **todos** (S1 a S10). Un solo «no» es no-go.
 | S1 | Los 12 puntos de la lista de verificación de [DESPLIEGUE.md](DESPLIEGUE.md) sección 6 pasan en la pila real | Resultado de cada punto anotado en el informe de la liberación |
 | S2 | La suite completa pasa, sin la variable `DJANGO_STATIC_MANIFEST` | `Ran N tests … OK`, con N mayor o igual que 650 |
 | S3 | El respaldo genera la base y `media/`, y la restauración de prueba (como `root`) coincide en filas, conserva el disparador y un `UPDATE` de `estado` con `ROLLBACK` no da el error 1449 | Pasos de B6 |
-| S4 | `python manage.py check --deploy` sin advertencias, salvo `W008`, justificada | Salida del comando |
+| S4 | `python manage.py check --deploy`, con `DJANGO_HTTPS=1`, sin más advertencias que `W005`, `W008` y `W021`, las tres justificadas en el README. **Ajustado el 16/11/2026 por decisión del líder:** antes admitía solo `W008`, pero al activar HSTS aparecen las otras dos | Salida del comando dentro del contenedor |
 | S5 | Ninguna URL pública sirve `media/` y el 3306 no está publicado | `/media/...` responde 404; `docker compose ps` sin mapeo para `db` |
 | S6 | Existen el manual de usuario y el de administrador | Archivos en el repositorio, enlazados desde el README |
 | S7 | Un docente y el administrador completan los flujos principales en la pila real (periodo, grupo, CSV, sesiones, pase de lista, corrección, justificante, reporte y exportación) | Recorrido de aceptación **simulado** (decisión de Victo del 16/11/2026, en lugar de una persona que no programó el sistema): [aceptacion_simulada.md](aceptacion_simulada.md). En B8 se repiten en la pila real los pasos de los puntos 2, 4 y 5 de la lista de verificación |
@@ -247,7 +247,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | 7 | Una excepción muestra la página 500 propia | **Pasa** | Con `db` detenido, la pantalla de acceso abre (200) e iniciar sesión responde 500 con la página «Error del servidor · Control de asistencia», sin detalles del error |
 | 8 | El 3306 no está publicado | **Pasa** | `docker port`: `db` y `web` sin puertos; solo `proxy` publica 80 y 443 |
 | 9 | Respaldo, restauración como `root`, disparador y `UPDATE` con `ROLLBACK` | **Pasa** | `scripts/respaldo.sh` (sin terminal) y `scripts/respaldo.ps1` (PowerShell 5.1) generan los dos archivos. `scripts/probar_restauracion.sh`: las 8 tablas coinciden (usuario 3, periodo 3, grupo 4, alumno 50, inscripción 60, sesión 8, asistencia 20, bitácora 2), el disparador existe con su dueño y el `UPDATE` escribe 1 fila en la bitácora, deshecha con `ROLLBACK`. Además se restauró de verdad sobre la base y sobre `media/` con los comandos del README, y la aplicación siguió funcionando |
-| 10 | `check --deploy` limpio, o solo con `W008` justificada | **Pasa con observación** | Dentro del contenedor, con `DJANGO_HTTPS=1`: `W005`, `W008` y `W021`, los tres justificados en el README. Como está la demostración (`DJANGO_HTTPS=0`): `W004`, `W008`, `W012` y `W016`. Ver la observación 1 |
+| 10 | `check --deploy` solo con `W005`, `W008` y `W021`, justificadas (texto ajustado el 16/11/2026) | **Pasa** | Dentro del contenedor, con `DJANGO_HTTPS=1`: `W005`, `W008` y `W021`, los tres justificados en el README. Como está la demostración (`DJANGO_HTTPS=0`): `W004`, `W008`, `W012` y `W016`, que son los de un sitio sin HTTPS. Ver la observación 1 |
 | 11 | Suite completa sin `DJANGO_STATIC_MANIFEST` y `collectstatic` al construir | **Pasa** | `Ran 683 tests in 992.973s`, `OK`, sobre el commit `33c81f5`. Al construir: `130 static files copied, 390 post-processed`; sin la clave desechable, la construcción aborta con `ImproperlyConfigured` |
 | 12 | `git status` limpio, sin `.env*` ni `respaldos/`, y README actualizado | **Pasa** | `git check-ignore -v .env.prod` muestra `.gitignore:4`; `git ls-files` solo trae `.env.example` y `.env.prod.example`; `respaldos/` y `staticfiles/` quedan ignorados. `git status --porcelain` salió vacío antes de fusionar y de etiquetar |
 
@@ -255,10 +255,10 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 | # | Estado al 16/11/2026 | Nota |
 |---|---|---|
-| S1 | Cumplido, con la observación 1 | Los 12 puntos de arriba |
+| S1 | Cumplido | Los 12 puntos de arriba |
 | S2 | Cumplido | `Ran 683 tests in 992.973s`, `OK`: las 651 de `main` más 32 nuevas (configuración, estáticos y `seed_demo`) |
 | S3 | Cumplido | Punto 9. El error 1449 se reprodujo con un volcado cuyo dueño no existe, y la prueba de restauración lo detecta y falla |
-| S4 | **Pendiente de una decisión** | Observación 1 |
+| S4 | Cumplido | Con `DJANGO_HTTPS=1` quedan exactamente `W005`, `W008` y `W021`, los que admite el criterio ajustado (observación 1) |
 | S5 | Cumplido | Puntos 6 y 8 |
 | S6 | No cumplido | Falta el manual de administrador (fase I, fuera de este registro) |
 | S7 | Simulado (decisión del 16/11) | Los pasos de los puntos 2, 4 y 5 se repitieron en la pila real, como pide el criterio |
@@ -268,7 +268,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Observaciones**
 
-1. **`check --deploy` (S4 y punto 10).** El criterio admite solo `W008`, pero se escribió sin medir. Al activar HSTS con `DJANGO_HTTPS=1` aparecen `W005` (`SECURE_HSTS_INCLUDE_SUBDOMAINS`) y `W021` (`SECURE_HSTS_PRELOAD`). Se dejaron apagados a propósito y están justificados en el README. El líder decide: aceptar los tres avisos y ajustar el texto de S4, o activar los dos ajustes.
+1. **`check --deploy` (S4 y punto 10).** El criterio admite solo `W008`, pero se escribió sin medir. Al activar HSTS con `DJANGO_HTTPS=1` aparecen `W005` (`SECURE_HSTS_INCLUDE_SUBDOMAINS`) y `W021` (`SECURE_HSTS_PRELOAD`). Se dejaron apagados a propósito y están justificados en el README. La alternativa era activar los dos ajustes. **Resuelta el 16/11/2026:** el líder aceptó los tres avisos, y el texto de S4 y el del punto 10 de la lista de verificación se ajustaron; los dos ajustes de HSTS siguen apagados.
 2. **Restauración de prueba.** Al restaurar como `root` en una base temporal, el `UPDATE` falla con el error 1142 (`TRIGGER command denied`), no con el 1449: el dueño del disparador no tiene permisos sobre esa base. `scripts/probar_restauracion.sh` se los da durante la prueba y se los quita al terminar.
 3. **Errores del servidor sin registro.** Con `DEBUG=0`, Django no escribe los errores 500 en la salida del contenedor: en los registros de `web` solo queda la línea de acceso con el código 500. No impide ningún criterio; corregirlo es un cambio de código y necesita su solicitud de cambio.
 4. **El proxy solo atiende el nombre de `DOMINIO`.** Entrar por `http://127.0.0.1` da una página en blanco; el README lo avisa.
@@ -286,7 +286,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Cómo entró la rama a `main`.** La rama `feature/rnf-08-despliegue` se fusionó desde la línea de comandos, con commit de fusión (`1fc9d7d`, que avanza `main` desde `d1042f4` sin reescribir nada), a petición expresa del líder. Es una excepción a la regla de que una rama entra a `main` por pull request ([gestion_configuracion.md](gestion_configuracion.md), sección 6): no hay pull request en GitHub para esta fusión, y el mensaje del commit lo dice. La revisión de la lista de la sección 7 queda cubierta por este registro.
 
-**Lo que la etiqueta no cambia.** La observación 1 (criterio S4) sigue abierta y el `CHANGELOG` conserva la sección `[Unreleased]`: la sección `[1.0.0]` se escribe al liberar la versión final. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
+**Lo que la etiqueta no cambia.** Cuando se etiquetó, la observación 1 (criterio S4) seguía abierta; el líder la resolvió después, el mismo 16/11/2026, sin cambiar código. El `CHANGELOG` conserva la sección `[Unreleased]`: la sección `[1.0.0]` se escribe al liberar la versión final. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
 
 *(El registro de `v1.0.0` se completa el 26/11/2026.)*
 
@@ -297,7 +297,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | Decisión | Dictamen | Razón |
 |---|---|---|
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
-| Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. Sigue a su criterio la observación sobre `check --deploy` (S4) |
+| Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
 | Liberar `v1.0.0` hoy | **No-go** | No se cumplen E5 ni E6, y los criterios de salida S1 a S8 dependen de cosas que todavía no existen: la fase J no se ha ejecutado, no hay manuales y no hay un servidor |
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
