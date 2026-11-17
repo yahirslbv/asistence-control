@@ -8,7 +8,7 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | **Línea base de partida** | `v0.9.0` (11/11/2026), etiqueta anotada sobre `main` |
 | **Fecha objetivo** | viernes 27/11/2026 (fecha límite de entrega del proyecto) |
 | **Responsable de la decisión** | Líder de proyecto, como comité de control de cambios ([gestión de la configuración](gestion_configuracion.md), sección 1) |
-| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó y se etiquetó el 16/11/2026 (sección 10) |
+| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó y se etiquetó el 16/11/2026; la `v1.0.0-rc.2` (con los manuales) se verificó el 17/11/2026 y espera el visto bueno del líder para etiquetarse (sección 10) |
 
 Este plan aplica la política de [gestion_configuracion.md](gestion_configuracion.md): números de versión (sección 5), ramas (sección 6), control de cambios (sección 7) y auditoría previa a cada etiqueta (sección 8). El detalle técnico del despliegue está en [DESPLIEGUE.md](DESPLIEGUE.md); aquí se decide cuándo, quién, con qué criterios y cómo se da marcha atrás.
 
@@ -180,19 +180,19 @@ Probabilidad e impacto en tres niveles (A alta, M media, B baja).
 
 ## 9. Notas de versión (borrador de la 1.0.0)
 
-Este borrador se completa al etiquetar. El texto definitivo va en `CHANGELOG.md` (sección `[1.0.0]`) y en la publicación de la versión en GitHub.
+Este borrador se completa al etiquetar (actualizado el 17/11/2026). El texto definitivo va en `CHANGELOG.md` (sección `[1.0.0]`, en borrador en la rama `release/v1.0.0`) y en la publicación de la versión en GitHub.
 
 **Qué es.** Primera versión en producción del Sistema de Control de Asistencia: sustituye las listas de asistencia en papel por una aplicación web para docentes y administradores, con registro por sesión, correcciones con historial, justificantes y reportes exportables.
 
 **Qué trae respecto a `0.9.0`.**
 
-- Despliegue con Docker: base de datos, aplicación y proxy en una sola pila (`docker-compose.prod.yml`).
+- Despliegue con Docker: base de datos, aplicación y proxy en una sola pila (`docker-compose.prod.yml`). En Windows, `scripts\demo.ps1` levanta la demostración local con un comando.
 - Respaldo diario de la base de datos y de los justificantes (RNF-08), con restauración probada.
 - Configuración de producción: clave obligatoria, HTTPS cuando hay dominio, archivos estáticos servidos por la aplicación y contraseña de demostración protegida.
-- Manual de usuario y manual de administrador.
+- Manual de usuario (docente) y manual de administrador, con capturas de cada pantalla.
 - Versiones exactas de las dependencias.
 
-**Compatibilidad y actualización.** Sin migraciones nuevas: el esquema es el de `0.9.0` (migraciones 0001 a 0004). Las variables de entorno nuevas son solo de producción (`DJANGO_HTTPS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `DJANGO_STATIC_MANIFEST`, `DOMINIO`); el `.env` de desarrollo no cambia. Requiere MySQL 8 (MariaDB no sirve: usa disparador, restricciones `CHECK` e índice único sobre una expresión).
+**Compatibilidad y actualización.** Sin migraciones nuevas: el esquema es el de `0.9.0` (migraciones 0001 a 0004). Las variables de entorno nuevas son solo de producción (`DJANGO_HTTPS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `DJANGO_STATIC_MANIFEST`, `DOMINIO`, y `PUERTO_HTTP` y `PUERTO_HTTPS` para la pila); el `.env` de desarrollo no cambia. Con `DJANGO_DEBUG=0` la aplicación exige una `DJANGO_SECRET_KEY` propia y `seed_demo` exige `SEED_PASSWORD`. Requiere MySQL 8 (MariaDB no sirve: usa disparador, restricciones `CHECK` e índice único sobre una expresión).
 
 **Problemas conocidos.**
 
@@ -201,7 +201,9 @@ Este borrador se completa al etiquetar. El texto definitivo va en `CHANGELOG.md`
 - La importación de un CSV de 500 filas tarda unos 3.8 s (hallazgo H-03); con grupos de 50 alumnos tarda 0.4 s.
 - El registro de docentes no tiene límite de intentos, CAPTCHA ni confirmación del correo: el control es la aprobación del administrador y el dominio permitido.
 - Bootstrap se carga desde un CDN: sin internet las pantallas pierden el estilo base.
-- Las copias de respaldo viven en el servidor salvo que se defina un destino externo.
+- Las copias de respaldo quedan en el mismo equipo que la base (decisión del 16/11/2026): no protegen contra la pérdida del equipo. La tarea programada del respaldo hay que instalarla a mano (el README trae la línea de `cron` y el comando de `schtasks`).
+- Se entrega como demostración local por HTTP (`http://localhost`); el despliegue con dominio y HTTPS está documentado pero no se ejecutó. El proxy solo atiende el nombre de `DOMINIO`: por `http://127.0.0.1` se ve una página en blanco.
+- Con `DJANGO_DEBUG=0`, un error del servidor muestra la página 500 propia, pero su causa no queda en los registros del contenedor; solo la línea de acceso con el código 500.
 
 **Seguridad.** No se ejecuta `seed_demo` en producción: su contraseña está en el historial de un repositorio público.
 
@@ -288,17 +290,102 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Lo que la etiqueta no cambia.** Cuando se etiquetó, la observación 1 (criterio S4) seguía abierta; el líder la resolvió después, el mismo 16/11/2026, sin cambiar código. El `CHANGELOG` conserva la sección `[Unreleased]`: la sección `[1.0.0]` se escribe al liberar la versión final. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
 
-*(El registro de `v1.0.0` se completa el 26/11/2026.)*
+### Registro de la candidata `v1.0.0-rc.2` (17/11/2026)
+
+**Qué se verificó.** El commit `500bf6b` de `main` (árbol `4fe3e1c38ae9aacf944f0ff26ea4ccdcdfbf12f5`), que es la fusión del pull request #9 con los dos manuales. Respecto a `v1.0.0-rc.1` cambian 19 archivos, todos de documentación: los dos manuales y sus 10 capturas, el README, el `CHANGELOG`, `CLAUDE.md` y cinco documentos de `docs/` (`git diff --name-only v1.0.0-rc.1 500bf6b`). Ninguno es código, prueba ni archivo de la pila, y ninguno entra a la imagen: `.dockerignore` excluye `docs` y `*.md`. Por eso la candidata se re-verificó con una prueba de humo de los puntos 1, 2, 4 y 6 de la lista de verificación, en lugar de repetir los doce.
+
+| Punto | Resultado | Evidencia |
+|---|---|---|
+| Imagen | **La misma que en `rc.1`** | Reconstruida desde `main`: Docker tomó de su caché los 8 pasos de la construcción. El contenido es idéntico archivo por archivo: 8512 archivos de `/app` y `/opt/venv` (sin `media/`) con la misma huella `d1f189ab588086a9`, en el contenedor que corre desde `rc.1` y en uno nuevo de la imagen de hoy. Docker muestra identificadores distintos para la imagen según desde qué proyecto se construyó, pero el contenido no cambia |
+| 1 | **Pasa** | Una pila desechable desde cero (volúmenes nuevos, eliminados al terminar) quedó con los tres servicios sanos; `migrate` aplicó las migraciones 0001 a 0004 y creó el disparador con el usuario `asistencia@%`; `db` y `web` sin puertos publicados. La pila real se reconstruyó con `up -d --build` y siguió sana |
+| 2 | **Pasa** | Recorrido por HTTP a través del proxy, igual al de `rc.1`: 29 de 29 comprobaciones. El administrador creó y activó el periodo 2028-1; con él activo, el grupo de 2026-2 quedó en solo lectura, y al reactivar 2026-2 el pase de lista volvió a guardarse |
+| 4 | **Pasa** | Pase de lista de 5 alumnos con un envío y corrección de ausente a justificado: la fila nueva de `bitacora_cambio` tiene como autor a `docente1@asistencia.test` y la escribió el disparador con el usuario `asistencia@%` |
+| 6 | **Pasa** | `/media/`, `/media/justificantes/` y un archivo: 404 desde Caddy; ninguna petición a `/media` llegó a Django |
+
+**Lo que no se repitió y por qué.** Los puntos 3, 5, 7, 8, 9, 10, 11 y 12 dependen del código, de la imagen o de la configuración de la pila, y ninguno de los tres cambió: su resultado del registro de `rc.1` sigue valiendo. **La suite completa no se corrió**: ningún archivo de `asistencia/`, `config/` ni `requirements.txt` cambió desde `rc.1`, donde pasó (`Ran 683 tests`, `OK`). El punto 12 (`git status` limpio y ningún archivo sensible versionado) se vuelve a comprobar al poner la etiqueta.
+
+**Criterios de salida al 17/11/2026**
+
+| # | Estado | Cambio respecto a `rc.1` |
+|---|---|---|
+| S1 a S5, S9 y S10 | Cumplidos | Ninguno: el código y la imagen son los mismos |
+| S6 | **Cumplido** | `docs/manual_usuario.md` y `docs/manual_administrador.md` existen y el README los enlaza (línea 10) |
+| S7 | Simulado (decisión del 16/11) | Los pasos de los puntos 2, 4 y 5 se repitieron otra vez en la pila real |
+| S8 | Pendiente | Auditoría del 26/11/2026 (plantilla al final de esta sección) |
+
+**Criterios de entrada.** Con S6, los seis criterios de entrada (E1 a E6) están cumplidos: E5 y E6 desde el 16/11/2026. Por eso se abre la rama `release/v1.0.0`, que según [gestion_configuracion.md](gestion_configuracion.md), sección 6, solo ajusta el `CHANGELOG`, la documentación de la liberación y el estado en `CLAUDE.md`; se fusiona después de la auditoría.
+
+**Etiqueta.** `v1.0.0-rc.2` se pondrá sobre `500bf6b`, el commit verificado, cuando el líder dé el visto bueno. Antes de ponerla se comprueba que su árbol sea `4fe3e1c38ae9aacf944f0ff26ea4ccdcdfbf12f5`.
+
+### Registro de `v1.0.0` (plantilla: se llena el 26/11/2026)
+
+**Qué se audita.** El commit de `main` que resulte de fusionar `release/v1.0.0`. Si entre `rc.2` y ese commit cambió algún archivo que no sea documentación, la auditoría no sigue: hace falta una candidata nueva (`rc.3`) con su verificación.
+
+Comandos, en una terminal de Git Bash en la carpeta del proyecto, con `main` al día (`git fetch origin` y `git switch main` y `git pull`), MySQL de desarrollo arriba y la pila de producción levantada:
+
+```bash
+# 0. Qué cambió desde la última candidata (solo debe salir documentación)
+git diff --name-only v1.0.0-rc.2 HEAD | grep -vE '\.md$|^docs/' || echo "solo documentación"
+
+# 1. Suite completa en una base MySQL 8 limpia (tarda de 9 a 17 minutos)
+python manage.py test --noinput
+
+# 2. Cada requisito de prioridad Alta tiene al menos un archivo de pruebas
+for rf in 01 02 03 04 06 08 09 10 11 13 14; do printf 'RF-%s: ' "$rf"; grep -lE "RF-$rf" asistencia/tests/*.py | wc -l; done
+
+# 4. Sin cambios en la copia de trabajo
+git status --porcelain
+
+# 5. Lo que documenta CLAUDE.md, sección 4, está versionado
+for f in manage.py config asistencia/models.py asistencia/migrations/0001_initial.py asistencia/migrations/0002_trigger_bitacora.py asistencia/migrations/0003_periodo.py asistencia/migrations/0004_usuario_aprobado.py asistencia/backends.py asistencia/permissions.py asistencia/forms.py asistencia/admin.py asistencia/services asistencia/views asistencia/templates/asistencia asistencia/templatetags/diseno.py asistencia/static asistencia/management/commands/seed_demo.py asistencia/tests docker scripts docs/manual_usuario.md docs/manual_administrador.md docs/informe_pruebas.md docs/seguimiento_semanal.md docs/DESPLIEGUE.md docs/gestion_configuracion.md docs/plan_liberacion.md docs/cambios CHANGELOG.md Dockerfile docker-compose.prod.yml docker-compose.yml requirements.txt .env.example .env.prod.example .dockerignore .gitattributes .gitignore README.md; do [ -n "$(git ls-files -- "$f")" ] || echo "falta: $f"; done; echo "fin"
+
+# 6. Ningún archivo sensible versionado
+git check-ignore -v .env .env.prod respaldos/x media/x dump.sql.gz
+git ls-files | grep -iE '(^|/)\.env|respaldos/|^media/|\.sql(\.gz)?$'
+
+# 7. El número de la versión coincide con el del CHANGELOG
+grep -m1 -E '^## \[[0-9]' CHANGELOG.md
+
+# 10. Versiones exactas (debe dar 0)
+tr -d '\r' < requirements.txt | grep -v '^#' | grep -v '^$' | grep -vc '=='
+
+# 11. La imagen tiene el mismo contenido que la verificada
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml exec -T web sh -c 'cd / && find app opt/venv -type f ! -path "app/media/*" -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-16'
+
+# 8 y 9. Después de crear la etiqueta: apunta al commit auditado y a su árbol
+git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
+```
+
+| # | Comprobación | Tipo | Resultado esperado | Resultado |
+|---|---|---|---|---|
+| 0 | Solo documentación desde `rc.2` | Física | `solo documentación` | *pendiente* |
+| 1 | La suite completa pasa en una base MySQL 8 limpia | Funcional | `Ran N tests … OK`, con N mayor o igual que 683 | *pendiente* |
+| 2 | Cada requisito de prioridad Alta tiene prueba | Funcional | Ningún requisito con 0 archivos (el 17/11: RF-09, 10, 11 y 14 con 2; los demás con 1) | *pendiente* |
+| 3 | Los hallazgos abiertos están revisados | Funcional | Solo el H-03 abierto, opcional por la sección 1 de este plan | *pendiente* |
+| 4 | `git status` sin cambios | Física | Salida vacía | *pendiente* |
+| 5 | Lo documentado en `CLAUDE.md`, sección 4, está versionado | Física | Solo `fin`, sin ninguna línea `falta:` | *pendiente* |
+| 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | Física | Las cinco rutas ignoradas; versionados solo `.env.example` y `.env.prod.example` | *pendiente* |
+| 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.0.0] - 2026-11-27` (o la fecha real de la etiqueta) | *pendiente* |
+| 8 | La etiqueta apunta al commit auditado | Física | `v1.0.0^{commit}` igual a `HEAD` | *pendiente* |
+| 9 | El árbol etiquetado es el auditado | Física | `v1.0.0^{tree}` igual a `HEAD^{tree}` | *pendiente* |
+| 10 | Versiones exactas | Física | `0` | *pendiente* |
+| 11 | La imagen es la verificada | Física | `d1f189ab588086a9`, mientras no cambie el código | *pendiente* |
+| S1 a S10 | Criterios de salida de la sección 3 | Ambos | Todos cumplidos (S7 simulado por decisión del líder) | *pendiente* |
+
+**Pasos para liberar, en orden:** (1) fusionar `release/v1.0.0` a `main`; (2) correr los comandos de arriba sobre `main` y llenar la columna «Resultado»; (3) dictamen go/no-go del líder (sección 11); (4) con go, `git tag -a v1.0.0 <commit auditado> -m "Versión 1.0.0"` y `git push origin v1.0.0`; (5) correr las comprobaciones 8 y 9; (6) publicar la versión en GitHub con las notas de la sección 9; (7) marcar la fase J en `CLAUDE.md` (sección 12) y mover la tarjeta J de Trello a «Hecho». Una etiqueta publicada no se mueve: un error se corrige con `1.0.1`.
+
 
 ## 11. Dictamen go/no-go
 
-**Fecha del dictamen:** 11/11/2026. **Decide:** líder de proyecto (CCB).
+**Fecha del dictamen:** 11/11/2026, actualizado el 17/11/2026 con la candidata `rc.2`. **Decide:** líder de proyecto (CCB).
 
 | Decisión | Dictamen | Razón |
 |---|---|---|
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
 | Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
-| Liberar `v1.0.0` hoy | **No-go** | No se cumplen E5 ni E6, y los criterios de salida S1 a S8 dependen de cosas que todavía no existen: la fase J no se ha ejecutado, no hay manuales y no hay un servidor |
+| Etiquetar la candidata `v1.0.0-rc.2` (17/11/2026) | **Propuesto: go**, falta el visto bueno del líder | Mismo código e imagen que `rc.1` más los dos manuales; la prueba de humo de los puntos 1, 2, 4 y 6 pasó en la pila real y S6 queda cumplido (sección 10) |
+| Liberar `v1.0.0` hoy | **No-go** | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 están cumplidos E1 a E6 y los criterios de salida salvo S8: falta la auditoría del 26/11/2026 |
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
 
