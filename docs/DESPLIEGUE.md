@@ -155,8 +155,8 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 - Elegir y contratar el hosting, abrir el firewall (solo 22, 80 y 443; nunca el 3306) y apuntar el dominio al servidor.
 - Instalar la tarea programada del respaldo en el servidor y definir dónde se guardan las copias fuera de la máquina.
 - Decidir si el repositorio sigue público. La contraseña de demostración ya está en el historial de Git: cambiarla en el código no la borra, así que ninguna cuenta de demostración debe existir nunca en un entorno real. Además, cada commit lleva el correo del autor.
-- Confirmar con su profesora el mínimo de asistencia (80 % es un supuesto) y si el sistema debe estar en internet.
-- La capacitación a los docentes, el acta de aceptación firmada y la prueba de tiempo del RNF-01 con una persona real.
+- ~~Confirmar el mínimo de asistencia y si el sistema debe estar en internet.~~ Resuelto el 16/11/2026: el mínimo es de 80 % (confirmado por Victo) y el hosting es la demostración local.
+- ~~La capacitación a los docentes, el acta de aceptación firmada y la prueba de tiempo del RNF-01 con una persona real.~~ Opcionales desde el 16/11/2026 (proyecto escolar); el RNF-01 y el S7 se verificaron por simulación (ver [aceptacion_simulada.md](aceptacion_simulada.md)).
 - Programar la fase I (manuales de usuario y de administrador): en el cronograma, la actividad J depende de H **e I**, y sin los manuales no se puede firmar el acta. Este documento la deja fuera a propósito.
 
 ## 8. Cierre

@@ -7,7 +7,7 @@ Módulos: autenticación y usuarios, grupos, sesiones, asistencia y reportes.
 El detalle de requisitos, reglas de negocio y plan por fases está en
 [CLAUDE.md](CLAUDE.md), que es la fuente de verdad del proyecto.
 
-**Si vas a usar el sistema como docente, empieza por el [manual de usuario](docs/manual_usuario.md).**
+**Si vas a usar el sistema como docente, empieza por el [manual de usuario](docs/manual_usuario.md). Si lo vas a administrar, por el [manual del administrador](docs/manual_administrador.md).**
 
 ## Requisitos
 
@@ -452,7 +452,8 @@ asistencia/    única app del proyecto
                    y pase_de_lista.js (reglas de las casillas del pase de lista)
   management/      comando seed_demo
   tests/           pruebas
-docs/          manual de usuario (con sus capturas en img/), informe de pruebas (fase H), seguimiento semanal,
+docs/          manuales de usuario y de administrador (con sus capturas en img/), informe de pruebas (fase H),
+               seguimiento semanal,
                plan de despliegue y gestión de la configuración
 docker/        arranque del contenedor (entrypoint.sh), comprobación de salud (healthcheck.py) y proxy (Caddyfile)
 scripts/       demo.ps1 (demostración local), respaldo.sh y respaldo.ps1 (RNF-08) y probar_restauracion.sh

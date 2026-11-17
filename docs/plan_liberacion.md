@@ -260,7 +260,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | S3 | Cumplido | Punto 9. El error 1449 se reprodujo con un volcado cuyo dueño no existe, y la prueba de restauración lo detecta y falla |
 | S4 | Cumplido | Con `DJANGO_HTTPS=1` quedan exactamente `W005`, `W008` y `W021`, los que admite el criterio ajustado (observación 1) |
 | S5 | Cumplido | Puntos 6 y 8 |
-| S6 | No cumplido | Falta el manual de administrador (fase I, fuera de este registro) |
+| S6 | Cumplido después de `rc.1` | Los dos manuales entran a `main` con la fusión de la fase I; la etiqueta `rc.1` se puso antes y no los incluye |
 | S7 | Simulado (decisión del 16/11) | Los pasos de los puntos 2, 4 y 5 se repitieron en la pila real, como pide el criterio |
 | S8 | Pendiente | Auditoría del 26/11/2026 |
 | S9 | Cumplido | Punto 12 |

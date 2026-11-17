@@ -16,7 +16,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 
 ## 1. Resumen
 
-- **Estado:** las actividades A a H están terminadas, la I (manuales) está en curso y la J (despliegue y entrega) está por hacer.
+- **Estado:** las actividades A a I están terminadas (los manuales, el 16/11) y la J (despliegue y entrega) está por hacer.
 - **Adelanto:** el cronograma prevé terminar la H el 20/11/2026. Quedó terminada el 15/10/2026, 36 días antes.
 - **Calidad:** 650 pruebas automáticas en verde (suite completa del 11/11/2026). El peor caso medido de consulta con 50 alumnos fue de 570 ms contra el límite de 3 s (RNF-07).
 - **Requisitos:** los 20 requisitos funcionales están implementados y probados (el RF-17, periodos escolares, se pidió y se hizo el 3/11; RF-18 a RF-20, que salieron de las observaciones de los evaluadores, el 4/11). También están hechos el RNF-10 (pase de lista compacto) y el RNF-11 (paleta, confirmada el 9/11). Quedan por hacer el respaldo diario (RNF-08) y los manuales (parte del RNF-09).
@@ -34,7 +34,7 @@ Este documento sirve para revisar los avances contra las actividades que el cron
 | F · Asistencia | S6–S7 (02–13/11) | 13/11 | 13/10 (el justificante, el 15/10) | 31 días |
 | G · Reportes | S6 (02–06/11) | 06/11 | 14/10 | 23 días |
 | H · Integración y pruebas | S8 (16–20/11) | 20/11 | 15/10 | 36 días |
-| I · Manuales y documentación | S6 (02–06/11), holgura hasta S8 | 20/11 | en curso | |
+| I · Manuales y documentación | S6 (02–06/11), holgura hasta S8 | 20/11 | 16/11 | 4 días |
 | J · Despliegue y entrega | S9 (23–27/11) | 27/11 | por hacer | |
 
 El código fuente tiene 63 commits entre el 13 y el 15/10/2026. Las actividades A, B y C vienen de la documentación previa (requisitos, modelo entidad-relación, prototipo de pantallas y cronograma) y su estado es el que marca el tablero.
@@ -147,12 +147,12 @@ Extra de esta semana: **RF-17 · periodos escolares y tema del admin** (3/11, a 
 ### S6 · 02/11 al 06/11 (holgura hasta S8) · I · Manuales y documentación
 - **Responsable:** documentador. **Ruta crítica:** no.
 - **Resultado esperado:** manual de usuario y manual de administrador terminados.
-- **Estado:** **en curso.**
+- **Estado:** **terminada el 16/11**, 4 días antes del cierre previsto.
   - [x] README de instalación y uso (RNF-09).
   - [x] Este documento de seguimiento.
-  - [ ] Manual de usuario.
-  - [ ] Manual de administrador.
-- **Observación:** conviene escribir los manuales ya. La fase H terminó y las pantallas no deberían cambiar.
+  - [x] Manual de usuario ([manual_usuario.md](manual_usuario.md)), con 21 capturas.
+  - [x] Manual de administrador ([manual_administrador.md](manual_administrador.md)), con 10 capturas.
+- **Observación:** las capturas son de la versión 0.9.0. Si una pantalla cambia antes de la entrega, hay que repetir su captura.
 
 ### S8 · 16/11 al 20/11 · H · Integración y pruebas del sistema
 - **Responsable:** responsable de pruebas. **Ruta crítica:** sí, sin holgura.
@@ -239,7 +239,7 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 | RNF-06 · Correcciones con autor y fecha | Hecho | Disparador de la base de datos, `test_integridad`, `test_correccion` |
 | RNF-07 · Consultas en menos de 3 s | Medido | Peor caso 570 ms con 50 alumnos; `test_rendimiento` (7) |
 | RNF-08 · Respaldo diario | **Pendiente** | Fase J |
-| RNF-09 · Código versionado y documentación | Parcial | Código en GitHub y README listos; faltan los manuales (fase I) |
+| RNF-09 · Código versionado y documentación | Hecho | Código en GitHub, README, manual de usuario y manual de administrador |
 | RNF-10 · Pase de lista compacto | Hecho | Fila de 57 a 65 px (antes, 128 a 148 px), casillas de 44 px o más y nombre de cada estado una sola vez; `test_casillas`, `test_estilo` |
 | RNF-11 · Paleta de colores final | Hecho | «Pino y ámbar», confirmada por Victo el 9/11; contraste comprobado en `test_estilo` |
 
