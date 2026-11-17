@@ -8,7 +8,7 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | **Línea base de partida** | `v0.9.0` (11/11/2026), etiqueta anotada sobre `main` |
 | **Fecha objetivo** | viernes 27/11/2026 (fecha límite de entrega del proyecto) |
 | **Responsable de la decisión** | Líder de proyecto, como comité de control de cambios ([gestión de la configuración](gestion_configuracion.md), sección 1) |
-| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó el 16/11/2026 (sección 10) y espera la aprobación del líder para etiquetarse |
+| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó y se etiquetó el 16/11/2026 (sección 10) |
 
 Este plan aplica la política de [gestion_configuracion.md](gestion_configuracion.md): números de versión (sección 5), ramas (sección 6), control de cambios (sección 7) y auditoría previa a cada etiqueta (sección 8). El detalle técnico del despliegue está en [DESPLIEGUE.md](DESPLIEGUE.md); aquí se decide cuándo, quién, con qué criterios y cómo se da marcha atrás.
 
@@ -232,7 +232,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 ### Registro de la candidata `v1.0.0-rc.1` (16/11/2026)
 
-**Qué se verificó.** El commit `33c81f5` de la rama `feature/rnf-08-despliegue`, que tiene el código final de los bloques B2 a B7 (los commits posteriores de esa rama solo agregan `scripts/demo.ps1`, que no entra a la imagen, y documentación). Se verificó en la pila real `control_asistencia_prod`, levantada con `docker-compose.prod.yml` en el equipo del proyecto (Windows 11, Docker 29.8.1, Compose v5.5.1), en `http://localhost` y con `DJANGO_HTTPS=0`, que es la demostración local decidida como hosting (E5). La etiqueta se pone cuando el líder la apruebe y la rama esté en `main`.
+**Qué se verificó.** El commit `33c81f5` de la rama `feature/rnf-08-despliegue`, que tiene el código final de los bloques B2 a B7 (los commits posteriores de esa rama solo agregan `scripts/demo.ps1`, que no entra a la imagen, y documentación). Se verificó en la pila real `control_asistencia_prod`, levantada con `docker-compose.prod.yml` en el equipo del proyecto (Windows 11, Docker 29.8.1, Compose v5.5.1), en `http://localhost` y con `DJANGO_HTTPS=0`, que es la demostración local decidida como hosting (E5). El líder aprobó la etiqueta el mismo día (ver «Etiqueta», al final de este registro).
 
 **Lista de verificación de [DESPLIEGUE.md](DESPLIEGUE.md), sección 6**
 
@@ -249,7 +249,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | 9 | Respaldo, restauración como `root`, disparador y `UPDATE` con `ROLLBACK` | **Pasa** | `scripts/respaldo.sh` (sin terminal) y `scripts/respaldo.ps1` (PowerShell 5.1) generan los dos archivos. `scripts/probar_restauracion.sh`: las 8 tablas coinciden (usuario 3, periodo 3, grupo 4, alumno 50, inscripción 60, sesión 8, asistencia 20, bitácora 2), el disparador existe con su dueño y el `UPDATE` escribe 1 fila en la bitácora, deshecha con `ROLLBACK`. Además se restauró de verdad sobre la base y sobre `media/` con los comandos del README, y la aplicación siguió funcionando |
 | 10 | `check --deploy` limpio, o solo con `W008` justificada | **Pasa con observación** | Dentro del contenedor, con `DJANGO_HTTPS=1`: `W005`, `W008` y `W021`, los tres justificados en el README. Como está la demostración (`DJANGO_HTTPS=0`): `W004`, `W008`, `W012` y `W016`. Ver la observación 1 |
 | 11 | Suite completa sin `DJANGO_STATIC_MANIFEST` y `collectstatic` al construir | **Pasa** | `Ran 683 tests in 992.973s`, `OK`, sobre el commit `33c81f5`. Al construir: `130 static files copied, 390 post-processed`; sin la clave desechable, la construcción aborta con `ImproperlyConfigured` |
-| 12 | `git status` limpio, sin `.env*` ni `respaldos/`, y README actualizado | **Pasa** | `git check-ignore -v .env.prod` muestra `.gitignore:4`; `git ls-files` solo trae `.env.example` y `.env.prod.example`; `respaldos/` y `staticfiles/` quedan ignorados. `git status --porcelain` se vuelve a comprobar al etiquetar |
+| 12 | `git status` limpio, sin `.env*` ni `respaldos/`, y README actualizado | **Pasa** | `git check-ignore -v .env.prod` muestra `.gitignore:4`; `git ls-files` solo trae `.env.example` y `.env.prod.example`; `respaldos/` y `staticfiles/` quedan ignorados. `git status --porcelain` salió vacío antes de fusionar y de etiquetar |
 
 **Criterios de salida de la sección 3**
 
@@ -275,6 +275,19 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Lo que este registro no cubre.** El despliegue con un dominio real y HTTPS no se ejecutó: solo se comprobó que Caddy interpreta ese valor de `DOMINIO` como HTTPS automático y que, con `DJANGO_HTTPS=1` y la cabecera del proxy, la aplicación manda HSTS de 3600 s y cookies seguras. La tarea programada del respaldo (cron o Programador de tareas) no se instaló. `scripts/respaldo.sh` y `scripts/probar_restauracion.sh` se ejecutaron en Git Bash sobre Windows, no en un servidor Linux. Las comprobaciones en el navegador se hicieron leyendo el contenido de las páginas, sin capturas de pantalla. Los comandos los ejecutó el asistente de IA en el equipo del proyecto; la decisión de etiquetar la toma el líder.
 
+**Etiqueta.** `v1.0.0-rc.1` es una etiqueta anotada sobre el commit `1fc9d7d` de `main`, creada y publicada el 16/11/2026 con la aprobación del líder.
+
+| Comprobación | Comando | Resultado |
+|---|---|---|
+| La etiqueta apunta a la punta de `main` | `git ls-remote --tags origin` y `git ls-remote --heads origin main` | `v1.0.0-rc.1^{}` y `main` dan `1fc9d7d` |
+| El árbol etiquetado es el que se verificó | `git rev-parse v1.0.0-rc.1^{tree}` contra el árbol de la punta de la rama verificada (`90786b3`) | Los dos dan `08e3333b50e7153d897fde860faf8868496b4e41` |
+| Ningún archivo sensible versionado | `git ls-tree -r --name-only` filtrado por `.env`, `respaldos/`, `media/` y `*.sql` | Solo `.env.example` y `.env.prod.example` |
+| Versiones exactas | Líneas de `requirements.txt` sin `==` | 0 |
+
+**Cómo entró la rama a `main`.** La rama `feature/rnf-08-despliegue` se fusionó desde la línea de comandos, con commit de fusión (`1fc9d7d`, que avanza `main` desde `d1042f4` sin reescribir nada), a petición expresa del líder. Es una excepción a la regla de que una rama entra a `main` por pull request ([gestion_configuracion.md](gestion_configuracion.md), sección 6): no hay pull request en GitHub para esta fusión, y el mensaje del commit lo dice. La revisión de la lista de la sección 7 queda cubierta por este registro.
+
+**Lo que la etiqueta no cambia.** La observación 1 (criterio S4) sigue abierta y el `CHANGELOG` conserva la sección `[Unreleased]`: la sección `[1.0.0]` se escribe al liberar la versión final. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
+
 *(El registro de `v1.0.0` se completa el 26/11/2026.)*
 
 ## 11. Dictamen go/no-go
@@ -284,7 +297,7 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | Decisión | Dictamen | Razón |
 |---|---|---|
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
-| Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Por decidir** | Los puntos técnicos pasaron en la pila real (sección 10). Quedan a criterio del líder la observación sobre `check --deploy` (S4) y la aprobación de la etiqueta |
+| Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. Sigue a su criterio la observación sobre `check --deploy` (S4) |
 | Liberar `v1.0.0` hoy | **No-go** | No se cumplen E5 ni E6, y los criterios de salida S1 a S8 dependen de cosas que todavía no existen: la fase J no se ha ejecutado, no hay manuales y no hay un servidor |
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
