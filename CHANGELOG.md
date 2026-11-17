@@ -6,6 +6,17 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
+### Added
+
+- Manual de usuario del docente, con capturas de cada pantalla: cuenta y acceso, grupos, alumnos y archivo CSV, sesiones, pase de lista con sus casillas, correcciones y justificantes, reportes y solo lectura (`docs/manual_usuario.md`, fase I).
+- Despliegue con Docker (fase J): imagen de la aplicación (`Dockerfile`, con gunicorn y un usuario sin privilegios) y pila de producción (`docker-compose.prod.yml`: MySQL 8 sin puertos publicados y con usuario propio de la aplicación, la aplicación, y Caddy como único servicio que publica puertos), configurada con `.env.prod` (`.env.prod.example`).
+- Archivos estáticos servidos por WhiteNoise, con huella en el nombre cuando `DJANGO_STATIC_MANIFEST=1` (lo fija la imagen).
+- Variables de producción `DJANGO_HTTPS` (cookies seguras, cabecera del proxy y HSTS de una hora) y `DJANGO_CSRF_TRUSTED_ORIGINS`.
+- Respaldo diario de la base de datos y de `media/`, con retención de 14 copias (`scripts/respaldo.sh` para cron y `scripts/respaldo.ps1` para Windows), y prueba de restauración (`scripts/probar_restauracion.sh`) (RNF-08).
+- `scripts/demo.ps1`: levanta la demostración local con un comando.
+- Sección «Despliegue» en el README: demostración local, servidor, variables, actualización, respaldo y restauración.
+- `.gitattributes`: los archivos que corren en Linux conservan saltos de línea LF al clonar en Windows.
+
 ### Fixed
 
 - El texto del selector de rol del admin de Django ya no se recorta: el alto fijo que Django le da a los selectores chocaba con el relleno del tema.
@@ -13,6 +24,12 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 ### Changed
 
 - `requirements.txt` fija la versión exacta de cada dependencia, directa e indirecta, y agrega `whitenoise` y `gunicorn` (este último solo fuera de Windows) para el despliegue (solicitud de cambio [CR-002](docs/cambios/CR-002_versiones_exactas.md)).
+
+### Security
+
+- Con `DJANGO_DEBUG=0` la aplicación no arranca si `DJANGO_SECRET_KEY` falta, está vacía o es la de un archivo de ejemplo.
+- `seed_demo` se niega a crear cuentas con la contraseña de demostración del código cuando `DEBUG` está apagado: exige una propia en `SEED_PASSWORD`.
+- En la pila de producción, `/media/` responde 404 desde el proxy, la base no publica el puerto 3306 y la aplicación entra a MySQL con un usuario sin privilegios fuera de su base.
 
 ## [0.9.0] - 2026-11-11
 

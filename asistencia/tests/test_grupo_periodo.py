@@ -1,7 +1,7 @@
 """El periodo de un grupo sale de los periodos del administrador (RF-17), no de un texto libre."""
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from asistencia.forms import GrupoForm
@@ -123,6 +123,8 @@ class FormularioDeGrupoTests(TestCase):
         self.assertContains(respuesta, 'Ya existe un grupo con esa clave en ese periodo.')
 
 
+# seed_demo es de desarrollo: con DEBUG apagado exige SEED_PASSWORD (test_seed_demo.py).
+@override_settings(DEBUG=True)
 class SeedDemoYPeriodosTests(TestCase):
 
     def test_deja_el_periodo_de_la_demo_creado_y_activo(self):

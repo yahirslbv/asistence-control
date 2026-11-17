@@ -1,0 +1,14 @@
+# Proxy de la pila de producción (bloque B5 de docs/DESPLIEGUE.md).
+#
+# DOMINIO sale de .env.prod:
+#   http://localhost     demostración local, sin HTTPS
+#   :80                  HTTP para cualquier nombre o IP (demostración en la red local)
+#   asistencia.mx        un dominio real: Caddy obtiene el certificado y sirve HTTPS
+{$DOMINIO:http://localhost} {
+	# Defensa extra: los justificantes solo se descargan por la vista de la
+	# aplicación. Ninguna ruta bajo /media/ llega siquiera a Django.
+	@media path /media /media/*
+	respond @media 404
+
+	reverse_proxy web:8000
+}

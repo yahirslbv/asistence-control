@@ -8,21 +8,57 @@ import os
 from pathlib import Path
 
 from django.contrib.messages import constants as mensajes
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'cambia-esto')
+
+def lista_del_entorno(nombre, por_defecto=''):
+    """Valores de una variable de entorno separados por comas, sin vacíos."""
+    return [
+        valor.strip()
+        for valor in os.environ.get(nombre, por_defecto).split(',')
+        if valor.strip()
+    ]
+
 
 DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-    if host.strip()
-]
+# Clave secreta. Con DEBUG apagado (producción) es obligatoria y no puede ser la
+# de los archivos de ejemplo, que es pública: la aplicación se niega a arrancar
+# antes que firmar las sesiones con ella. En desarrollo se tolera para no estorbar.
+CLAVE_DE_EJEMPLO = 'cambia-esto'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '').strip()
+if not DEBUG and (not SECRET_KEY or CLAVE_DE_EJEMPLO in SECRET_KEY.lower()):
+    raise ImproperlyConfigured(
+        'Falta DJANGO_SECRET_KEY o tiene el valor de un archivo de ejemplo. '
+        'Con DJANGO_DEBUG=0 la aplicación no arranca sin una clave propia, '
+        'larga y aleatoria (se define en .env o en .env.prod).'
+    )
+SECRET_KEY = SECRET_KEY or CLAVE_DE_EJEMPLO
+
+ALLOWED_HOSTS = lista_del_entorno('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+
+# Orígenes de confianza para los formularios, con esquema (https://midominio.com).
+CSRF_TRUSTED_ORIGINS = lista_del_entorno('DJANGO_CSRF_TRUSTED_ORIGINS')
+
+# HTTPS. DJANGO_HTTPS=1 solo cuando el sitio se sirve por HTTPS (un dominio real
+# detrás del proxy). En la demostración local por HTTP va en 0: con cookies
+# «solo HTTPS» nadie podría iniciar sesión.
+if os.environ.get('DJANGO_HTTPS', '0') == '1':
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Detrás del proxy Django recibe HTTP; el proxy avisa con esta cabecera que
+    # el visitante llegó por HTTPS. Es seguro porque solo el proxy llega a la
+    # aplicación (gunicorn no publica puertos).
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # HSTS empieza bajo (una hora) y se sube después: uno largo en un dominio
+    # de prueba es difícil de revertir. La redirección de HTTP a HTTPS la hace
+    # el proxy, por eso no se activa SECURE_SSL_REDIRECT.
+    SECURE_HSTS_SECONDS = 3600
 
 
 INSTALLED_APPS = [
@@ -39,6 +75,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise sirve los archivos estáticos (solo STATIC_ROOT, nunca media/).
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -113,7 +151,30 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
+# `collectstatic` reúne aquí los archivos estáticos y WhiteNoise los sirve.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# La carpeta existe aunque esté vacía (desarrollo y pruebas): sin ella,
+# WhiteNoise avisa «No directory at» en cada arranque.
+STATIC_ROOT.mkdir(exist_ok=True)
 
+# Con DJANGO_STATIC_MANIFEST=1 los archivos estáticos llevan una huella en el
+# nombre (estilo.3153bc6eb70d.css) y se sirven comprimidos. La variable la fija
+# la imagen de Docker, que ejecuta `collectstatic` al construirse. No se activa
+# por defecto: sin `collectstatic` previo ninguna pantalla se podría mostrar,
+# y así desarrollo y pruebas siguen funcionando sin ese paso.
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': (
+            'whitenoise.storage.CompressedManifestStaticFilesStorage'
+            if os.environ.get('DJANGO_STATIC_MANIFEST') == '1'
+            else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        ),
+    },
+}
+
+# Los justificantes no tienen URL pública: `config/urls.py` no sirve MEDIA_URL
+# y WhiteNoise solo conoce STATIC_ROOT. Se descargan por la vista del docente.
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
