@@ -6,7 +6,7 @@ Este documento define cómo se identifica, versiona, cambia y libera cada compon
 
 ## 1. Alcance y roles
 
-- **Un solo repositorio** guarda el código, la base de datos (migraciones), los scripts y la documentación. Los manuales de usuario y de administrador (fase I) entrarán al mismo repositorio cuando existan.
+- **Un solo repositorio** guarda el código, la base de datos (migraciones), los scripts y la documentación. Los manuales de usuario y de administrador (fase I) están en `docs/`, con sus capturas en `docs/img/`.
 - **Trabajo individual** (supuesto del README: una sola persona). Los roles son los del cronograma (líder de proyecto, analista, desarrollador de base de datos, backend, frontend, pruebas y documentador) y una persona puede cubrir varios.
 - **Comité de control de cambios (CCB).** Lo ejerce el líder de proyecto. SWEBOK admite que, en proyectos pequeños, la autoridad para aceptar o rechazar cambios la tenga una sola persona. Para que la decisión no sea solo mental, cada solicitud de cambio se escribe en `docs/cambios/` con su evaluación y su resolución (sección 7).
 
@@ -45,11 +45,11 @@ Un solo número de versión identifica al producto completo (repositorio único)
 | ECS-14 | Instalación y uso | `README.md` | Documento | Documentador | LB-L | 0.9.0 |
 | ECS-15 | Historial de versiones | `CHANGELOG.md` | Documento | Documentador | LB-L | 0.9.0 |
 | ECS-16 | Gestión de la configuración, solicitudes de cambio y plan de liberación | `docs/gestion_configuracion.md`, `docs/cambios/`, `docs/plan_liberacion.md` | Documento | Líder de proyecto | LB-L | 0.9.0 |
-| ECS-17 | Manual de usuario y manual de administrador | pendientes (fase I) | Documento | Documentador | LB-L | por definir (antes de 1.0.0) |
+| ECS-17 | Manual de usuario y manual de administrador | `docs/manual_usuario.md`, `docs/manual_administrador.md`, `docs/img/` | Documento | Documentador | LB-L | 1.0.0 |
 | ECS-18 | Imagen y pila de producción | `Dockerfile`, `.dockerignore`, `docker/`, `docker-compose.prod.yml`, `.env.prod.example`, `.gitattributes` | Script de infraestructura | Backend | LB-L | 1.0.0 |
 | ECS-19 | Respaldo, restauración y demostración local | `scripts/` | Script | Backend | LB-L | 1.0.0 |
 
-La imagen, la pila y los scripts del despliegue (ECS-18 y ECS-19) se crearon el 16/11/2026 y entran a LB-L con la versión `1.0.0`. **Todavía no existe** el manual de administrador (ECS-17). La documentación previa (EDT, modelo entidad-relación, prototipo y cronograma) está fuera del repositorio.
+La imagen, la pila y los scripts del despliegue (ECS-18 y ECS-19) se crearon el 16/11/2026 y entran a LB-L con la versión `1.0.0`. Los manuales (ECS-17) se escribieron el 16/11/2026 y entran a LB-L con la versión `1.0.0`. La documentación previa (EDT, modelo entidad-relación, prototipo y cronograma) está fuera del repositorio.
 
 ## 4. Convención de nombres
 
