@@ -93,7 +93,7 @@ La fecha de hoy es el miércoles 11/11/2026. El lunes 16/11 es descanso obligato
 | lun 23 y mar 24/11 | Recorrido de aceptación (S7) y RNF-01: simulados el 16/11 ([aceptacion_simulada.md](aceptacion_simulada.md)); capacitación opcional | Defectos encontrados, con su solicitud de cambio si hacen falta | Pruebas y líder de proyecto |
 | mié 25/11 | Correcciones y, si las hay, `v1.0.0-rc.2` | Candidata final | Backend |
 | jue 26/11 | Auditoría funcional y física, y decisión go/no-go final | Dictamen actualizado (sección 11) | Líder de proyecto |
-| vie 27/11 | Etiqueta `v1.0.0`, despliegue, acta de aceptación (opcional), publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
+| vie 27/11 | Etiqueta `v1.0.0` (**adelantada al 17/11/2026** por decisión del líder), despliegue, acta de aceptación (opcional), publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
 
 La ruta crítica es la de [CLAUDE.md](../CLAUDE.md) sección 11: la fase J no tiene holgura. Con el feriado, los bloques B2 a B8 quedan en cuatro días (17 al 20/11). Si B8 no termina el 20/11, pasa al 23/11 y el recorrido de aceptación se reduce a un solo día; el congelamiento y la fecha de entrega no se mueven.
 
@@ -326,9 +326,9 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 `main` entró por pull request (#9), sin excepciones al proceso. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
 
-### Registro de `v1.0.0` (plantilla: se llena el 26/11/2026)
+### Registro de la auditoría de `v1.0.0` (17/11/2026)
 
-**Qué se audita.** La punta de `main` el día de la auditoría (`release/v1.0.0` ya se fusionó el 17/11/2026, pull request #10). Si entre `rc.2` y ese commit cambió algún archivo que no sea documentación, la auditoría no sigue: hace falta una candidata nueva (`rc.3`) con su verificación.
+**Qué se audita.** La punta de `main` el día de la auditoría (`release/v1.0.0` ya se fusionó el 17/11/2026, pull request #10). **Se adelantó al 17/11/2026** (estaba prevista para el 26/11) y se hizo sobre el commit `5548a56` (árbol `891680c52b2d3027fad8dbfe7da76fc45ddc4297`). Si antes de poner la etiqueta `main` cambia en algo que no sea documentación, se repite. Si entre `rc.2` y ese commit cambió algún archivo que no sea documentación, la auditoría no sigue: hace falta una candidata nueva (`rc.3`) con su verificación.
 
 Comandos, en una terminal de Git Bash en la carpeta del proyecto, con `main` al día (`git fetch origin` y `git switch main` y `git pull`), MySQL de desarrollo arriba y la pila de producción levantada:
 
@@ -358,9 +358,10 @@ grep -m1 -E '^## \[[0-9]' CHANGELOG.md
 # 10. Versiones exactas (debe dar 0)
 tr -d '\r' < requirements.txt | grep -v '^#' | grep -v '^$' | grep -vc '=='
 
-# 11. La imagen tiene el mismo contenido que la verificada
+# 11. La imagen lleva el mismo código que la última candidata (sin contar los saltos de línea)
 docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml exec -T web sh -c 'cd / && find app opt/venv -type f ! -path "app/media/*" -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-16'
+docker compose -f docker-compose.prod.yml exec -T web sh -c 'cd /app && find asistencia config docker manage.py requirements.txt -type f | sort | while read f; do printf "%s %s\n" "$(tr -d "\r" < "$f" | sha256sum | cut -c1-64)" "$f"; done' > /tmp/imagen.txt
+while read h f; do [ "$h" = "$(git show "v1.0.0-rc.2:$f" 2>/dev/null | tr -d '\r' | sha256sum | cut -c1-64)" ] || echo "difiere: $f"; done < /tmp/imagen.txt; echo "fin"
 
 # 8 y 9. Después de crear la etiqueta: apunta al commit auditado y a su árbol
 git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
@@ -368,19 +369,23 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 
 | # | Comprobación | Tipo | Resultado esperado | Resultado |
 |---|---|---|---|---|
-| 0 | Solo documentación desde `rc.2` | Física | `solo documentación` | *pendiente* |
-| 1 | La suite completa pasa en una base MySQL 8 limpia | Funcional | `Ran N tests … OK`, con N mayor o igual que 683 | *pendiente* |
-| 2 | Cada requisito de prioridad Alta tiene prueba | Funcional | Ningún requisito con 0 archivos (el 17/11: RF-09, 10, 11 y 14 con 2; los demás con 1) | *pendiente* |
-| 3 | Los hallazgos abiertos están revisados | Funcional | Solo el H-03 abierto, opcional por la sección 1 de este plan | *pendiente* |
-| 4 | `git status` sin cambios | Física | Salida vacía | *pendiente* |
-| 5 | Lo documentado en `CLAUDE.md`, sección 4, está versionado | Física | Solo `fin`, sin ninguna línea `falta:` | *pendiente* |
-| 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | Física | Las cinco rutas ignoradas; versionados solo `.env.example` y `.env.prod.example` | *pendiente* |
-| 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.0.0] - 2026-11-27` (o la fecha real de la etiqueta) | *pendiente* |
-| 8 | La etiqueta apunta al commit auditado | Física | `v1.0.0^{commit}` igual a `HEAD` | *pendiente* |
-| 9 | El árbol etiquetado es el auditado | Física | `v1.0.0^{tree}` igual a `HEAD^{tree}` | *pendiente* |
-| 10 | Versiones exactas | Física | `0` | *pendiente* |
-| 11 | La imagen es la verificada | Física | `d1f189ab588086a9`, mientras no cambie el código | *pendiente* |
-| S1 a S10 | Criterios de salida de la sección 3 | Ambos | Todos cumplidos (S7 simulado por decisión del líder) | *pendiente* |
+| 0 | Solo documentación desde `rc.2` | Física | `solo documentación` | **Pasa.** `solo documentación` |
+| 1 | La suite completa pasa en una base MySQL 8 limpia | Funcional | `Ran N tests … OK`, con N mayor o igual que 683 | **Pasa.** `Ran 683 tests in 1681.307s`, `OK` |
+| 2 | Cada requisito de prioridad Alta tiene prueba | Funcional | Ningún requisito con 0 archivos | **Pasa.** RF-09, 10, 11 y 14 con 2 archivos; RF-01, 02, 03, 04, 06, 08 y 13 con 1. Es trazabilidad por nombre, no cobertura |
+| 3 | Los hallazgos abiertos están revisados | Funcional | Solo el H-03 abierto, opcional por la sección 1 de este plan | **Pasa.** H-01 y H-02 corregidos; el H-03 (importar un CSV de 500 filas tarda unos 3.8 s) sigue abierto y es opcional |
+| 4 | `git status` sin cambios | Física | Salida vacía | **Pasa.** 0 líneas |
+| 5 | Lo documentado en `CLAUDE.md`, sección 4, está versionado | Física | Solo `fin`, sin ninguna línea `falta:` | **Pasa.** Solo `fin` |
+| 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | Física | Las cinco rutas ignoradas; versionados solo `.env.example` y `.env.prod.example` | **Pasa.** Las cinco ignoradas (líneas 3, 4, 14, 15 y 17 de `.gitignore`) y solo los dos ejemplos versionados |
+| 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.0.0] - 2026-11-27` (o la fecha real de la etiqueta) | **Pasa.** La auditoría encontró `2026-11-27`; el líder adelantó la liberación al 17/11/2026 y el encabezado se corrigió a `## [1.0.0] - 2026-11-17` en el mismo pull request que este registro. Se vuelve a comprobar antes de etiquetar |
+| 8 | La etiqueta apunta al commit auditado | Física | `v1.0.0^{commit}` igual a `HEAD` | *Se comprueba al crear la etiqueta* |
+| 9 | El árbol etiquetado es el auditado | Física | `v1.0.0^{tree}` igual a `HEAD^{tree}` | *Se comprueba al crear la etiqueta* |
+| 10 | Versiones exactas | Física | `0` | **Pasa.** `0` |
+| 11 | La imagen lleva el código verificado | Física | Solo `fin`, sin líneas `difiere:` | **Pasa, con observación.** Los 126 archivos del repositorio que lleva la imagen son iguales a los de `v1.0.0-rc.2`; las dependencias salen de la misma capa en caché; los estáticos conservan los nombres con huella de `rc.1` (`estilo.fbbd6d027a0e.css`, `admin.42609df61b19.css`, `pase_de_lista.2a0fed160107.js`). Ver la observación de abajo |
+| S1 a S10 | Criterios de salida de la sección 3 | Ambos | Todos cumplidos (S7 simulado por decisión del líder) | **Cumplidos.** S1 a S5, S9 y S10 en `rc.1`, S6 en `rc.2`, S7 simulado y S8 es esta auditoría |
+
+**Observación sobre la comprobación 11.** La plantilla original comparaba la imagen con una huella fija (`d1f189ab588086a9`) y hoy dio otra (`efdc81a48a501f8b`), con 2 de los 8 pasos de la construcción rehechos. La causa no es el código, sino los saltos de línea de la copia de trabajo: con `core.autocrlf` (Windows), Git escribe los archivos con CRLF, y la imagen copia los archivos tal como están en disco. Varios archivos que se crearon el 16/11 con LF (`config/settings.py`, `seed_demo.py`, tres archivos de pruebas, `docker/healthcheck.py`) volvieron a escribirse con CRLF al poner esta copia en `main`. Los 126 archivos del repositorio coinciden con `rc.2` en cuanto se ignoran los retornos de carro. Por eso la comprobación 11 ahora compara archivo por archivo contra la última candidata, sin contar los saltos de línea, en lugar de una huella fija. Python, pip y Django tratan igual LF y CRLF, y `entrypoint.sh` y el `Caddyfile` ya tienen LF fijo en `.gitattributes`, así que el comportamiento no cambia. Lo que sí deja ver es que una imagen construida en otro equipo no es idéntica byte a byte (saltos de línea y archivos que genera la instalación de dependencias), aunque lleve el mismo código y las mismas versiones. Fijar LF para todos los archivos en `.gitattributes` lo resolvería; es un cambio de configuración y necesitaría su solicitud de cambio y una candidata nueva.
+
+**Lo que esta auditoría no cubre.** La auditoría la ejecutó el asistente de IA en el equipo del proyecto, sobre `main` y la pila de producción local; la decisión de etiquetar la toma el líder. El despliegue con dominio y HTTPS sigue sin ejecutarse y la tarea programada del respaldo sigue sin instalarse, como en los registros de las candidatas.
 
 **Pasos para liberar, en orden:** (1) fusionar `release/v1.0.0` a `main` (**hecho el 17/11/2026**, pull request #10; si la fecha de la versión cambia, corregir el encabezado del `CHANGELOG` con un pull request); (2) correr los comandos de arriba sobre `main` y llenar la columna «Resultado»; (3) dictamen go/no-go del líder (sección 11); (4) con go, `git tag -a v1.0.0 <commit auditado> -m "Versión 1.0.0"` y `git push origin v1.0.0`; (5) correr las comprobaciones 8 y 9; (6) publicar la versión en GitHub con las notas de la sección 9; (7) marcar la fase J en `CLAUDE.md` (sección 12) y mover la tarjeta J de Trello a «Hecho». Una etiqueta publicada no se mueve: un error se corrige con `1.0.1`.
 
@@ -394,8 +399,8 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
 | Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
 | Etiquetar la candidata `v1.0.0-rc.2` (17/11/2026) | **Go** (visto bueno del líder el mismo día) | Mismo código e imagen que `rc.1` más los dos manuales; la prueba de humo de los puntos 1, 2, 4 y 6 pasó en la pila real y S6 queda cumplido (sección 10) |
-| Liberar `v1.0.0` hoy | **No-go** | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 están cumplidos E1 a E6 y los criterios de salida salvo S8: falta la auditoría del 26/11/2026 |
+| Liberar `v1.0.0` | **Go** (17/11/2026, decisión del líder) | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 la auditoría (S8) pasó sobre `5548a56` y todos los criterios de salida están cumplidos (S7 simulado). El líder adelantó la liberación del 27/11 al 17/11/2026 «para ya terminar»; la entrega a la profesora sigue siendo el 27/11 |
 
-**Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
+**Condiciones para pasar a go** (previsto para el 26/11/2026; la auditoría se adelantó al 17/11): los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
 
 **Limitación.** El proyecto es individual: quien lo programa también ejerce el comité de control de cambios y decide el go. No se puede crear un comité de varias personas; se compensaba con dos condiciones: que el criterio S7 lo ejecutara otra persona y que la profesora firmara el acta de aceptación antes del go final. El 16/11/2026 Victo decidió, por ser un proyecto escolar, que el S7 se simule ([aceptacion_simulada.md](aceptacion_simulada.md)) y que el acta sea opcional; el go lo sigue decidiendo una sola persona.

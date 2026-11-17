@@ -6,7 +6,7 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-11-27
+## [1.0.0] - 2026-11-17
 
 Primera versión en producción. Agrega a la 0.9.0 los manuales de usuario y de administrador (fase I) y la parte técnica de la fase J: despliegue con Docker, configuración de producción y respaldo diario con restauración probada (RNF-08). Sin migraciones nuevas: el esquema es el de la 0.9.0. Se entrega como demostración local con Docker (`http://localhost`); la misma pila sirve en un servidor con dominio y HTTPS, pero ese caso no se ha ejecutado.
 
