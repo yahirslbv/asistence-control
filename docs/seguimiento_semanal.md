@@ -287,7 +287,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 2. **Hosting.** Resuelta el 16/11/2026: demostración local con Docker (`http://localhost`). El despliegue con dominio queda documentado, sin ejecutar.
 3. **Respaldo de `media/`.** Resuelta el 16/11/2026: `scripts/respaldo.sh` y `scripts/respaldo.ps1` la incluyen. Las copias quedan solo en el equipo.
 4. **El administrador solo gestiona usuarios.** Es el valor por defecto, sin confirmar.
-5. **Avisos de `check --deploy`.** Con `DJANGO_HTTPS=1` quedan `W005`, `W008` y `W021`; el criterio S4 esperaba solo `W008`. Falta decidir si se aceptan los tres.
+5. **Avisos de `check --deploy`.** Resuelta el 16/11/2026: Victo aceptó `W005`, `W008` y `W021` (los que quedan con `DJANGO_HTTPS=1`), justificados en el README, y el criterio S4 del plan de liberación se ajustó.
 6. **Errores del servidor sin registro.** Con `DEBUG=0` los errores 500 no se escriben en la salida del contenedor.
 
 **Hallazgos menores de la fase H** (ninguno crítico ni mayor):
