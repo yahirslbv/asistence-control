@@ -192,7 +192,7 @@ Medidas del pase de lista en el navegador (25 alumnos): sin desbordamiento horiz
 ### S9 · 23/11 al 27/11 · J · Despliegue, capacitación y entrega final
 - **Responsable:** líder de proyecto. **Ruta crítica:** sí, sin holgura. Fecha límite: **viernes 27/11/2026**.
 - **Resultado esperado:** sistema desplegado y acta de aceptación firmada.
-- **Estado:** **parte técnica hecha el 16/11/2026** (bloques B2 a B8 de [DESPLIEGUE.md](DESPLIEGUE.md)); la candidata `v1.0.0-rc.1` quedó etiquetada ese día sobre `main`. El 17/11/2026 se verificó y se etiquetó la `v1.0.0-rc.2`, con los dos manuales (S6 cumplido); la auditoría de la `1.0.0` se adelantó y pasó el 17/11/2026, y Victo adelantó la liberación a ese día; faltan la etiqueta `v1.0.0`, la demostración y la entrega del 27/11. El hosting quedó decidido: demostración local con Docker en el equipo del proyecto.
+- **Estado:** **parte técnica hecha el 16/11/2026** (bloques B2 a B8 de [DESPLIEGUE.md](DESPLIEGUE.md)); la candidata `v1.0.0-rc.1` quedó etiquetada ese día sobre `main`. El 17/11/2026 se verificó y se etiquetó la `v1.0.0-rc.2`, con los dos manuales (S6 cumplido); la auditoría de la `1.0.0` se adelantó y pasó el 17/11/2026, y Victo adelantó la liberación a ese día; la versión `1.0.0` quedó publicada ese mismo día (etiqueta `v1.0.0`). Faltan la demostración y la entrega del 27/11. El hosting quedó decidido: demostración local con Docker en el equipo del proyecto.
   - **Qué se hizo:** configuración de producción (clave obligatoria, `DJANGO_HTTPS`), archivos estáticos con WhiteNoise, imagen de la aplicación, pila de tres servicios (`docker-compose.prod.yml`), respaldo diario con restauración probada, `seed_demo` protegido, demostración de un comando (`scripts/demo.ps1`) y sección «Despliegue» del README.
   - **Evidencia:** los 12 puntos de la lista de verificación pasaron en la pila real; el detalle está en el registro de `v1.0.0-rc.1` de [plan_liberacion.md](plan_liberacion.md). Suite completa: `Ran 683 tests in 992.973s`, `OK` (commit `33c81f5`).
   - **Sin ejecutar:** el despliegue con dominio y HTTPS (solo documentado) y la tarea programada del respaldo (el README trae la línea de `cron` y el comando de `schtasks`).
@@ -299,7 +299,7 @@ Entorno: Python 3.11, Django 5.2, MySQL 8.0 en Docker, `openpyxl` y `reportlab`.
 | H-03 | Importar un CSV de 500 filas tarda 3.8 s (con 50 filas, 0.4 s) | Importar por bloques en lugar de por fila |
 
 **Riesgos**
-- **Ruta crítica en J.** Es la única actividad pendiente de la ruta crítica. La parte técnica quedó hecha y la candidata `v1.0.0-rc.1` etiquetada el 16/11/2026; falta la entrega.
+- **Ruta crítica en J.** Es la única actividad pendiente de la ruta crítica. La parte técnica quedó hecha el 16/11/2026 y la versión `1.0.0` se publicó el 17/11/2026; falta la entrega del 27/11.
 - **RNF-01 sin evidencia con personas.** El diseño no impone esperas, pero solo se puede confirmar con docentes.
 - **Repositorio público.** La contraseña de demostración de `seed_demo` está escrita en el código y cada commit lleva el correo del autor. Conviene cambiar esa contraseña antes de desplegar, o hacer el repositorio privado.
 - **Registro público sin límite de intentos ni CAPTCHA (RF-19).** Cualquiera puede crear cuentas pendientes; el control es el filtro de dominio y la aprobación del administrador. Si se llega a abusar, hay que limitar las peticiones a `/registro/` en el proxy (ver [DESPLIEGUE.md](DESPLIEGUE.md)).
