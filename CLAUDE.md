@@ -237,7 +237,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 - [x] RF-19 y RF-20 · Registro de docentes con aprobación y panel del administrador (4/11/2026)
 - [ ] I · Manuales (el manual de usuario está hecho, 16/11/2026; falta el manual de administrador)
 - [x] H · Integración y pruebas (informe en `docs/informe_pruebas.md`; RNF-01 sin cronometrar con personas)
-- [ ] J · Despliegue y entrega. **Parte técnica hecha el 16/11/2026** (bloques B2 a B8 de `docs/DESPLIEGUE.md`): configuración de producción, archivos estáticos, imagen, pila de Docker, respaldo diario con restauración probada (RNF-08), `seed_demo` protegido y sección «Despliegue» del README; verificada en la pila real (registro de `v1.0.0-rc.1` en `docs/plan_liberacion.md`). **Pendiente:** que Victo apruebe y se etiquete `v1.0.0-rc.1`, la demostración y la entrega; la capacitación y el acta son opcionales
+- [ ] J · Despliegue y entrega. **Parte técnica hecha el 16/11/2026** (bloques B2 a B8 de `docs/DESPLIEGUE.md`): configuración de producción, archivos estáticos, imagen, pila de Docker, respaldo diario con restauración probada (RNF-08), `seed_demo` protegido y sección «Despliegue» del README; verificada en la pila real (registro de `v1.0.0-rc.1` en `docs/plan_liberacion.md`). La candidata **`v1.0.0-rc.1` se etiquetó el 16/11/2026** sobre `main` (commit `1fc9d7d`), con la aprobación de Victo, que también pidió fusionar la rama desde la línea de comandos. **Pendiente:** la decisión sobre S4, la demostración y la entrega; la capacitación y el acta son opcionales
 
 ### Decisiones tomadas
 
