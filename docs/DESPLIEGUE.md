@@ -4,6 +4,8 @@ Léelo junto con `CLAUDE.md`, que sigue siendo la fuente de verdad. Aquí se des
 
 Fecha límite de entrega del proyecto: viernes 27/11/2026. La fase J es la única pendiente de la ruta crítica.
 
+**Ejecutado el 16/11/2026.** Los bloques B2 a B8 están hechos; el resultado, lo que cambió respecto a este texto y lo que se midió están en la sección 10. Las secciones 1 a 9 se conservan como se escribieron, salvo el punto 10 de la sección 6, que se ajustó ese mismo día.
+
 **Revisión del 15/10/2026.** Este documento se contrastó con el código y con pruebas desechables (sección 9). Las correcciones están en el historial de Git de este archivo: el primer commit es el texto original.
 
 ## 1. Alcance
@@ -144,7 +146,7 @@ Con el stack de producción levantado de verdad, comprueba y reporta cada punto 
 7. Una excepción provocada muestra la página 500 propia con `DEBUG=0`.
 8. El 3306 no está publicado en el host (`docker compose ps` no muestra mapeo de puertos para `db`).
 9. El respaldo genera los dos archivos, la restauración de prueba (como `root`) coincide, el disparador existe tras restaurar y un `UPDATE` de `estado` con `ROLLBACK` sobre la copia no da el error 1449.
-10. `python manage.py check --deploy` limpio, o solo con `W008` (la redirección a HTTPS la hace Caddy) justificada en el README. La línea base era de 4 advertencias.
+10. `python manage.py check --deploy`, con `DJANGO_HTTPS=1`, solo con `W005`, `W008` y `W021`, las tres justificadas en el README. La línea base era de 4 advertencias. *(Ajustado el 16/11/2026 por decisión de Victo: antes decía «limpio, o solo con `W008`»; al activar HSTS aparecen `W005` y `W021`, ver la sección 10.)*
 11. La suite completa sigue pasando (650 pruebas más las nuevas) **sin** `DJANGO_STATIC_MANIFEST`, y `collectstatic` durante la construcción de la imagen termina bien con la clave desechable.
 12. `git status` limpio, sin `.env*` ni `respaldos/` y el README actualizado; `git check-ignore -v .env.prod` muestra la regla del `.gitignore`.
 
@@ -190,3 +192,51 @@ Se hicieron en un MySQL 8.0.46 desechable (eliminado al terminar), con configura
 - Que `mysqlclient` compile en una imagen `python:3.11-slim` de Debian y conecte a MySQL 8 con su método de autenticación por defecto (`caching_sha2_password`). El equipo de desarrollo es Windows y usa una rueda ya compilada. Se verifica en B4/B5 con `migrate` dentro del contenedor.
 - La configuración concreta de Caddy, el comportamiento de `gunicorn` y el stack de producción completo: todavía no existen.
 - Que `W004`, `W012` y `W016` desaparezcan con `DJANGO_HTTPS=1`: se espera por cómo se definen, pero no se midió.
+
+## 10. Ejecución del 16/11/2026
+
+Los bloques B2 a B8 se ejecutaron en la rama `feature/rnf-08-despliegue`, con la solicitud de cambio [CR-002](cambios/CR-002_versiones_exactas.md) integrada antes de construir la imagen. El resultado de cada punto de la sección 6 está en el registro de la candidata `v1.0.0-rc.1` de [plan_liberacion.md](plan_liberacion.md). Las respuestas a la sección 3: demostración local con Docker (pregunta 1), Bootstrap por CDN (3), copias solo en `respaldos/` (4) e imagen Linux con la demostración en Windows (5).
+
+### Qué quedó distinto de lo que dice este documento
+
+| Tema | Este documento decía | Lo que se hizo y por qué |
+|---|---|---|
+| Commits (sección 4) | Prefijos `RNF-08:`, `H-02:`, `Despliegue:` | Conventional Commits con el ámbito (`feat(rnf-08): ...`), como fija [gestion_configuracion.md](gestion_configuracion.md) desde la `0.9.0` |
+| Imagen base (B4) | Python 3.11 slim | `python:3.11-slim-trixie`: nombra la versión de Debian para que un cambio de base no cambie la biblioteca cliente de MySQL sin que nadie lo decida |
+| Variables de la base (B5) | `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` | `.env.prod` solo trae `DB_NAME`, `DB_USER` y `DB_PASSWORD`, las mismas que lee Django; el servicio `db` las traduce al arrancar. Así cada dato se escribe una vez. `db` se niega a arrancar si falta alguna o sigue en `CAMBIA-ESTO` |
+| Contraseña de `root` (B5) | No lo trataba | `web` y `proxy` cargan `.env.prod`, pero el compose les deja vacías las variables que no les tocan: ninguno recibe `MYSQL_ROOT_PASSWORD`, y `proxy` tampoco la clave de Django ni la contraseña de la base |
+| `healthcheck` de `web` (B5) | Pedir `/login/` con un `Host` válido | `docker/healthcheck.py`, que toma el primer nombre de `DJANGO_ALLOWED_HOSTS` |
+| `check --deploy` (B2) | Con `DJANGO_HTTPS=1` solo quedaría `W008` | Quedan `W005`, `W008` y `W021`: los dos nuevos aparecen al activar HSTS. Están apagados a propósito y justificados en el README. Victo aceptó los tres avisos el 16/11/2026, y el criterio S4 y el punto 10 de la sección 6 se ajustaron |
+| Restauración de prueba (B6) | Un `UPDATE` con `ROLLBACK` sobre la copia, que no debe dar el error 1449 | Sobre una base temporal el `UPDATE` falla antes con el error 1142, porque el dueño del disparador no tiene permisos ahí. `scripts/probar_restauracion.sh` se los da durante la prueba y se los quita; además comprueba que el dueño existe, que es lo que evita el 1449 |
+| Carpeta de estáticos (B3) | No lo trataba | `settings.py` crea `staticfiles/` vacía: sin ella, WhiteNoise avisa «No directory at» en cada arranque de desarrollo y de las pruebas |
+| Saltos de línea | No lo trataba | `.gitattributes` fija LF en `*.sh`, `Dockerfile` y `docker/Caddyfile`. Git en Windows los entregaba con CRLF y el contenedor no puede ejecutar así el script de arranque |
+| Demostración local | No lo trataba | `scripts/demo.ps1` crea `.env.prod` la primera vez y levanta la pila. Si la base ya existe y falta `.env.prod`, se detiene |
+| Pruebas de `seed_demo` (B7) | Agregar la prueba | Además, las cuatro pruebas que ya llamaban a `seed_demo` corren ahora con `DEBUG=True`: el ejecutor fuerza `DEBUG=False` y, con la regla nueva, el comando se negaría. Sus aserciones no cambiaron |
+
+### Comprobaciones del 16/11/2026
+
+Se hicieron en la pila real y en pilas y contenedores desechables (con el prefijo `analisis_`, eliminados al terminar). Equipo: Windows 11, Docker 29.8.1, Compose v5.5.1, MySQL 8.0.46, Caddy 2.11.9.
+
+| Comprobación | Resultado |
+|---|---|
+| `mysqlclient 2.3.0` en `python:3.11-slim` (Debian 13) | Compila contra el cliente de MariaDB 3.4.9 y se autentica con `caching_sha2_password` sin TLS. `migrate` corre dentro del contenedor |
+| Disparador con el usuario de la aplicación | `migrate` lo crea con `asistencia@%` como dueño y escribe en la bitácora |
+| Construcción sin la clave desechable | Aborta con `ImproperlyConfigured` |
+| Imagen final | Usuario `asistencia` (uid 10001), sin compilador, `media/` escribible y el resto de `/app` no; `pip check` limpio; las 13 versiones instaladas son las fijadas |
+| `Host` frente a `gunicorn` con `ALLOWED_HOSTS=midominio.test` | `127.0.0.1` y `localhost`: 400. El dominio: 200 |
+| Estáticos con manifiesto | `estilo.fbbd6d027a0e.css` con `Cache-Control: max-age=315360000, public, immutable`, también comprimida; las hojas del admin responden 200 |
+| `.env.prod` con saltos de línea de Windows (CRLF) | Funciona: la pila levantó con ese archivo y los valores llegan a los contenedores sin retorno de carro. Con `docker-compose.prod.yml` en CRLF, Compose lee el guion de arranque de `db` sin retornos de carro (solo se revisó la configuración interpretada, no se levantó la pila así) |
+| `DJANGO_HTTPS=1` con `gunicorn 27.0.1` | Con `X-Forwarded-Proto: https`: HSTS de 3600 s y cookies seguras. Sin la cabecera no hay HSTS |
+| `check --deploy` | `DJANGO_HTTPS=0`: `W004`, `W008`, `W012`, `W016`. `DJANGO_HTTPS=1`: `W005`, `W008`, `W021` |
+| Valores de `DOMINIO` según Caddy | `http://localhost`: puerto 80, solo ese nombre. `:80`: puerto 80, cualquier nombre. Un dominio: puerto 443 con HTTPS automático (este último no se ejecutó) |
+| `PUERTO_HTTP=8081` | La pila publica el 8081 y responde ahí |
+| `/media/` por el proxy | 404 con `Server: Caddy`; la petición no llega a Django |
+| Entrar por `http://127.0.0.1` con `DOMINIO=http://localhost` | Página en blanco de Caddy (200, 0 bytes): el proxy solo atiende ese nombre |
+| Respaldo con 17 copias de cada tipo | Quedan 14; los archivos que no son `db_*` ni `media_*` no se tocan |
+| Respaldo con `db` detenido | Código de salida 1 y la carpeta queda igual, en bash y en PowerShell |
+| Restauración como `root`, sin permisos del dueño en la base temporal | `ERROR 1142: TRIGGER command denied to user 'asistencia'@'%'` |
+| Restauración de un volcado con un dueño inexistente | `ERROR 1449` en el `UPDATE` de `estado` y en el de `justificante`; la prueba de restauración falla y lo explica |
+| Restauración real con los comandos del README | La base y `media/` se restauran y la aplicación sigue corrigiendo y descargando justificantes |
+| `seed_demo` en la pila, sin `SEED_PASSWORD` o con la clave del código | Se niega, con código 1 |
+
+**Sigue sin comprobarse:** el despliegue con un dominio real y su certificado; la tarea programada del respaldo, que no se instaló; y `scripts/respaldo.sh` en un servidor Linux (se ejecutó en Git Bash sobre Windows).

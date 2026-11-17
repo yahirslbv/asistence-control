@@ -1,0 +1,100 @@
+# Pila de producción: base de datos, aplicación y proxy (fase J, bloque B5).
+#
+#   docker compose -f docker-compose.prod.yml up -d --build   # levantar
+#   docker compose -f docker-compose.prod.yml ps              # estado
+#   docker compose -f docker-compose.prod.yml logs -f web     # registros
+#   docker compose -f docker-compose.prod.yml down            # apagar (los datos se conservan)
+#
+# NUNCA uses `down -v`: borra los volúmenes (base de datos y justificantes).
+#
+# Todos los valores salen de `.env.prod` (cópialo de `.env.prod.example`). El
+# proyecto y sus volúmenes tienen nombre propio para no chocar con el MySQL de
+# desarrollo de `docker-compose.yml`.
+name: control_asistencia_prod
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: .env.prod
+    # La imagen de MySQL crea la base y el usuario de la aplicación a partir de
+    # MYSQL_DATABASE, MYSQL_USER y MYSQL_PASSWORD. Aquí se toman de las mismas
+    # variables DB_* que lee Django, para no escribir cada dato dos veces.
+    # OJO: solo se aplican la primera vez que arranca el volumen (ver README).
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        case "$$MYSQL_ROOT_PASSWORD|$$DB_PASSWORD|$$DB_USER|$$DB_NAME" in
+          *CAMBIA-ESTO*|"|"*|*"||"*|*"|")
+            echo "ERROR: revisa MYSQL_ROOT_PASSWORD, DB_NAME, DB_USER y DB_PASSWORD en .env.prod:" >&2
+            echo "       falta alguna o sigue con el valor CAMBIA-ESTO del ejemplo." >&2
+            sleep 15
+            exit 1 ;;
+        esac
+        export MYSQL_DATABASE="$$DB_NAME" MYSQL_USER="$$DB_USER" MYSQL_PASSWORD="$$DB_PASSWORD"
+        exec docker-entrypoint.sh mysqld \
+          --character-set-server=utf8mb4 \
+          --collation-server=utf8mb4_unicode_ci \
+          --default-time-zone=+00:00 \
+          --log-bin-trust-function-creators=1
+    # Sin `ports:`: el 3306 solo existe dentro de la red de Docker.
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # Por TCP (-h 127.0.0.1): durante la inicialización MySQL solo atiende
+      # por socket, así que el servicio no se marca sano antes de tiempo.
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$DB_PASSWORD\" mysqladmin ping -h 127.0.0.1 -u \"$$DB_USER\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  web:
+    build: .
+    image: control_asistencia_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env.prod
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      # La aplicación entra con su propio usuario; no necesita la clave de root.
+      MYSQL_ROOT_PASSWORD: ""
+    # Sin `ports:`: solo el proxy llega a gunicorn.
+    volumes:
+      - media:/app/media
+    healthcheck:
+      test: ["CMD", "python", "/app/docker/healthcheck.py"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    env_file: .env.prod
+    environment:
+      # El proxy solo necesita DOMINIO: se le quitan los secretos.
+      DJANGO_SECRET_KEY: ""
+      DB_PASSWORD: ""
+      MYSQL_ROOT_PASSWORD: ""
+    ports:
+      - "${PUERTO_HTTP:-80}:80"
+      - "${PUERTO_HTTPS:-443}:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  mysql_data:
+  media:
+  caddy_data:
+  caddy_config:

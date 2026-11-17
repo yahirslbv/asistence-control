@@ -46,8 +46,10 @@ Un solo número de versión identifica al producto completo (repositorio único)
 | ECS-15 | Historial de versiones | `CHANGELOG.md` | Documento | Documentador | LB-L | 0.9.0 |
 | ECS-16 | Gestión de la configuración, solicitudes de cambio y plan de liberación | `docs/gestion_configuracion.md`, `docs/cambios/`, `docs/plan_liberacion.md` | Documento | Líder de proyecto | LB-L | 0.9.0 |
 | ECS-17 | Manual de usuario y manual de administrador | pendientes (fase I) | Documento | Documentador | LB-L | por definir (antes de 1.0.0) |
+| ECS-18 | Imagen y pila de producción | `Dockerfile`, `.dockerignore`, `docker/`, `docker-compose.prod.yml`, `.env.prod.example`, `.gitattributes` | Script de infraestructura | Backend | LB-L | 1.0.0 |
+| ECS-19 | Respaldo, restauración y demostración local | `scripts/` | Script | Backend | LB-L | 1.0.0 |
 
-**Todavía no existen** y entrarán a LB-L cuando se creen: el `Dockerfile`, `docker-compose.prod.yml`, `.env.prod.example` y `scripts/respaldo.sh` del plan de despliegue, y los manuales (ECS-17). La documentación previa (EDT, modelo entidad-relación, prototipo y cronograma) está fuera del repositorio.
+La imagen, la pila y los scripts del despliegue (ECS-18 y ECS-19) se crearon el 16/11/2026 y entran a LB-L con la versión `1.0.0`. **Todavía no existe** el manual de administrador (ECS-17). La documentación previa (EDT, modelo entidad-relación, prototipo y cronograma) está fuera del repositorio.
 
 ## 4. Convención de nombres
 
@@ -118,6 +120,7 @@ Todo cambio a un elemento que ya pertenece a una línea base (ECS-01 a ECS-03 si
 | Solicitud | Descripción | Fecha | Decisión | Rama | Versión |
 |---|---|---|---|---|---|
 | [CR-001](cambios/CR-001_pagina_500.md) | Página 500 propia (hallazgo H-02) | 2026-11-11 | Aprobada | `cambio/cr-001-pagina-500` | 0.9.0 |
+| [CR-002](cambios/CR-002_versiones_exactas.md) | Versiones exactas de las dependencias, con `gunicorn` y `whitenoise` (riesgo R13) | 2026-11-16 | Aprobada | `cambio/cr-002-versiones-exactas` | 1.0.0 |
 
 ## 8. Auditoría de configuración
 

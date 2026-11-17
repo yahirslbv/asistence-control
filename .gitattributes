@@ -1,0 +1,7 @@
+# Los archivos que corren en Linux (dentro de un contenedor o en el servidor)
+# conservan saltos de línea LF aunque el repositorio se clone en Windows.
+# Con CRLF, el contenedor no puede ejecutar el script de arranque.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+docker/Caddyfile text eol=lf
+*.ps1           text eol=crlf

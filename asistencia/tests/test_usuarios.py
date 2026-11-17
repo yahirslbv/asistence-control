@@ -3,7 +3,7 @@
 from django.contrib.auth.models import Permission
 from django.core.management import call_command
 from django.db.models import ProtectedError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from asistencia.models import Usuario
@@ -504,6 +504,8 @@ class ServicioDeUsuariosTests(TestCase):
             validar_cambio(otro, DOCENTE, False, otro)
 
 
+# seed_demo es de desarrollo: con DEBUG apagado exige SEED_PASSWORD (test_seed_demo.py).
+@override_settings(DEBUG=True)
 class SeedDemoTests(TestCase):
 
     def test_el_administrador_de_demo_queda_con_acceso_solo_a_usuarios(self):

@@ -8,7 +8,7 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | **Línea base de partida** | `v0.9.0` (11/11/2026), etiqueta anotada sobre `main` |
 | **Fecha objetivo** | viernes 27/11/2026 (fecha límite de entrega del proyecto) |
 | **Responsable de la decisión** | Líder de proyecto, como comité de control de cambios ([gestión de la configuración](gestion_configuracion.md), sección 1) |
-| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`** |
+| **Estado** | Plan del 11/11/2026. Dictamen vigente en la sección 11: **no-go para `1.0.0` hoy; go para fijar `0.9.0`**. La candidata `v1.0.0-rc.1` se verificó y se etiquetó el 16/11/2026 (sección 10) |
 
 Este plan aplica la política de [gestion_configuracion.md](gestion_configuracion.md): números de versión (sección 5), ramas (sección 6), control de cambios (sección 7) y auditoría previa a cada etiqueta (sección 8). El detalle técnico del despliegue está en [DESPLIEGUE.md](DESPLIEGUE.md); aquí se decide cuándo, quién, con qué criterios y cómo se da marcha atrás.
 
@@ -16,10 +16,10 @@ Este plan aplica la política de [gestion_configuracion.md](gestion_configuracio
 
 **Entra en `1.0.0`:**
 
-1. Todo lo de `0.9.0`: los 20 requisitos funcionales y 9 de los 10 no funcionales implementados. El RNF-08 (respaldo diario) entra con la fase J, y el RNF-01 (pase de lista de 40 alumnos en 3 minutos) está implementado pero sin cronometrar con personas (R9).
+1. Todo lo de `0.9.0`: los 20 requisitos funcionales y 9 de los 10 no funcionales implementados. El RNF-08 (respaldo diario) entra con la fase J, y el RNF-01 (pase de lista de 40 alumnos en 3 minutos) está implementado y se verificó por simulación el 16/11/2026 ([aceptacion_simulada.md](aceptacion_simulada.md), R9).
 2. Fase I: manual de usuario y manual de administrador (ECS-17).
 3. Fase J, parte técnica ([DESPLIEGUE.md](DESPLIEGUE.md), bloques B2 a B8): configuración de producción, archivos estáticos, imagen Docker, `docker-compose.prod.yml`, respaldo diario con restauración probada (RNF-08, que incluye `media/`), contraseña de demostración protegida y sección «Despliegue» del README.
-4. Capacitación a los docentes y acta de aceptación.
+4. Capacitación a los docentes y acta de aceptación: **opcionales**. Victo decidió el 16/11/2026 que no son necesarias por ser un proyecto escolar; si la profesora las pide, se hacen.
 
 **No entra** (y no cambia el número de versión): elegir y contratar el hosting, abrir el firewall y apuntar el dominio (le toca al líder de proyecto, [DESPLIEGUE.md](DESPLIEGUE.md) sección 7); el hallazgo H-03 (importación de CSV de 500 filas), que es opcional; cualquier función nueva.
 
@@ -54,7 +54,7 @@ La línea base de partida es la etiqueta `v0.9.0`. Los elementos son los del inv
 | E3 | La línea base `v0.9.0` está etiquetada y el `CHANGELOG` está al día | `git tag -l -n` y `CHANGELOG.md` |
 | E4 | No hay hallazgos críticos ni mayores abiertos | [informe_pruebas.md](informe_pruebas.md), sección 11 |
 | E5 | El hosting está decidido (internet con dominio, o demostración local) | Respuesta del líder a la pregunta 1 de [DESPLIEGUE.md](DESPLIEGUE.md) sección 3 |
-| E6 | El mínimo de asistencia está confirmado con la profesora | `ASISTENCIA_MINIMA` deja de ser un supuesto en `CLAUDE.md` |
+| E6 | El mínimo de asistencia está confirmado | **Cumplido el 16/11/2026:** Victo confirmó el 80 %, sin consultarlo con la profesora. `ASISTENCIA_MINIMA` deja de ser un supuesto en `CLAUDE.md` |
 
 ### Salida (go para etiquetar `v1.0.0`)
 
@@ -65,10 +65,10 @@ Se deben cumplir **todos** (S1 a S10). Un solo «no» es no-go.
 | S1 | Los 12 puntos de la lista de verificación de [DESPLIEGUE.md](DESPLIEGUE.md) sección 6 pasan en la pila real | Resultado de cada punto anotado en el informe de la liberación |
 | S2 | La suite completa pasa, sin la variable `DJANGO_STATIC_MANIFEST` | `Ran N tests … OK`, con N mayor o igual que 650 |
 | S3 | El respaldo genera la base y `media/`, y la restauración de prueba (como `root`) coincide en filas, conserva el disparador y un `UPDATE` de `estado` con `ROLLBACK` no da el error 1449 | Pasos de B6 |
-| S4 | `python manage.py check --deploy` sin advertencias, salvo `W008`, justificada | Salida del comando |
+| S4 | `python manage.py check --deploy`, con `DJANGO_HTTPS=1`, sin más advertencias que `W005`, `W008` y `W021`, las tres justificadas en el README. **Ajustado el 16/11/2026 por decisión del líder:** antes admitía solo `W008`, pero al activar HSTS aparecen las otras dos | Salida del comando dentro del contenedor |
 | S5 | Ninguna URL pública sirve `media/` y el 3306 no está publicado | `/media/...` responde 404; `docker compose ps` sin mapeo para `db` |
 | S6 | Existen el manual de usuario y el de administrador | Archivos en el repositorio, enlazados desde el README |
-| S7 | Un docente y el administrador completan los flujos principales en la pila real (periodo, grupo, CSV, sesiones, pase de lista, corrección, justificante, reporte y exportación) | Recorrido de aceptación hecho por una persona que no programó el sistema (un docente o la profesora), con el resultado anotado |
+| S7 | Un docente y el administrador completan los flujos principales en la pila real (periodo, grupo, CSV, sesiones, pase de lista, corrección, justificante, reporte y exportación) | Recorrido de aceptación **simulado** (decisión de Victo del 16/11/2026, en lugar de una persona que no programó el sistema): [aceptacion_simulada.md](aceptacion_simulada.md). En B8 se repiten en la pila real los pasos de los puntos 2, 4 y 5 de la lista de verificación |
 | S8 | Auditoría funcional y física sin diferencias ([gestion_configuracion.md](gestion_configuracion.md), sección 8) | Sección 9 de este plan |
 | S9 | `git status` limpio y ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | `git check-ignore -v` |
 | S10 | `requirements.txt` tiene versiones exactas y la imagen se construye con ellas (CR-002 integrada) | Cada línea con `==`; `pip check` sin conflictos dentro de la imagen |
@@ -86,14 +86,14 @@ La fecha de hoy es el miércoles 11/11/2026. El lunes 16/11 es descanso obligato
 | mié 11/11 | Fusionar los PR, auditar y etiquetar `v0.9.0` | Línea base `0.9.0` | Líder de proyecto |
 | jue 12 y vie 13/11 | Fase I: manual de usuario y manual de administrador | ECS-17 | Documentador |
 | lun 16/11 | **Descanso obligatorio**: sin actividad | | |
-| mar 17/11 | Decidir el hosting (E5) y confirmar el mínimo de asistencia (E6); B2 configuración de producción | Decisiones anotadas en `CLAUDE.md`; `settings.py` de producción | Líder de proyecto y backend |
+| mar 17/11 | Decidir el hosting (E5) y confirmar el mínimo de asistencia (E6, hecho el 16/11); B2 configuración de producción | Decisiones anotadas en `CLAUDE.md`; `settings.py` de producción | Líder de proyecto y backend |
 | mié 18/11 | B3 estáticos y B4 imagen, con CR-002 (versiones exactas) | Imagen que arranca | Backend y frontend |
 | jue 19/11 | B5 pila de producción y B6 respaldo con restauración probada | Pila completa y respaldo verificado | Backend y base de datos |
 | vie 20/11 | B7 contraseña de demostración y README; B8 verificación en la pila real; congelamiento y etiqueta `v1.0.0-rc.1` | Informe de la lista de verificación | Pruebas |
-| lun 23 y mar 24/11 | Recorrido de aceptación (S7), medición del RNF-01 con personas y capacitación | Defectos encontrados, con su solicitud de cambio si hacen falta | Pruebas y líder de proyecto |
+| lun 23 y mar 24/11 | Recorrido de aceptación (S7) y RNF-01: simulados el 16/11 ([aceptacion_simulada.md](aceptacion_simulada.md)); capacitación opcional | Defectos encontrados, con su solicitud de cambio si hacen falta | Pruebas y líder de proyecto |
 | mié 25/11 | Correcciones y, si las hay, `v1.0.0-rc.2` | Candidata final | Backend |
 | jue 26/11 | Auditoría funcional y física, y decisión go/no-go final | Dictamen actualizado (sección 11) | Líder de proyecto |
-| vie 27/11 | Etiqueta `v1.0.0`, despliegue, acta de aceptación, publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
+| vie 27/11 | Etiqueta `v1.0.0`, despliegue, acta de aceptación (opcional), publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
 
 La ruta crítica es la de [CLAUDE.md](../CLAUDE.md) sección 11: la fase J no tiene holgura. Con el feriado, los bloques B2 a B8 quedan en cuatro días (17 al 20/11). Si B8 no termina el 20/11, pasa al 23/11 y el recorrido de aceptación se reduce a un solo día; el congelamiento y la fecha de entrega no se mueven.
 
@@ -141,8 +141,8 @@ Probabilidad e impacto en tres niveles (A alta, M media, B baja).
 | R5 | Olvidar `collectstatic` rompe todas las pantallas, no solo el admin | M | A | `collectstatic` en la construcción de la imagen (B4); el punto 3 de la lista de verificación comprueba que cargan las tres hojas de estilo | Pantallas sin estilo o error `Missing staticfiles manifest entry` |
 | R6 | Registro público sin límite de intentos ni CAPTCHA: cuentas pendientes que se acumulan | M | M | `REGISTRO_DOMINIOS` solo con dominios institucionales (o vacía); revisar el Panel; limitar `/registro/` en el proxy si hace falta | Más de 20 cuentas pendientes sin atender |
 | R7 | La contraseña de demostración está en el historial de un repositorio público | A | M | Ninguna cuenta de demostración existe en un entorno real; `seed_demo` se niega con `DEBUG=0` (B7); el líder decide si el repositorio sigue público | Cualquier acceso con la contraseña de `seed_demo` en producción |
-| R8 | El mínimo de asistencia (80 %) es un supuesto sin confirmar | M | M | Confirmarlo con la profesora (E6) el 17/11; es una variable de entorno (`ASISTENCIA_MINIMA`), cambiarla no requiere código | Respuesta distinta al 80 % |
-| R9 | El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas | M | M | Medirlo el 23 y 24/11 con docentes; el costo medido es de 9 toques para 5 excepciones y un solo envío | Más de 3 minutos en la medición |
+| R8 | **Cerrado el 16/11/2026:** el mínimo de asistencia (80 %) lo confirmó Victo | M | M | Confirmado (E6); es una variable de entorno (`ASISTENCIA_MINIMA`), cambiarla no requiere código | Respuesta distinta al 80 % |
+| R9 | El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas: se verificó por simulación el 16/11 (estimación, no medición, [aceptacion_simulada.md](aceptacion_simulada.md)) | M | M | Medirlo con docentes si la profesora lo pide; el costo medido es de 9 toques para 5 excepciones y un solo envío | Más de 3 minutos en la medición |
 | R10 | Solo cuatro días hábiles (17 al 20/11, por el feriado del 16) para los bloques B2 a B8, con un solo desarrollador y una fecha límite que no se mueve | A | A | Congelamiento el 20/11, criterios de salida cerrados desde hoy y regla de que lo Media se difiere antes de arriesgar la fecha ([CLAUDE.md](../CLAUDE.md) sección 11) | B8 sin terminar el 20/11 |
 | R11 | Las copias de respaldo viven en la misma máquina que la base: se pierden con ella | M | A | Decidir dónde se copian fuera del servidor (pregunta 4 de [DESPLIEGUE.md](DESPLIEGUE.md)); mientras tanto, aviso explícito en el README | Sin destino externo al 26/11 |
 | R12 | Bootstrap se carga desde un CDN: sin internet en el salón, las pantallas pierden el estilo base | B | M | Si la capacitación es sin internet, autoalojarlo con las precauciones de B3 | Capacitación sin red |
@@ -172,9 +172,9 @@ Probabilidad e impacto en tres niveles (A alta, M media, B baja).
 
 | A quién | Qué | Cuándo | Por qué medio |
 |---|---|---|---|
-| Profesora de la materia | Avance contra el cronograma y decisiones pendientes (hosting y mínimo de asistencia) | Cada semana y el 17/11 | Tablero de Trello y [seguimiento_semanal.md](seguimiento_semanal.md) |
-| Docentes que usarán el sistema | Fecha y contenido de la capacitación; qué cuenta crear (registro con correo institucional y espera de aprobación) | 20/11 | Mensaje del líder, con enlace al manual de usuario |
-| Administrador del sistema | Cómo aprobar cuentas, activar periodos y respaldar | 23/11, junto con la capacitación | Manual de administrador |
+| Profesora de la materia | Avance contra el cronograma y decisiones pendientes (hosting) | Cada semana y el 17/11 | Tablero de Trello y [seguimiento_semanal.md](seguimiento_semanal.md) |
+| Docentes que usarán el sistema (opcional) | Fecha y contenido de la capacitación; qué cuenta crear (registro con correo institucional y espera de aprobación) | 20/11 | Mensaje del líder, con enlace al manual de usuario |
+| Administrador del sistema | Cómo aprobar cuentas, activar periodos y respaldar | 23/11, si hay capacitación | Manual de administrador |
 | Quien revise el repositorio | Qué trae cada versión y cómo se desplegó | En cada etiqueta | `CHANGELOG.md`, notas de la etiqueta y este plan |
 | Todos | Aviso de liberación y de cualquier reversión, con la causa | El mismo día | Mensaje del líder y nota en `docs/cambios/` |
 
@@ -196,8 +196,8 @@ Este borrador se completa al etiquetar. El texto definitivo va en `CHANGELOG.md`
 
 **Problemas conocidos.**
 
-- El mínimo de asistencia (80 %) es un supuesto sin confirmar con la profesora; se cambia con `ASISTENCIA_MINIMA`.
-- El pase de lista de 40 alumnos en 3 minutos (RNF-01) no se ha cronometrado con personas; se mide el costo de interacción (9 toques para 5 excepciones, y un solo envío).
+- El mínimo de asistencia es de 80 % (confirmado por Victo el 16/11/2026); se cambia con `ASISTENCIA_MINIMA`.
+- El pase de lista de 40 alumnos en 3 minutos (RNF-01) se verificó por simulación, no con personas; se mide el costo de interacción (9 toques para 5 excepciones, y un solo envío).
 - La importación de un CSV de 500 filas tarda unos 3.8 s (hallazgo H-03); con grupos de 50 alumnos tarda 0.4 s.
 - El registro de docentes no tiene límite de intentos, CAPTCHA ni confirmación del correo: el control es la aprobación del administrador y el dominio permitido.
 - Bootstrap se carga desde un CDN: sin internet las pantallas pierden el estilo base.
@@ -230,6 +230,64 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 
 **Lo que esta auditoría no cubre.** El RNF-01 (pase de lista de 40 alumnos en 3 minutos) no se ha cronometrado con personas y sigue sin verificarse. Los comandos los ejecutó el asistente de IA sobre una copia del repositorio en la máquina del proyecto; la decisión de fusionar y de etiquetar la toma el responsable del repositorio.
 
+### Registro de la candidata `v1.0.0-rc.1` (16/11/2026)
+
+**Qué se verificó.** El commit `33c81f5` de la rama `feature/rnf-08-despliegue`, que tiene el código final de los bloques B2 a B7 (los commits posteriores de esa rama solo agregan `scripts/demo.ps1`, que no entra a la imagen, y documentación). Se verificó en la pila real `control_asistencia_prod`, levantada con `docker-compose.prod.yml` en el equipo del proyecto (Windows 11, Docker 29.8.1, Compose v5.5.1), en `http://localhost` y con `DJANGO_HTTPS=0`, que es la demostración local decidida como hosting (E5). El líder aprobó la etiqueta el mismo día (ver «Etiqueta», al final de este registro).
+
+**Lista de verificación de [DESPLIEGUE.md](DESPLIEGUE.md), sección 6**
+
+| # | Punto | Resultado | Evidencia |
+|---|---|---|---|
+| 1 | `up -d --build` desde cero deja los tres servicios sanos | **Pasa** | Una pila nueva con el código final levantó en 42 s y la pila real en 26 s: `db` y `web` sanos (`healthy`) y `proxy` arriba. `migrate` aplicó las migraciones 0001 a 0004 dentro del contenedor: `mysqlclient 2.3.0` compiló en `python:3.11-slim` (Debian 13) y se autentica contra MySQL 8.0.46 con `caching_sha2_password` (riesgo R3 cerrado) |
+| 2 | Docente y administrador entran; periodo, grupo y solo lectura (RF-17) | **Pasa** | Recorrido por HTTP a través del proxy, con sesión y token CSRF reales: 29 de 29 comprobaciones. El administrador llega a su panel, crea el periodo 2027-2 y lo activa con el botón de su fila; el docente crea un grupo, importa 5 alumnos por CSV y programa 4 sesiones; con su periodo inactivo el pase de lista se rechaza y la página avisa «solo lectura»; al reactivarlo vuelve a guardarse. En el navegador integrado: el docente llega a «Inicio» y el administrador a «Panel de administración», cada uno con su menú |
+| 3 | Cargan Bootstrap, `estilo.css` y `admin.css` con `DEBUG=0` | **Pasa** | En el navegador: Bootstrap 5.3.3 del CDN (1 298 reglas, con `integrity`), `estilo.fbbd6d027a0e.css` (222 reglas) y, en el admin, cinco hojas con huella, entre ellas `asistencia/admin.42609df61b19.css`; ningún recurso con error ni mensajes en la consola. `pase_de_lista.2a0fed160107.js` carga y bloquea las casillas |
+| 4 | Pase de lista y corrección: fila en la bitácora | **Pasa** | Pase de 5 registros con un envío y corrección de ausente a justificado. La base tiene la fila de `bitacora_cambio` (autor `docente1@asistencia.test`, `ausente` → `justificado`), escrita por el disparador con el usuario `asistencia@%`, que solo tiene permisos sobre su base |
+| 5 | Justificante, `down` (sin `-v`), `up -d` y sigue descargándose | **Pasa** | Tras `down`, 0 contenedores y los 4 volúmenes intactos; tras `up -d`, el PDF se descarga por la vista idéntico byte a byte. Sin sesión redirige al acceso y otro docente recibe 404 (RNF-04) |
+| 6 | Una URL directa a `/media/...` responde 404 | **Pasa** | `/media/`, `/media/justificantes/` y un archivo: 404 con `Server: Caddy` y 0 bytes. El registro de accesos de `web` no tiene ninguna petición a `/media` |
+| 7 | Una excepción muestra la página 500 propia | **Pasa** | Con `db` detenido, la pantalla de acceso abre (200) e iniciar sesión responde 500 con la página «Error del servidor · Control de asistencia», sin detalles del error |
+| 8 | El 3306 no está publicado | **Pasa** | `docker port`: `db` y `web` sin puertos; solo `proxy` publica 80 y 443 |
+| 9 | Respaldo, restauración como `root`, disparador y `UPDATE` con `ROLLBACK` | **Pasa** | `scripts/respaldo.sh` (sin terminal) y `scripts/respaldo.ps1` (PowerShell 5.1) generan los dos archivos. `scripts/probar_restauracion.sh`: las 8 tablas coinciden (usuario 3, periodo 3, grupo 4, alumno 50, inscripción 60, sesión 8, asistencia 20, bitácora 2), el disparador existe con su dueño y el `UPDATE` escribe 1 fila en la bitácora, deshecha con `ROLLBACK`. Además se restauró de verdad sobre la base y sobre `media/` con los comandos del README, y la aplicación siguió funcionando |
+| 10 | `check --deploy` solo con `W005`, `W008` y `W021`, justificadas (texto ajustado el 16/11/2026) | **Pasa** | Dentro del contenedor, con `DJANGO_HTTPS=1`: `W005`, `W008` y `W021`, los tres justificados en el README. Como está la demostración (`DJANGO_HTTPS=0`): `W004`, `W008`, `W012` y `W016`, que son los de un sitio sin HTTPS. Ver la observación 1 |
+| 11 | Suite completa sin `DJANGO_STATIC_MANIFEST` y `collectstatic` al construir | **Pasa** | `Ran 683 tests in 992.973s`, `OK`, sobre el commit `33c81f5`. Al construir: `130 static files copied, 390 post-processed`; sin la clave desechable, la construcción aborta con `ImproperlyConfigured` |
+| 12 | `git status` limpio, sin `.env*` ni `respaldos/`, y README actualizado | **Pasa** | `git check-ignore -v .env.prod` muestra `.gitignore:4`; `git ls-files` solo trae `.env.example` y `.env.prod.example`; `respaldos/` y `staticfiles/` quedan ignorados. `git status --porcelain` salió vacío antes de fusionar y de etiquetar |
+
+**Criterios de salida de la sección 3**
+
+| # | Estado al 16/11/2026 | Nota |
+|---|---|---|
+| S1 | Cumplido | Los 12 puntos de arriba |
+| S2 | Cumplido | `Ran 683 tests in 992.973s`, `OK`: las 651 de `main` más 32 nuevas (configuración, estáticos y `seed_demo`) |
+| S3 | Cumplido | Punto 9. El error 1449 se reprodujo con un volcado cuyo dueño no existe, y la prueba de restauración lo detecta y falla |
+| S4 | Cumplido | Con `DJANGO_HTTPS=1` quedan exactamente `W005`, `W008` y `W021`, los que admite el criterio ajustado (observación 1) |
+| S5 | Cumplido | Puntos 6 y 8 |
+| S6 | No cumplido | Falta el manual de administrador (fase I, fuera de este registro) |
+| S7 | Simulado (decisión del 16/11) | Los pasos de los puntos 2, 4 y 5 se repitieron en la pila real, como pide el criterio |
+| S8 | Pendiente | Auditoría del 26/11/2026 |
+| S9 | Cumplido | Punto 12 |
+| S10 | Cumplido | Todas las líneas de `requirements.txt` llevan `==`; dentro de la imagen, `pip check` no encuentra conflictos y `pip freeze` devuelve exactamente las 13 versiones fijadas para Linux |
+
+**Observaciones**
+
+1. **`check --deploy` (S4 y punto 10).** El criterio admite solo `W008`, pero se escribió sin medir. Al activar HSTS con `DJANGO_HTTPS=1` aparecen `W005` (`SECURE_HSTS_INCLUDE_SUBDOMAINS`) y `W021` (`SECURE_HSTS_PRELOAD`). Se dejaron apagados a propósito y están justificados en el README. La alternativa era activar los dos ajustes. **Resuelta el 16/11/2026:** el líder aceptó los tres avisos, y el texto de S4 y el del punto 10 de la lista de verificación se ajustaron; los dos ajustes de HSTS siguen apagados.
+2. **Restauración de prueba.** Al restaurar como `root` en una base temporal, el `UPDATE` falla con el error 1142 (`TRIGGER command denied`), no con el 1449: el dueño del disparador no tiene permisos sobre esa base. `scripts/probar_restauracion.sh` se los da durante la prueba y se los quita al terminar.
+3. **Errores del servidor sin registro.** Con `DEBUG=0`, Django no escribe los errores 500 en la salida del contenedor: en los registros de `web` solo queda la línea de acceso con el código 500. No impide ningún criterio; corregirlo es un cambio de código y necesita su solicitud de cambio.
+4. **El proxy solo atiende el nombre de `DOMINIO`.** Entrar por `http://127.0.0.1` da una página en blanco; el README lo avisa.
+
+**Lo que este registro no cubre.** El despliegue con un dominio real y HTTPS no se ejecutó: solo se comprobó que Caddy interpreta ese valor de `DOMINIO` como HTTPS automático y que, con `DJANGO_HTTPS=1` y la cabecera del proxy, la aplicación manda HSTS de 3600 s y cookies seguras. La tarea programada del respaldo (cron o Programador de tareas) no se instaló. `scripts/respaldo.sh` y `scripts/probar_restauracion.sh` se ejecutaron en Git Bash sobre Windows, no en un servidor Linux. Las comprobaciones en el navegador se hicieron leyendo el contenido de las páginas, sin capturas de pantalla. Los comandos los ejecutó el asistente de IA en el equipo del proyecto; la decisión de etiquetar la toma el líder.
+
+**Etiqueta.** `v1.0.0-rc.1` es una etiqueta anotada sobre el commit `1fc9d7d` de `main`, creada y publicada el 16/11/2026 con la aprobación del líder.
+
+| Comprobación | Comando | Resultado |
+|---|---|---|
+| La etiqueta apunta a la punta de `main` | `git ls-remote --tags origin` y `git ls-remote --heads origin main` | `v1.0.0-rc.1^{}` y `main` dan `1fc9d7d` |
+| El árbol etiquetado es el que se verificó | `git rev-parse v1.0.0-rc.1^{tree}` contra el árbol de la punta de la rama verificada (`90786b3`) | Los dos dan `08e3333b50e7153d897fde860faf8868496b4e41` |
+| Ningún archivo sensible versionado | `git ls-tree -r --name-only` filtrado por `.env`, `respaldos/`, `media/` y `*.sql` | Solo `.env.example` y `.env.prod.example` |
+| Versiones exactas | Líneas de `requirements.txt` sin `==` | 0 |
+
+**Cómo entró la rama a `main`.** La rama `feature/rnf-08-despliegue` se fusionó desde la línea de comandos, con commit de fusión (`1fc9d7d`, que avanza `main` desde `d1042f4` sin reescribir nada), a petición expresa del líder. Es una excepción a la regla de que una rama entra a `main` por pull request ([gestion_configuracion.md](gestion_configuracion.md), sección 6): no hay pull request en GitHub para esta fusión, y el mensaje del commit lo dice. La revisión de la lista de la sección 7 queda cubierta por este registro.
+
+**Lo que la etiqueta no cambia.** Cuando se etiquetó, la observación 1 (criterio S4) seguía abierta; el líder la resolvió después, el mismo 16/11/2026, sin cambiar código. El `CHANGELOG` conserva la sección `[Unreleased]`: la sección `[1.0.0]` se escribe al liberar la versión final. El commit que agrega esta nota es posterior a la etiqueta y solo toca documentación.
+
 *(El registro de `v1.0.0` se completa el 26/11/2026.)*
 
 ## 11. Dictamen go/no-go
@@ -239,8 +297,9 @@ La auditoría la define [gestion_configuracion.md](gestion_configuracion.md), se
 | Decisión | Dictamen | Razón |
 |---|---|---|
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
+| Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
 | Liberar `v1.0.0` hoy | **No-go** | No se cumplen E5 ni E6, y los criterios de salida S1 a S8 dependen de cosas que todavía no existen: la fase J no se ha ejecutado, no hay manuales y no hay un servidor |
 
 **Condiciones para pasar a go el 26/11/2026:** los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
 
-**Limitación.** El proyecto es individual: quien lo programa también ejerce el comité de control de cambios y decide el go. No se puede crear un comité de varias personas; se compensa con dos condiciones: el criterio S7 lo ejecuta otra persona y el acta de aceptación debe estar firmada por la profesora antes de dar el go final.
+**Limitación.** El proyecto es individual: quien lo programa también ejerce el comité de control de cambios y decide el go. No se puede crear un comité de varias personas; se compensaba con dos condiciones: que el criterio S7 lo ejecutara otra persona y que la profesora firmara el acta de aceptación antes del go final. El 16/11/2026 Victo decidió, por ser un proyecto escolar, que el S7 se simule ([aceptacion_simulada.md](aceptacion_simulada.md)) y que el acta sea opcional; el go lo sigue decidiendo una sola persona.
