@@ -93,7 +93,7 @@ La fecha de hoy es el miércoles 11/11/2026. El lunes 16/11 es descanso obligato
 | lun 23 y mar 24/11 | Recorrido de aceptación (S7) y RNF-01: simulados el 16/11 ([aceptacion_simulada.md](aceptacion_simulada.md)); capacitación opcional | Defectos encontrados, con su solicitud de cambio si hacen falta | Pruebas y líder de proyecto |
 | mié 25/11 | Correcciones y, si las hay, `v1.0.0-rc.2` | Candidata final | Backend |
 | jue 26/11 | Auditoría funcional y física, y decisión go/no-go final | Dictamen actualizado (sección 11) | Líder de proyecto |
-| vie 27/11 | Etiqueta `v1.0.0`, despliegue, acta de aceptación (opcional), publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
+| vie 27/11 | Etiqueta `v1.0.0` (**adelantada al 17/11/2026** por decisión del líder), despliegue, acta de aceptación (opcional), publicación de la versión en GitHub con sus notas y entrega | Versión 1.0.0 en producción | Líder de proyecto |
 
 La ruta crítica es la de [CLAUDE.md](../CLAUDE.md) sección 11: la fase J no tiene holgura. Con el feriado, los bloques B2 a B8 quedan en cuatro días (17 al 20/11). Si B8 no termina el 20/11, pasa al 23/11 y el recorrido de aceptación se reduce a un solo día; el congelamiento y la fecha de entrega no se mueven.
 
@@ -376,7 +376,7 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 | 4 | `git status` sin cambios | Física | Salida vacía | **Pasa.** 0 líneas |
 | 5 | Lo documentado en `CLAUDE.md`, sección 4, está versionado | Física | Solo `fin`, sin ninguna línea `falta:` | **Pasa.** Solo `fin` |
 | 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | Física | Las cinco rutas ignoradas; versionados solo `.env.example` y `.env.prod.example` | **Pasa.** Las cinco ignoradas (líneas 3, 4, 14, 15 y 17 de `.gitignore`) y solo los dos ejemplos versionados |
-| 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.0.0] - 2026-11-27` (o la fecha real de la etiqueta) | **Pasa, con la fecha por decidir.** `## [1.0.0] - 2026-11-27`. Si la etiqueta se pone otro día, hay que corregir la fecha con un pull request antes de etiquetar |
+| 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.0.0] - 2026-11-27` (o la fecha real de la etiqueta) | **Pasa.** La auditoría encontró `2026-11-27`; el líder adelantó la liberación al 17/11/2026 y el encabezado se corrigió a `## [1.0.0] - 2026-11-17` en el mismo pull request que este registro. Se vuelve a comprobar antes de etiquetar |
 | 8 | La etiqueta apunta al commit auditado | Física | `v1.0.0^{commit}` igual a `HEAD` | *Se comprueba al crear la etiqueta* |
 | 9 | El árbol etiquetado es el auditado | Física | `v1.0.0^{tree}` igual a `HEAD^{tree}` | *Se comprueba al crear la etiqueta* |
 | 10 | Versiones exactas | Física | `0` | **Pasa.** `0` |
@@ -399,7 +399,7 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 | Fijar la línea base `v0.9.0` | **Go** | La suite completa pasa; todos los requisitos de prioridad Alta tienen prueba y no hay hallazgos críticos ni mayores. No es una versión de producción y se declara así en el `CHANGELOG` |
 | Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
 | Etiquetar la candidata `v1.0.0-rc.2` (17/11/2026) | **Go** (visto bueno del líder el mismo día) | Mismo código e imagen que `rc.1` más los dos manuales; la prueba de humo de los puntos 1, 2, 4 y 6 pasó en la pila real y S6 queda cumplido (sección 10) |
-| Liberar `v1.0.0` | **Propuesto: go**, decide el líder | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 la auditoría (S8) pasó sobre `5548a56` y todos los criterios de salida están cumplidos (S7 simulado). Antes de etiquetar falta decidir la fecha: el `CHANGELOG` dice 27/11/2026 |
+| Liberar `v1.0.0` | **Go** (17/11/2026, decisión del líder) | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 la auditoría (S8) pasó sobre `5548a56` y todos los criterios de salida están cumplidos (S7 simulado). El líder adelantó la liberación del 27/11 al 17/11/2026 «para ya terminar»; la entrega a la profesora sigue siendo el 27/11 |
 
 **Condiciones para pasar a go** (previsto para el 26/11/2026; la auditoría se adelantó al 17/11): los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
 
