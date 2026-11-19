@@ -1,19 +1,25 @@
-/* Estilo del Sistema de Control de Asistencia: «pino y ámbar».
+/* Estilo del Sistema de Control de Asistencia: «la lista de asistencia» (CR-003).
  *
  * Se apoya en Bootstrap 5.3 (cargado antes): aquí se cambian sus variables y se
  * definen los componentes propios. Los nombres de clase de Bootstrap que usan las
  * plantillas y las pruebas (btn-check, table-danger, text-bg-*, alert-link) se
  * conservan; el aspecto se logra desde este archivo.
  *
- * Criterios:
- * - Un color de marca (verde pino) y un solo acento (ámbar). El resto son neutros
- *   con el mismo tinte verdoso. El color con significado (presente, retardo,
- *   ausente, justificado, avisos) es aparte y siempre va con texto.
- * - Una sola escala de esquinas: 16 px en contenedores, 10 px en controles y
- *   botones, píldora solo en etiquetas de estado.
- * - Sombras teñidas con el verde del fondo, nunca negro puro.
- * - Fuente del sistema: no se descarga nada. La jerarquía sale del peso, el
- *   tamaño y el interletraje.
+ * Identidad: la hoja de asistencia en papel que el sistema sustituye, sin imitar papel.
+ * - Renglones: las listas son renglones con línea fina teñida de pino, no tarjetas.
+ * - Línea de margen: doble línea ámbar a la izquierda de las listas; en el pase de lista
+ *   se vuelve del color del estado cuando el alumno no está «presente».
+ * - Encabezado de formato: línea de datos en monoespaciada, título en serif y doble regla.
+ * - Sellos: los estados son rectángulos de esquina corta con borde del color del texto.
+ * - Tachado: una corrección muestra el valor anterior tachado (<del>) y el nuevo (<ins>).
+ *
+ * Tipografía, toda del sistema (no se descarga nada): serif para títulos, monoespaciada
+ * para datos (matrícula, hora, fecha, porcentaje, sellos) y la sans del sistema para el texto.
+ *
+ * Color: la paleta «pino y ámbar» confirmada el 9/11/2026, sin cambiar ningún valor. El pino
+ * es la tinta de títulos y reglas; el ámbar, la línea de margen y el resaltador. El color con
+ * significado (presente, retardo, ausente, justificado, avisos) es aparte y siempre va con texto
+ * o con una marca.
  */
 
 /* ---------- 1. Tokens ---------- */
@@ -28,25 +34,39 @@
   --pino-200: #bcd8cb;
   --pino-100: #dcebe4;
   --pino-50: #eef5f1;
-  --ambar: #f2b33d;            /* único acento: relleno, nunca texto sobre blanco */
+  --ambar: #f2b33d;            /* único acento: relleno y líneas, nunca texto sobre blanco */
 
   /* Neutros con tinte verdoso */
   --tinta: #16201c;            /* texto principal */
   --tinta-suave: #52605a;      /* texto secundario, contraste 5.9:1 sobre el lienzo */
   --lienzo: #f1f4f1;           /* fondo de página */
-  --superficie: #ffffff;       /* tarjetas */
-  --realce: #e9eeea;           /* hover y encabezados */
+  --superficie: #ffffff;       /* hojas y listas */
+  --realce: #e9eeea;           /* hover y fondos de apoyo */
   --linea: #dbe2dc;
   --linea-fuerte: #c5cfc7;
   --enlace: #135a45;
   --enlace-hover: #0b2e26;
+  --control-borde: #7a8881;    /* borde de un control vacío: contraste 3.6:1 sobre blanco (mínimo 3:1) */
 
-  /* Esquinas y sombras */
-  --radio: .625rem;            /* controles y botones */
-  --radio-grande: 1rem;        /* contenedores */
-  --sombra: 0 1px 2px rgba(11, 46, 38, .06), 0 10px 28px -14px rgba(11, 46, 38, .22);
-  --sombra-alta: 0 2px 4px rgba(11, 46, 38, .08), 0 18px 40px -16px rgba(11, 46, 38, .3);
+  /* Renglones y margen (transparencias del pino: se leen igual sobre el lienzo y sobre blanco) */
+  --renglon: rgba(11, 46, 38, .11);
+  --renglon-fuerte: rgba(11, 46, 38, .24);
+  --margen: var(--ambar);
+
+  /* Tipografía del sistema */
+  --serif: "Sitka Heading", "Sitka Text", Charter, "Bitstream Charter", "Iowan Old Style",
+    Cambria, "Noto Serif", Georgia, serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", "Segoe UI Mono", Menlo, Consolas,
+    "Roboto Mono", "Liberation Mono", monospace;
+
+  /* Esquinas y sombras: esquinas cortas y casi sin elevación; la jerarquía la dan las reglas */
+  --radio-sello: 3px;          /* sellos */
+  --radio: .5rem;              /* controles, botones y casillas */
+  --radio-grande: .625rem;     /* hojas y listas */
+  --sombra: 0 1px 0 rgba(11, 46, 38, .05);
+  --sombra-alta: 0 1px 2px rgba(11, 46, 38, .06), 0 14px 34px -18px rgba(11, 46, 38, .32);
   --foco: 0 0 0 .22rem rgba(20, 82, 63, .3);
+  --alto-barra: 3.75rem;       /* barra superior: el encabezado del pase de lista se pega debajo */
 
   /* Colores con significado: fondo suave y texto con contraste >= 4.5:1 */
   --verde-fondo: #e3f3ea;      --verde-texto: #17603a;      --verde-borde: #bfe0cc;
@@ -59,6 +79,7 @@
   /* Variables de Bootstrap */
   --bs-body-font-family: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;
+  --bs-font-monospace: var(--mono);
   --bs-body-color: var(--tinta);
   --bs-body-color-rgb: 22, 32, 28;
   --bs-secondary-color: var(--tinta-suave);
@@ -71,7 +92,7 @@
   --bs-secondary-bg-rgb: 233, 238, 234;
   --bs-border-color: var(--linea);
   --bs-border-radius: var(--radio);
-  --bs-border-radius-sm: .5rem;
+  --bs-border-radius-sm: .375rem;
   --bs-border-radius-lg: var(--radio-grande);
   --bs-primary: #14523f;
   --bs-primary-rgb: 20, 82, 63;
@@ -101,10 +122,12 @@ body {
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--serif);
   font-weight: 650;
-  letter-spacing: -.02em;
-  line-height: 1.2;
-  color: var(--tinta);
+  font-variant-numeric: lining-nums;
+  letter-spacing: -.01em;
+  line-height: 1.15;
+  color: var(--pino-900);
   text-wrap: balance;
 }
 
@@ -113,9 +136,49 @@ a { text-underline-offset: .2em; }
 :focus-visible { outline: 2px solid var(--pino-600); outline-offset: 2px; }
 .text-secondary { color: var(--tinta-suave) !important; }
 ::selection { background: var(--pino-200); color: var(--pino-950); }
+code, kbd, pre, samp { font-family: var(--mono); }
 
 .container { max-width: 1180px; }
 main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
+
+/* Línea de formato: los datos de la hoja (grupo, periodo, fecha, horario) sobre el título. */
+.formato {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .2rem .9rem;
+  margin: 0 0 .55rem;
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.formato > * + *::before {
+  content: "";
+  display: inline-block;
+  width: .3rem;
+  height: .3rem;
+  margin-right: .9rem;
+  border-radius: 1px;
+  background: var(--ambar);
+  vertical-align: .12em;
+}
+
+/* Datos: cifras alineadas en monoespaciada. */
+.dato { font-family: var(--mono); font-size: .92em; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+
+/* Corrección: el valor anterior queda tachado y el nuevo, escrito al lado (RF-11). */
+del {
+  color: var(--tinta-suave);
+  text-decoration-line: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(161, 47, 47, .85);
+}
+
+ins { text-decoration: none; font-weight: 650; color: var(--tinta); }
 
 .ico {
   width: 1.25rem;
@@ -148,23 +211,26 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
 
 /* ---------- 3. Barra superior ---------- */
 
+/* La banda pino con su regla ámbar es el membrete de la hoja. */
 .app-nav {
   position: sticky;
   top: 0;
   z-index: 1030;
+  min-height: var(--alto-barra);
   background: var(--pino-900);
-  padding-block: .55rem;
-  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  padding-block: .5rem;
+  border-bottom: 3px solid var(--ambar);
 }
 
 .app-nav .navbar-brand {
   display: inline-flex;
   align-items: center;
-  gap: .65rem;
+  gap: .6rem;
   margin-right: 1.75rem;
-  font-size: 1.05rem;
-  font-weight: 650;
-  letter-spacing: -.015em;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -.005em;
   color: #fff;
 }
 
@@ -172,13 +238,13 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
 .app-nav .marca rect { fill: var(--ambar); }
 .app-nav .marca path { stroke: var(--pino-900); }
 
-.app-nav .navbar-nav { gap: .2rem; }
+.app-nav .navbar-nav { gap: .15rem; }
 
 .app-nav .nav-link {
   display: inline-flex;
   align-items: center;
   gap: .5rem;
-  padding: .5rem .9rem;
+  padding: .5rem .85rem;
   border-radius: var(--radio);
   font-weight: 500;
   color: rgba(255, 255, 255, .74);
@@ -188,9 +254,9 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
 .app-nav .nav-link:hover { color: #fff; background: rgba(255, 255, 255, .08); }
 
 .app-nav .nav-link.active {
-  color: #fff;
-  background: rgba(255, 255, 255, .13);
-  box-shadow: inset 0 -2px 0 var(--ambar);
+  color: var(--pino-950);
+  background: #fff;
+  font-weight: 600;
 }
 
 .app-nav .navbar-toggler {
@@ -208,10 +274,11 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
   flex: none;
   width: 2.1rem;
   height: 2.1rem;
-  border-radius: .65rem;
+  border-radius: var(--radio);
   background: var(--ambar);
   color: var(--pino-950);
-  font-size: .8rem;
+  font-family: var(--mono);
+  font-size: .78rem;
   font-weight: 700;
   letter-spacing: .02em;
 }
@@ -220,12 +287,14 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
    así no entran al texto de la página (ni al copiar una tabla, ni a las pruebas que leen sus celdas). */
 .avatar::before, .ficha-grupo::before { content: attr(data-texto); }
 
-.avatar-sm { width: 1.85rem; height: 1.85rem; border-radius: .55rem; font-size: .72rem; }
+.avatar-sm { width: 1.85rem; height: 1.85rem; border-radius: .4rem; font-size: .7rem; }
 .avatar-suave { background: var(--pino-100); color: var(--pino-800); }
 
-/* Alumno en una tabla: iniciales a la izquierda y nombre (con la matrícula debajo en el teléfono) a la derecha. */
+/* Alumno en una tabla: el nombre, con la matrícula debajo en el teléfono. Las iniciales no se
+   muestran en las tablas: repiten el nombre y competían con él (CR-003, A-08). */
 .celda-alumno { display: flex; align-items: center; gap: .6rem; min-width: 0; }
-.celda-alumno small { font-size: .78rem; line-height: 1.2; }
+.celda-alumno .avatar { display: none; }
+.celda-alumno small { font-family: var(--mono); font-size: .74rem; line-height: 1.3; }
 
 .app-nav .navbar-text { color: rgba(255, 255, 255, .86); font-size: .9rem; padding: 0; }
 
@@ -241,6 +310,7 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
   display: inline-flex;
   align-items: center;
   gap: .4rem;
+  box-shadow: none;
 }
 
 @media (max-width: 767.98px) {
@@ -256,68 +326,84 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
 
 /* ---------- 4. Encabezados de página ---------- */
 
-.breadcrumb { font-size: .85rem; margin-bottom: 1rem; }
+.breadcrumb { font-family: var(--mono); font-size: .76rem; letter-spacing: .01em; margin-bottom: 1rem; }
 .breadcrumb a { color: var(--tinta-suave); text-decoration: none; }
 .breadcrumb a:hover { color: var(--pino-700); text-decoration: underline; }
-.breadcrumb-item + .breadcrumb-item::before { color: var(--linea-fuerte); content: "\203A"; font-size: 1.05em; }
-.breadcrumb-item.active { color: var(--tinta); font-weight: 500; }
+.breadcrumb-item + .breadcrumb-item::before { color: var(--linea-fuerte); content: "/"; }
+.breadcrumb-item.active { color: var(--tinta); font-weight: 600; }
 
+/* Encabezado de formato: título en serif y doble regla debajo, como el encabezado de una lista impresa. */
 .encabezado {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 3px double var(--renglon-fuerte);
 }
 
 .encabezado h1 {
   margin: 0;
-  font-size: clamp(1.6rem, 1.25rem + 1.4vw, 2.15rem);
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
   font-weight: 700;
-  letter-spacing: -.03em;
+  letter-spacing: -.015em;
 }
 
-.encabezado-sub { margin: .35rem 0 0; color: var(--tinta-suave); max-width: 62ch; }
+.encabezado h1 .sub { display: block; margin-top: .3rem; font-size: .5em; font-weight: 600; color: var(--tinta-suave); letter-spacing: 0; }
+.encabezado-sub { margin: .45rem 0 0; color: var(--tinta-suave); max-width: 62ch; }
 .encabezado-acciones { display: flex; flex-wrap: wrap; gap: .5rem; }
 
-/* ---------- 5. Tarjetas, tablas y datos ---------- */
+/* ---------- 5. Hojas, tablas y cifras ---------- */
 
 .card {
   --bs-card-bg: var(--superficie);
   --bs-card-border-color: var(--linea);
   --bs-card-border-radius: var(--radio-grande);
   --bs-card-inner-border-radius: calc(var(--radio-grande) - 1px);
-  --bs-card-cap-bg: var(--superficie);
+  --bs-card-cap-bg: transparent;
   box-shadow: var(--sombra);
 }
 
 .shadow-sm { box-shadow: var(--sombra) !important; }
-.card-header { border-bottom-color: var(--linea); font-weight: 600; padding: .9rem 1.1rem; }
+
+.card-header {
+  padding: .95rem 1.1rem;
+  border-bottom: 1px solid var(--renglon-fuerte);
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  font-weight: 650;
+  color: var(--pino-900);
+}
 
 .table {
   --bs-table-bg: transparent;
   --bs-table-color: var(--tinta);
-  --bs-table-border-color: var(--linea);
+  --bs-table-border-color: var(--renglon);
   --bs-table-hover-bg: var(--pino-50);
   --bs-table-striped-bg: var(--lienzo);
   font-variant-numeric: tabular-nums;
 }
 
-.table > :not(caption) > * > * { padding: .85rem 1.1rem; }
-.table-sm > :not(caption) > * > * { padding: .65rem 1rem; }
+.table > :not(caption) > * > * { padding: .8rem 1.1rem; }
+.table-sm > :not(caption) > * > * { padding: .62rem 1rem; }
 
+/* Encabezado de columna: versalitas monoespaciadas sobre una regla de tinta, como una lista impresa. */
 .table > thead > tr > th {
-  background: var(--lienzo);
-  color: var(--tinta-suave);
-  font-size: .8rem;
-  font-weight: 600;
-  letter-spacing: .01em;
+  background: transparent;
+  color: var(--pino-800);
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 650;
+  letter-spacing: .07em;
+  text-transform: uppercase;
   white-space: nowrap;
-  border-bottom: 1px solid var(--linea);
+  border-bottom: 2px solid var(--pino-900);
 }
 
 .table > tbody > tr:last-child > * { border-bottom-width: 0; }
+.table > tfoot > tr > * { border-top: 2px solid var(--pino-900); border-bottom: 0; font-weight: 650; }
 .table-responsive { border-radius: inherit; }
 
 .table a:not(.btn) {
@@ -344,64 +430,84 @@ pre.bg-body-secondary {
   font-size: .85rem;
 }
 
-/* Indicadores del resumen (inicio y detalle de grupo). */
-.indicadores { display: grid; gap: .85rem; grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 768px) { .indicadores { grid-template-columns: repeat(4, 1fr); } }
-
-.indicador {
-  display: flex;
-  flex-direction: column;
-  gap: .15rem;
-  padding: 1.05rem 1.15rem;
+/* Renglón de cifras (inicio, detalle de grupo, reporte y panel): una sola banda con separadores,
+   como el pie de una hoja de asistencia; la etiqueta va arriba y la cifra, en serif, debajo. */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   background: var(--superficie);
   border: 1px solid var(--linea);
   border-radius: var(--radio-grande);
   box-shadow: var(--sombra);
+  overflow: hidden;
 }
 
-.indicador .ico-caja {
-  display: grid;
-  place-items: center;
-  width: 2.35rem;
-  height: 2.35rem;
-  margin-bottom: .6rem;
-  border-radius: .7rem;
-  background: var(--pino-50);
-  color: var(--pino-700);
+@media (min-width: 768px) { .indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  min-width: 0;
+  padding: 1rem 1.15rem 1.1rem;
 }
 
-.indicador.aviso .ico-caja { background: var(--ambar-fondo); color: var(--ambar-texto); }
-.indicador.alerta .ico-caja { background: var(--rojo-fondo); color: var(--rojo-texto); }
+.indicador:nth-child(even) { border-left: 1px solid var(--renglon); }
+.indicador:nth-child(n+3) { border-top: 1px solid var(--renglon); }
+
+@media (min-width: 768px) {
+  .indicador + .indicador { border-left: 1px solid var(--renglon); }
+  .indicador:nth-child(n+3) { border-top: 0; }
+}
+
+.indicador .ico-caja { display: none; }
+
+.indicador .etiqueta-indicador {
+  order: -1;
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  line-height: 1.35;
+}
 
 .indicador .cifra {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -.04em;
+  align-self: flex-start;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 1.6rem + 1.2vw, 2.6rem);
+  font-weight: 650;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -.02em;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
+  color: var(--pino-900);
 }
 
-.indicador .cifra.cifra-texto { font-size: 1.35rem; line-height: 1.5; letter-spacing: -.025em; }
-.indicador .etiqueta-indicador { font-size: .85rem; color: var(--tinta-suave); }
+.indicador .cifra.cifra-texto { font-size: clamp(1.25rem, 1.05rem + .6vw, 1.55rem); line-height: 1.25; letter-spacing: -.01em; }
+
+/* Lo que espera atención se subraya con el resaltador ámbar; lo que está mal, en rojo. */
+.indicador.aviso .cifra { padding: 0 .12em; background: linear-gradient(to top, rgba(242, 179, 61, .7) .36em, transparent .36em); }
+.indicador.alerta .cifra { color: var(--rojo-texto); }
 
 /* Barra de porcentaje (reportes): el elemento <progress> es accesible y no necesita estilos en línea. */
 progress.barra-pct {
   -webkit-appearance: none;
   appearance: none;
   width: 4.5rem;
-  height: .4rem;
+  height: .375rem;
   margin-right: .6rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 1px;
   vertical-align: middle;
   overflow: hidden;
   background: var(--realce);
   color: var(--pino-600);
 }
 
-progress.barra-pct::-webkit-progress-bar { background: var(--realce); border-radius: 999px; }
-progress.barra-pct::-webkit-progress-value { background: var(--pino-600); border-radius: 999px; }
-progress.barra-pct::-moz-progress-bar { background: var(--pino-600); border-radius: 999px; }
+progress.barra-pct::-webkit-progress-bar { background: var(--realce); border-radius: 1px; }
+progress.barra-pct::-webkit-progress-value { background: var(--pino-600); border-radius: 1px; }
+progress.barra-pct::-moz-progress-bar { background: var(--pino-600); border-radius: 1px; }
 progress.barra-pct.baja::-webkit-progress-value { background: var(--rojo-texto); }
 progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
@@ -409,7 +515,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
 .btn {
   --bs-btn-border-radius: var(--radio);
-  --bs-btn-font-weight: 550;
+  --bs-btn-font-weight: 600;
   --bs-btn-focus-box-shadow: var(--foco);
   display: inline-flex;
   align-items: center;
@@ -433,7 +539,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   --bs-btn-active-border-color: var(--pino-900);
   --bs-btn-disabled-bg: var(--pino-700);
   --bs-btn-disabled-border-color: var(--pino-700);
-  box-shadow: 0 1px 2px rgba(11, 46, 38, .2), 0 8px 18px -10px rgba(20, 82, 63, .6);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .18);
 }
 
 .btn-outline-primary,
@@ -512,13 +618,25 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
 /* ---------- 7. Formularios ---------- */
 
-.form-label { font-size: .875rem; font-weight: 550; margin-bottom: .35rem; }
+/* Etiqueta de formato: versalitas monoespaciadas sobre el campo, como en un formato impreso. */
+.form-label {
+  margin-bottom: .4rem;
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 650;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--pino-800);
+}
+
 .form-text { color: var(--tinta-suave); }
 
+/* El campo es un renglón para escribir: borde fino y la línea de abajo más marcada. */
 .form-control,
 .form-select {
   background-color: var(--superficie);
   border-color: var(--linea-fuerte);
+  border-bottom: 2px solid var(--control-borde);
   border-radius: var(--radio);
   padding: .6rem .85rem;
   transition: border-color .18s ease, box-shadow .18s ease;
@@ -554,16 +672,30 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .alert-danger { --bs-alert-color: var(--rojo-texto); --bs-alert-bg: var(--rojo-fondo); --bs-alert-border-color: var(--rojo-borde); --bs-alert-link-color: var(--rojo-texto); border-left-color: #c24b4b; }
 .alert-secondary { --bs-alert-color: var(--gris-texto); --bs-alert-bg: var(--gris-fondo); --bs-alert-border-color: var(--gris-borde); --bs-alert-link-color: var(--gris-texto); border-left-color: #8a9a91; }
 
-/* ---------- 9. Etiquetas de estado ---------- */
+/* Las sesiones pendientes (RF-10) son una lista de renglones con fecha en monoespaciada. */
+#pendientes ul { list-style: none; padding-left: 0 !important; margin-top: .35rem; }
+#pendientes li { padding: .3rem 0; border-top: 1px dashed rgba(122, 82, 0, .28); }
+#pendientes li:first-child { border-top: 0; }
+#pendientes .alert-link { font-family: var(--mono); font-size: .86rem; font-weight: 650; letter-spacing: -.01em; }
 
+/* ---------- 9. Sellos (etiquetas de estado) ---------- */
+
+/* Un estado es un sello: rectángulo de esquina corta, versalitas monoespaciadas y borde del color
+   del texto. Las clases text-bg-* se conservan (las usan las pruebas); aquí solo cambia el aspecto. */
 .badge {
-  padding: .32em .75em;
-  font-size: .74rem;
-  font-weight: 600;
-  letter-spacing: .01em;
-  border-radius: 999px;
+  padding: .36em .62em .32em;
+  font-family: var(--mono);
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: var(--radio-sello);
   vertical-align: middle;
 }
+
+.badge .ico { width: .85rem; height: .85rem; vertical-align: -.15em; }
 
 .badge.text-bg-primary   { background-color: var(--azul-fondo) !important;     color: var(--azul-texto) !important; }
 .badge.text-bg-success   { background-color: var(--verde-fondo) !important;    color: var(--verde-texto) !important; }
@@ -572,71 +704,81 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .badge.text-bg-info      { background-color: var(--turquesa-fondo) !important; color: var(--turquesa-texto) !important; }
 .badge.text-bg-secondary { background-color: var(--gris-fondo) !important;     color: var(--gris-texto) !important; }
 
-/* ---------- 10. Inicio ---------- */
+/* Sello grande del encabezado (estado de la sesión): doble borde, sin relleno y un poco ladeado. */
+.badge.sello {
+  padding: .5em .8em .45em;
+  font-size: .78rem;
+  border: 3px double currentColor;
+  background-color: transparent !important;
+  transform: rotate(-2.5deg);
+}
 
-.hero {
-  position: relative;
+/* ---------- 10. Inicio: la hoja del día ---------- */
+
+/* El inicio abre con la fecha grande y el saludo; la clase de hoy es la protagonista. */
+.hoja-dia {
   display: grid;
-  gap: 1.5rem;
-  padding: clamp(1.4rem, 1rem + 2vw, 2.25rem);
-  border-radius: 1.25rem;
-  background-color: var(--pino-900);
-  background-image: radial-gradient(rgba(255, 255, 255, .075) 1px, transparent 1px);
-  background-size: 18px 18px;
-  color: #fff;
-  box-shadow: var(--sombra-alta);
-  overflow: hidden;
-}
-
-@media (min-width: 768px) { .hero { grid-template-columns: 1fr auto; align-items: center; } }
-
-.hero h1 { color: #fff; margin: 0 0 .4rem; font-size: clamp(1.65rem, 1.2rem + 1.8vw, 2.5rem); font-weight: 700; letter-spacing: -.035em; }
-.hero p { margin: 0; color: rgba(255, 255, 255, .78); max-width: 52ch; }
-.hero .rol { display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .85rem; padding: .3rem .75rem; border-radius: 999px; background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .9); font-size: .78rem; font-weight: 600; }
-
-.ficha-fecha {
-  display: inline-flex;
-  flex-direction: column;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  min-width: 5.4rem;
-  padding: .75rem 1rem;
-  border-radius: 1rem;
-  background: var(--ambar);
-  color: var(--pino-950);
-  text-align: center;
-  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, .5);
+  gap: 1.1rem 1.5rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 3px double var(--renglon-fuerte);
 }
 
-.ficha-fecha .dia { font-size: 2.4rem; font-weight: 750; letter-spacing: -.05em; line-height: 1; }
-.ficha-fecha .mes { font-size: .8rem; font-weight: 700; }
-.ficha-fecha .semana { font-size: .75rem; font-weight: 550; opacity: .85; }
-
-@media (max-width: 767.98px) {
-  .ficha-fecha {
-    flex-direction: row;
-    align-items: baseline;
-    justify-self: start;
-    gap: .5rem;
-    min-width: 0;
-    padding: .5rem .95rem;
-    border-radius: .85rem;
-  }
-
-  .ficha-fecha .dia { order: 2; font-size: 1.5rem; }
-  .ficha-fecha .semana { order: 1; }
-  .ficha-fecha .mes { order: 3; }
+.fecha-grande {
+  display: grid;
+  justify-items: center;
+  min-width: 4.5rem;
+  padding-right: 1.25rem;
+  border-right: 2px solid var(--ambar);
+  color: var(--pino-900);
+  line-height: 1;
 }
 
-.seccion { margin-top: 2rem; }
-.seccion > h2 { font-size: 1.05rem; font-weight: 650; margin-bottom: .85rem; }
+.fecha-grande .dia {
+  font-family: var(--serif);
+  font-size: clamp(3.25rem, 2.4rem + 3.2vw, 5.5rem);
+  font-weight: 700;
+  font-variant-numeric: lining-nums;
+  letter-spacing: -.04em;
+}
 
+.fecha-grande .mes,
+.fecha-grande .semana {
+  font-family: var(--mono);
+  font-size: .7rem;
+  font-weight: 650;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.fecha-grande .mes { margin-top: .35rem; }
+.fecha-grande .semana { margin-top: .2rem; color: var(--tinta-suave); }
+
+.hoja-dia h1 { margin: 0 0 .45rem; font-size: clamp(1.7rem, 1.2rem + 2vw, 2.75rem); font-weight: 700; letter-spacing: -.02em; }
+.hoja-dia .lema-dia { margin: 0; max-width: 58ch; color: var(--tinta-suave); font-size: 1.02rem; }
+
+.seccion { margin-top: 2.25rem; }
+
+.seccion > h2,
+.seccion-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+  margin-bottom: .9rem;
+  font-size: 1.3rem;
+  font-weight: 650;
+}
+
+/* Clase en un renglón grande: hora en monoespaciada, regla ámbar, grupo en serif y el botón. */
 .clase-de-hoy {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: .95rem 1.1rem;
+  gap: 1.1rem;
+  padding: 1rem 1.15rem;
   background: var(--superficie);
   border: 1px solid var(--linea);
+  border-left: 4px solid var(--ambar);
   border-radius: var(--radio-grande);
   box-shadow: var(--sombra);
 }
@@ -645,28 +787,38 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
 .hora {
   display: grid;
-  place-items: center;
   flex: none;
-  width: 4.1rem;
-  padding: .45rem 0;
-  border-radius: .75rem;
-  background: var(--pino-50);
-  color: var(--pino-800);
-  font-weight: 700;
+  min-width: 4.4rem;
+  padding-right: 1.1rem;
+  border-right: 1px solid var(--renglon-fuerte);
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
   line-height: 1.15;
-  text-align: center;
+  color: var(--pino-900);
 }
 
-.hora small { display: block; font-weight: 500; font-size: .72rem; color: var(--tinta-suave); }
-.clase-de-hoy .titulo { font-weight: 600; line-height: 1.3; }
-.clase-de-hoy .detalle { font-size: .85rem; color: var(--tinta-suave); }
+.hora small { display: block; margin-top: .15rem; font-size: .7rem; font-weight: 500; letter-spacing: 0; color: var(--tinta-suave); }
+.clase-de-hoy .titulo { font-family: var(--serif); font-size: 1.12rem; font-weight: 650; line-height: 1.3; color: var(--pino-900); }
+.clase-de-hoy .detalle { font-size: .86rem; color: var(--tinta-suave); }
 .clase-de-hoy .acciones { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
 
 @media (max-width: 575.98px) {
-  .clase-de-hoy { flex-wrap: wrap; }
+  .clase-de-hoy { flex-wrap: wrap; gap: .6rem 1rem; }
+  .clase-de-hoy .hora { display: flex; align-items: baseline; gap: .5rem; width: 100%; padding: 0 0 .55rem; border-right: 0; border-bottom: 1px solid var(--renglon); }
+  .clase-de-hoy .hora small { margin: 0; }
   .clase-de-hoy .acciones { margin-left: 0; width: 100%; }
   .clase-de-hoy .acciones .btn { flex: 1; }
+}
+
+/* En el inicio la clase de hoy manda: renglón más alto, hora y grupo más grandes. */
+@media (min-width: 992px) {
+  .inicio-columnas .clase-de-hoy { padding: 1.35rem 1.4rem; gap: 1.4rem; }
+  .inicio-columnas .hora { font-size: 1.6rem; min-width: 5.6rem; }
+  .inicio-columnas .clase-de-hoy .titulo { font-size: 1.4rem; }
+  .inicio-columnas .clase-de-hoy .acciones .btn { padding: .7rem 1.2rem; font-size: 1.02rem; }
 }
 
 /* Cuenta que espera aprobación en el panel del administrador (RF-19 y RF-20). */
@@ -676,16 +828,21 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   gap: 1rem;
   padding: .85rem 1.1rem;
   background: var(--superficie);
+}
+
+.cuenta-pendiente + .cuenta-pendiente { border-top: 1px solid var(--renglon); }
+.cuenta-pendiente .datos { min-width: 0; }
+.cuenta-pendiente .titulo { font-weight: 650; line-height: 1.3; }
+.cuenta-pendiente .detalle { font-size: .85rem; color: var(--tinta-suave); overflow-wrap: anywhere; }
+.cuenta-pendiente .acciones { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
+
+.renglones {
+  background: var(--superficie);
   border: 1px solid var(--linea);
   border-radius: var(--radio-grande);
   box-shadow: var(--sombra);
+  overflow: hidden;
 }
-
-.cuenta-pendiente + .cuenta-pendiente { margin-top: .6rem; }
-.cuenta-pendiente .datos { min-width: 0; }
-.cuenta-pendiente .titulo { font-weight: 600; line-height: 1.3; }
-.cuenta-pendiente .detalle { font-size: .85rem; color: var(--tinta-suave); overflow-wrap: anywhere; }
-.cuenta-pendiente .acciones { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
 
 @media (max-width: 575.98px) {
   .cuenta-pendiente { flex-wrap: wrap; }
@@ -695,71 +852,114 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   .cuenta-pendiente .acciones .btn { width: 100%; }
 }
 
-.accesos { display: grid; gap: .85rem; grid-template-columns: 1fr; }
-@media (min-width: 768px) { .accesos { grid-template-columns: 1.3fr 1fr 1fr; } }
+/* Accesos como índice de un cuaderno: número, sección, para qué sirve y flecha. */
+.accesos {
+  counter-reset: acceso;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
 
 .acceso {
-  display: flex;
-  flex-direction: column;
-  gap: .3rem;
-  padding: 1.15rem 1.25rem;
-  background: var(--superficie);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio-grande);
+  counter-increment: acceso;
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .15rem 1rem;
+  padding: 1rem 1.15rem;
   color: var(--tinta);
   text-decoration: none;
-  box-shadow: var(--sombra);
-  transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease, border-color .2s ease;
+  transition: background-color .18s ease;
 }
 
-.acceso:hover {
-  color: var(--tinta);
-  border-color: var(--pino-200);
-  box-shadow: var(--sombra-alta);
-  transform: translateY(-2px);
+.acceso + .acceso { border-top: 1px solid var(--renglon); }
+
+.acceso::before {
+  content: counter(acceso, decimal-leading-zero);
+  grid-row: span 2;
+  align-self: start;
+  padding-top: .2rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 650;
+  color: var(--tinta-suave);
 }
 
-.acceso .icono {
-  display: grid;
-  place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  margin-bottom: .55rem;
-  border-radius: .75rem;
-  background: var(--pino-700);
-  color: #fff;
+.acceso strong { font-family: var(--serif); font-size: 1.15rem; font-weight: 650; color: var(--pino-900); }
+.acceso .detalle { grid-column: 2; color: var(--tinta-suave); font-size: .92rem; }
+.acceso .ir { grid-column: 3; grid-row: 1 / span 2; color: var(--pino-700); transition: transform .2s cubic-bezier(.16, 1, .3, 1); }
+.acceso:hover { color: var(--tinta); background: var(--pino-50); }
+.acceso:hover .ir { transform: translateX(3px); }
+
+@media (min-width: 768px) {
+  .acceso { grid-template-columns: 2.25rem 12rem minmax(0, 1fr) auto; }
+  .acceso::before { grid-row: auto; align-self: center; padding-top: 0; }
+  .acceso .detalle { grid-column: 3; }
+  .acceso .ir { grid-column: 4; grid-row: auto; }
 }
 
-.acceso .icono .ico { width: 1.35rem; height: 1.35rem; }
-.acceso strong { font-size: 1.05rem; font-weight: 650; letter-spacing: -.015em; }
-.acceso span.detalle { color: var(--tinta-suave); font-size: .92rem; }
-.acceso .ir { margin-top: auto; padding-top: .6rem; color: var(--pino-700); font-weight: 600; font-size: .88rem; display: inline-flex; align-items: center; gap: .35rem; }
+/* Inicio en pantalla ancha: la clase del día a la izquierda y el índice a la derecha. */
+@media (min-width: 992px) {
+  .inicio-columnas { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0 2rem; align-items: start; }
+  .inicio-columnas .acceso { grid-template-columns: 2.25rem minmax(0, 1fr) auto; }
+  .inicio-columnas .acceso::before { grid-row: span 2; align-self: start; padding-top: .2rem; }
+  .inicio-columnas .acceso .detalle { grid-column: 2; }
+  .inicio-columnas .acceso .ir { grid-column: 3; grid-row: 1 / span 2; }
+}
 
-/* ---------- 11. Grupos ---------- */
+/* ---------- 11. Grupos: renglones del cuaderno ---------- */
 
-.grupos-rejilla { display: grid; gap: .9rem; grid-template-columns: 1fr; }
-@media (min-width: 768px) { .grupos-rejilla { grid-template-columns: repeat(2, 1fr); } }
-
-.grupo-tarjeta {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.15rem 1.25rem;
+.grupos-rejilla {
   background: var(--superficie);
   border: 1px solid var(--linea);
   border-radius: var(--radio-grande);
   box-shadow: var(--sombra);
-  transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease, border-color .2s ease;
+  overflow: hidden;
 }
 
-.grupo-tarjeta:hover { border-color: var(--pino-200); box-shadow: var(--sombra-alta); transform: translateY(-2px); }
-.grupo-tarjeta .cabeza { display: flex; align-items: flex-start; gap: .85rem; }
-.grupo-tarjeta .clave { font-size: 1.25rem; font-weight: 700; letter-spacing: -.03em; line-height: 1.15; }
-.grupo-tarjeta .materia { color: var(--tinta-suave); font-size: .92rem; line-height: 1.35; }
-.grupo-tarjeta .cifras { display: flex; gap: 1.4rem; margin-top: auto; padding-top: .9rem; border-top: 1px dashed var(--linea-fuerte); font-variant-numeric: tabular-nums; }
-.grupo-tarjeta .cifras div { display: flex; align-items: center; gap: .5rem; color: var(--tinta-suave); font-size: .9rem; }
-.grupo-tarjeta .cifras strong { color: var(--tinta); font-size: 1.05rem; }
+.grupo-tarjeta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .85rem 1.5rem;
+  padding: 1.1rem 1.15rem 1.15rem 1.5rem;
+  position: relative;
+  transition: background-color .18s ease;
+}
+
+.grupo-tarjeta + .grupo-tarjeta { border-top: 1px solid var(--renglon); }
+.grupo-tarjeta:hover { background: var(--pino-50); }
+
+/* Línea de margen de cada renglón; un grupo congelado la lleva gris. */
+.grupo-tarjeta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: .55rem;
+  width: 4px;
+  border-left: 1px solid var(--margen);
+  border-right: 1px solid var(--margen);
+}
+
+.grupo-tarjeta.congelado::before { border-color: var(--linea-fuerte); }
+
+.grupo-tarjeta .cabeza { display: flex; align-items: flex-start; gap: .85rem; min-width: 0; }
+.grupo-tarjeta .clave { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; color: var(--pino-900); }
+.grupo-tarjeta .clave a { color: inherit; text-decoration: none; }
+.grupo-tarjeta .clave a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--ambar); }
+.grupo-tarjeta .materia { font-family: var(--serif); color: var(--tinta); font-size: 1.05rem; line-height: 1.3; }
+.grupo-tarjeta .sellos { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.grupo-tarjeta .cifras { display: flex; gap: 1.5rem; font-variant-numeric: tabular-nums; }
+.grupo-tarjeta .cifras div { display: grid; color: var(--tinta-suave); font-size: .8rem; line-height: 1.2; }
+.grupo-tarjeta .cifras strong { font-family: var(--serif); color: var(--pino-900); font-size: 1.55rem; font-weight: 650; font-variant-numeric: lining-nums tabular-nums; }
 .grupo-tarjeta .pie { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+@media (min-width: 768px) {
+  .grupo-tarjeta { grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; padding-left: 1.75rem; }
+  .grupo-tarjeta::before { left: .7rem; }
+}
 
 .ficha-grupo {
   display: grid;
@@ -767,16 +967,17 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   flex: none;
   width: 3rem;
   height: 3rem;
-  border-radius: .85rem;
+  border-radius: var(--radio);
   background: var(--pino-700);
   color: #fff;
-  font-size: .85rem;
+  font-family: var(--mono);
+  font-size: .82rem;
   font-weight: 700;
   letter-spacing: .01em;
 }
 
-.ficha-grupo.mini { display: inline-grid; width: 2.1rem; height: 2.1rem; border-radius: .6rem; font-size: .68rem; vertical-align: middle; }
-.ficha-grupo.grande { width: 3.4rem; height: 3.4rem; border-radius: 1rem; font-size: .95rem; }
+.ficha-grupo.mini { display: inline-grid; width: 2.1rem; height: 2.1rem; border-radius: .4rem; font-size: .66rem; vertical-align: middle; }
+.ficha-grupo.grande { width: 3.4rem; height: 3.4rem; font-size: .92rem; }
 .ficha-grupo.congelado { background: var(--gris-texto); }
 
 /* ---------- 12. Estados vacíos ---------- */
@@ -795,76 +996,127 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .vacio .figura {
   display: grid;
   place-items: center;
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 4rem;
+  height: 4rem;
   margin-bottom: 1.1rem;
-  border-radius: 1.4rem;
+  border: 1px solid var(--pino-200);
+  border-radius: var(--radio);
   background: var(--pino-50);
   color: var(--pino-700);
-  box-shadow: 0 0 0 .55rem rgba(220, 235, 228, .5);
 }
 
-.vacio .figura .ico { width: 2rem; height: 2rem; }
-.vacio h2 { font-size: 1.15rem; margin-bottom: .35rem; }
+.vacio .figura .ico { width: 1.85rem; height: 1.85rem; }
+.vacio h2 { font-size: 1.3rem; margin-bottom: .4rem; }
 .vacio p { max-width: 42ch; margin-bottom: 1.1rem; color: var(--tinta-suave); }
 
 /* ---------- 13. Inicio de sesión y registro ---------- */
 
+/* La portada: el nombre en serif sobre una lista de renglones con su margen, y el formulario
+   en una hoja con la banda pino del membrete. Sin bloque oscuro ni tarjeta partida (CR-003, A-12). */
 .entrada {
   display: grid;
-  max-width: 62rem;
-  margin: 1rem auto 0;
-  overflow: hidden;
-  background: var(--superficie);
-  border: 1px solid var(--linea);
-  border-radius: 1.5rem;
-  box-shadow: var(--sombra-alta);
+  gap: 1.75rem;
+  max-width: 64rem;
+  margin: .5rem auto 0;
+  align-items: center;
 }
 
-@media (min-width: 900px) { .entrada { grid-template-columns: 1.05fr 1fr; margin-top: 2.5rem; } }
+@media (min-width: 900px) { .entrada { grid-template-columns: 1.1fr 1fr; gap: 4rem; margin-top: 3rem; } }
 
-.entrada-marca {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: clamp(1.5rem, 1rem + 2vw, 2.75rem);
-  background-color: var(--pino-900);
-  background-image: radial-gradient(rgba(255, 255, 255, .075) 1px, transparent 1px);
-  background-size: 18px 18px;
-  color: #fff;
-}
-
+.entrada-marca { min-width: 0; }
 .entrada-marca .marca-grande { width: 3rem; height: 3rem; }
 .entrada-marca .marca-grande rect { fill: var(--ambar); }
 .entrada-marca .marca-grande path { stroke: var(--pino-900); }
-.entrada-marca .titulo-marca { color: #fff; font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.3rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.15; margin: 1.1rem 0 .6rem; }
-.entrada-marca p { color: rgba(255, 255, 255, .78); max-width: 38ch; margin: 0; }
 
-.entrada-marca ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .65rem; }
-.entrada-marca li { display: flex; align-items: center; gap: .65rem; color: rgba(255, 255, 255, .9); font-size: .92rem; }
-.entrada-marca li .ico { color: var(--ambar); }
+.entrada-marca .titulo-marca {
+  margin: 1rem 0 .7rem;
+  font-family: var(--serif);
+  font-size: clamp(2.1rem, 1.4rem + 3vw, 3.6rem);
+  font-weight: 700;
+  font-variant-numeric: lining-nums;
+  letter-spacing: -.025em;
+  line-height: 1.02;
+  color: var(--pino-900);
+  text-wrap: balance;
+}
+
+.entrada-marca > div > p:not(.titulo-marca) { margin: 0; max-width: 38ch; color: var(--tinta-suave); font-size: 1.05rem; }
+
+/* Tres renglones numerados con su línea de margen, como el inicio de una lista. */
+.entrada-marca ul {
+  counter-reset: renglon;
+  position: relative;
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--renglon-fuerte);
+}
+
+.entrada-marca ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2.5rem;
+  width: 4px;
+  border-left: 1px solid var(--margen);
+  border-right: 1px solid var(--margen);
+}
+
+.entrada-marca li {
+  counter-increment: renglon;
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-height: 3.1rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--renglon-fuerte);
+  color: var(--tinta);
+  font-size: .95rem;
+}
+
+.entrada-marca li::before {
+  content: counter(renglon, decimal-leading-zero);
+  flex: none;
+  width: 2.5rem;
+  font-family: var(--mono);
+  font-size: .78rem;
+  font-weight: 650;
+  color: var(--tinta-suave);
+}
+
+.entrada-marca li .ico { margin-left: .9rem; color: var(--pino-700); }
 
 @media (max-width: 899.98px) { .entrada-marca ul { display: none; } }
 
-.entrada-form { padding: clamp(1.5rem, 1rem + 2vw, 2.75rem); align-self: center; }
-.entrada-form h2 { font-size: 1.45rem; font-weight: 700; letter-spacing: -.03em; margin-bottom: .3rem; }
+.entrada-form {
+  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-top: 6px solid var(--pino-900);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-alta);
+}
+
+.entrada-form h1, .entrada-form h2 { font-size: 1.65rem; font-weight: 700; margin-bottom: .3rem; }
 .entrada-form .lema { color: var(--tinta-suave); margin-bottom: 1.5rem; }
-.entrada-form .pie-form { margin: 1.35rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--linea); color: var(--tinta-suave); font-size: .92rem; }
+.entrada-form .pie-form { margin: 1.35rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--renglon); color: var(--tinta-suave); font-size: .92rem; }
 
 /* ---------- 14. Pase de lista (pantalla crítica: RNF-01, RNF-02, RNF-10 y RF-18) ---------- */
 
 /* Una fila por alumno: nombre a la izquierda y cuatro casillas a la derecha, para recorrer
    la lista sin desplazarse de más. El nombre de cada estado aparece una sola vez, en el
    encabezado; en las filas solo hay casillas con su marca de verificación. En 375 px caben
-   el nombre (unos 130 px) y las cuatro casillas de 44 px, el mínimo táctil. */
+   el nombre (unos 130 px) y las cuatro casillas de 44 px, el mínimo táctil.
+   Como todos empiezan en «Presente», esa casilla marcada es tranquila (palomita verde sobre
+   fondo claro) y las excepciones llevan relleno sólido: se ven de un vistazo (CR-003, A-06). */
 .lista-pase {
   --alto-casilla: 44px;
   --ancho-casilla: 44px;
   --ancho-columna: 44px;       /* ancho de cada columna: en pantalla ancha es mayor que la casilla, para que quepa el nombre del estado en el encabezado */
   --hueco-casilla: 4px;
-  --control-borde: #7a8881;    /* borde de una casilla vacía: contraste 3.6:1 sobre blanco (mínimo 3:1) */
+  --margen-x: .1rem;           /* posición de la línea de margen */
+  counter-reset: fila;
   max-width: 56rem;            /* una fila muy ancha aleja el nombre de sus casillas */
   background: var(--superficie);
   border: 1px solid var(--linea);
@@ -873,7 +1125,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 }
 
 @media (min-width: 640px) {
-  .lista-pase { --ancho-casilla: 56px; --ancho-columna: 88px; }
+  .lista-pase { --ancho-casilla: 56px; --ancho-columna: 88px; --margen-x: 2.6rem; }
 }
 
 .lista-cabecera,
@@ -885,49 +1137,89 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   padding: .4rem .5rem;
 }
 
-/* El encabezado queda pegado bajo la barra superior mientras se recorre la lista. */
+/* Desde 640 px el número de lista tiene su propia columna, a la izquierda del margen. */
+@media (min-width: 640px) {
+  .lista-cabecera,
+  .fila-lista { grid-template-columns: 2.1rem minmax(0, 1fr) repeat(4, var(--ancho-columna)); padding-left: .25rem; }
+  .lista-cabecera::before { content: "N.º"; }
+  .fila-lista::before {
+    content: counter(fila, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: .78rem;
+    font-weight: 650;
+    color: var(--tinta-suave);
+    text-align: center;
+  }
+}
+
+/* El encabezado es la banda de tinta de la lista y queda pegado bajo la barra superior. */
 .lista-cabecera {
   position: sticky;
-  top: 3.8rem;
+  top: var(--alto-barra);
   z-index: 5;
-  padding-block: .5rem;
-  background: var(--realce);
-  border-bottom: 1px solid var(--linea);
-  border-radius: var(--radio-grande) var(--radio-grande) 0 0;
-  color: var(--tinta-suave);
-  font-size: .72rem;
+  padding-block: .55rem;
+  background: var(--pino-900);
+  border-radius: calc(var(--radio-grande) - 1px) calc(var(--radio-grande) - 1px) 0 0;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: .68rem;
   font-weight: 650;
-  letter-spacing: .02em;
+  letter-spacing: .06em;
+  text-transform: uppercase;
   text-align: center;
 }
 
-.cab-alumno { text-align: left; padding-left: .25rem; }
+.cab-alumno { text-align: left; padding-left: .5rem; }
 .cab-largo { display: none; }
 
 @media (min-width: 640px) {
-  .lista-cabecera { font-size: .78rem; }
+  .lista-cabecera { font-size: .72rem; }
+  .cab-alumno { padding-left: .9rem; }
   .cab-corto { display: none; }
   .cab-largo { display: inline; }
 }
 
 .fila-lista {
+  counter-increment: fila;
   position: relative;
   min-height: 56px;
-  transition: box-shadow .15s ease, background-color .15s ease;
+  transition: background-color .15s ease;
 }
 
-.fila-lista + .fila-lista { border-top: 1px solid var(--linea); }
+.fila-lista + .fila-lista { border-top: 1px solid var(--renglon); }
 .fila-lista:last-child { border-radius: 0 0 var(--radio-grande) var(--radio-grande); }
 .fila-lista:hover { background: var(--pino-50); }
 
-.dato-alumno { min-width: 0; padding-left: .25rem; line-height: 1.25; }
+/* Línea de margen: doble línea ámbar continua; con una excepción se vuelve una barra del color del estado. */
+.fila-lista::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--margen-x);
+  width: 4px;
+  border-left: 1px solid var(--margen);
+  border-right: 1px solid var(--margen);
+  pointer-events: none;
+}
+
+.dato-alumno { min-width: 0; padding-left: .5rem; line-height: 1.25; }
 .dato-alumno .nombre { display: block; font-weight: 600; font-size: .95rem; overflow-wrap: anywhere; }
-.dato-alumno .matricula { font-size: .78rem; color: var(--tinta-suave); }
+.dato-alumno .matricula { font-family: var(--mono); font-size: .74rem; color: var(--tinta-suave); }
+
+/* En el teléfono el número de lista va junto a la matrícula, para no quitarle ancho al nombre. */
+@media (max-width: 639.98px) {
+  .dato-alumno .matricula::before { content: counter(fila, decimal-leading-zero) " · "; font-weight: 650; }
+}
+
+@media (min-width: 640px) {
+  .dato-alumno { padding-left: .9rem; }
+}
 
 /* «Sin registrar»: lo manda el servidor cuando el alumno no tiene registro, y también aparece
    al quitar todas sus casillas. Son dos reglas aparte: si un navegador no entiende :has, la
    primera sigue valiendo. */
-.etiqueta-sin-estado { display: none; margin-left: .4rem; font-size: .68rem; }
+.etiqueta-sin-estado { display: none; margin-left: .4rem; font-size: .6rem; }
 .fila-lista.sin-registro .etiqueta-sin-estado { display: inline-block; }
 .fila-lista:not(:has(.btn-check:checked)) .etiqueta-sin-estado { display: inline-block; }
 
@@ -954,12 +1246,20 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   font-weight: 500;
   line-height: 1.1;
   text-align: center;
+  box-shadow: none;
 }
 
 .casilla .btn-outline-success { --estado-tinta: var(--verde-texto);    --estado-fondo: var(--verde-fondo);    --estado-solido: #1b6b43; }
 .casilla .btn-outline-warning { --estado-tinta: var(--ambar-texto);    --estado-fondo: var(--ambar-fondo);    --estado-solido: #8a5a00; }
 .casilla .btn-outline-danger  { --estado-tinta: var(--rojo-texto);     --estado-fondo: var(--rojo-fondo);     --estado-solido: #a12f2f; }
 .casilla .btn-outline-info    { --estado-tinta: var(--turquesa-texto); --estado-fondo: var(--turquesa-fondo); --estado-solido: #1a6478; }
+
+/* «Presente» es lo normal: marcado se ve tranquilo, con su palomita y su borde, sin relleno sólido. */
+.casilla .btn-outline-success.estado-btn {
+  --bs-btn-active-color: var(--verde-texto);
+  --bs-btn-active-bg: var(--verde-fondo);
+  --bs-btn-active-border-color: var(--estado-solido);
+}
 
 .casilla .btn-check:checked + .estado-btn { font-weight: 650; }
 
@@ -983,7 +1283,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   width: .34em;
   height: .66em;
   border: solid currentColor;
-  border-width: 0 .15em .15em 0;
+  border-width: 0 .16em .16em 0;
   transform: rotate(45deg) translateY(-.1em);
 }
 
@@ -1003,23 +1303,84 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   border: 1px solid var(--estado-solido);
 }
 
-/* Quien no está «presente» se distingue de un vistazo al recorrer la lista. */
-.fila-lista:has(.btn-check[data-casilla="retardo"]:checked)     { box-shadow: inset 4px 0 0 #8a5a00; }
-.fila-lista:has(.btn-check[data-casilla="ausente"]:checked)     { box-shadow: inset 4px 0 0 #a12f2f; }
-.fila-lista:has(.btn-check[data-casilla="justificado"]:checked) { box-shadow: inset 4px 0 0 #1a6478; }
+.casilla .btn-check:disabled:checked + .btn-outline-success.estado-btn {
+  color: var(--verde-texto);
+  background: var(--verde-fondo);
+}
 
-.fila-justificante { grid-column: 1 / -1; padding: 0 .25rem .2rem; font-size: .85rem; }
+/* Quien no está «presente» se distingue de un vistazo: fondo del estado y el margen se vuelve
+   una barra de su color (además de la casilla sólida con su palomita). */
+.fila-lista:has(.btn-check[data-casilla="retardo"]:checked)     { --margen: #8a5a00; background: color-mix(in srgb, var(--ambar-fondo) 55%, #fff); }
+.fila-lista:has(.btn-check[data-casilla="ausente"]:checked)     { --margen: #a12f2f; background: color-mix(in srgb, var(--rojo-fondo) 60%, #fff); }
+.fila-lista:has(.btn-check[data-casilla="justificado"]:checked) { --margen: #1a6478; background: color-mix(in srgb, var(--turquesa-fondo) 60%, #fff); }
+.fila-lista:has(.btn-check[data-casilla="retardo"]:checked)::after,
+.fila-lista:has(.btn-check[data-casilla="ausente"]:checked)::after,
+.fila-lista:has(.btn-check[data-casilla="justificado"]:checked)::after { background: var(--margen); }
 
+.fila-justificante { grid-column: 1 / -1; padding: 0 .25rem .2rem .5rem; font-size: .85rem; }
+
+@media (min-width: 640px) {
+  .fila-justificante { grid-column: 2 / -1; padding-left: .9rem; }
+}
+
+/* Nota de instrucciones al margen. */
+.nota-margen {
+  max-width: 56rem;
+  margin-bottom: 1rem;
+  padding: .1rem 0 .1rem .9rem;
+  border-left: 2px solid var(--ambar);
+  color: var(--tinta-suave);
+}
+
+/* Pie fijo de la lista: el conteo de lo que se lleva marcado y el botón de guardar. */
 .barra-guardar {
-  background: rgba(241, 244, 241, .92);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid var(--linea);
+  display: grid;
+  gap: .5rem;
+  max-width: 56rem;
+  padding: .65rem .75rem;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-top: 2px solid var(--pino-900);
+  border-radius: var(--radio-grande) var(--radio-grande) 0 0;
+  box-shadow: 0 -10px 28px -18px rgba(11, 46, 38, .45);
   bottom: 0;
   z-index: 1020;
 }
 
+.barra-botones { display: grid; gap: .5rem; }
+
+@media (min-width: 576px) {
+  .barra-guardar { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .barra-botones { display: flex; }
+}
+
+.conteo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .9rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: .74rem;
+  color: var(--tinta-suave);
+}
+
+.conteo[hidden] { display: none; }
+.conteo span { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
+.conteo b { color: var(--tinta); font-size: .95rem; font-weight: 700; }
+.conteo span::before { content: ""; width: .6rem; height: .6rem; border-radius: 2px; border: 1px solid currentColor; }
+.conteo .c-presente::before { background: var(--verde-fondo); color: #1b6b43; }
+.conteo .c-retardo::before { background: #8a5a00; color: #8a5a00; }
+.conteo .c-ausente::before { background: #a12f2f; color: #a12f2f; }
+.conteo .c-justificado::before { background: #1a6478; color: #1a6478; }
+.conteo .c-sin { color: var(--rojo-texto); }
+.conteo .c-sin b { color: var(--rojo-texto); }
+.conteo .c-sin::before { border-style: dashed; }
+
 /* ---------- 15. Tablas con anchos propios ---------- */
+
+/* Matrícula y porcentaje en monoespaciada: se leen como datos de formato. */
+.tabla-alumnos td:first-child,
+.tabla-inscritos td:first-child { font-family: var(--mono); font-size: .85rem; }
 
 /* El reporte del grupo tiene siete columnas: al nombre se le reserva sitio para que no se parta en tres líneas. */
 .tabla-alumnos th:nth-child(2) { min-width: 11rem; }
@@ -1031,8 +1392,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   .tabla-alumnos td:last-child, .tabla-alumnos th:last-child { padding-right: 1rem; }
 }
 @media (max-width: 575.98px) {
-  /* En el teléfono caben tres columnas (nombre, porcentaje, situación): sin iniciales. */
-  .tabla-alumnos .avatar { display: none; }
+  /* En el teléfono caben tres columnas (nombre, porcentaje, situación). */
   .tabla-alumnos th:nth-child(2) { min-width: 0; }
   .tabla-alumnos td, .tabla-alumnos th { padding-left: .5rem; padding-right: .5rem; }
 }
@@ -1048,6 +1408,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .tabla-sesiones th:nth-child(1) { width: 12.5rem; }
 .tabla-sesiones th:nth-child(2) { width: 8rem; }
 .tabla-sesiones th:nth-child(3) { width: 8rem; }
+.tabla-sesiones td:nth-child(2) { font-family: var(--mono); font-size: .86rem; }
 
 @media (max-width: 767.98px) {
   /* En el teléfono cada sesión es una tarjeta: fecha y estado arriba, horario debajo y los botones al final. */
@@ -1060,12 +1421,12 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
     align-items: center;
     gap: .2rem .75rem;
     padding: .8rem 1rem;
-    border-bottom: 1px solid var(--linea);
+    border-bottom: 1px solid var(--renglon);
   }
   .tabla-sesiones tr:last-child { border-bottom: 0; }
   .tabla-sesiones td { display: block; padding: 0; border: 0; box-shadow: none; background: transparent; }
   .tabla-sesiones td:nth-child(1) { grid-column: 1; font-weight: 600; }
-  .tabla-sesiones td:nth-child(2) { grid-column: 1; grid-row: 2; color: var(--tinta-suave); font-size: .9rem; }
+  .tabla-sesiones td:nth-child(2) { grid-column: 1; grid-row: 2; color: var(--tinta-suave); }
   .tabla-sesiones td:nth-child(3) { grid-column: 2; grid-row: 1; justify-self: end; }
   .tabla-sesiones td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; text-align: left !important; margin-top: .45rem; }
   .tabla-sesiones td:nth-child(4):not(:has(a)) { display: none; }
@@ -1079,7 +1440,14 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
     to { opacity: 1; transform: none; }
   }
 
-  .hero, .encabezado, .escalonado > * { animation: subir .5s cubic-bezier(.16, 1, .3, 1) both; }
+  /* El sello cae sobre la hoja: aparece un poco más grande y se asienta. */
+  @keyframes sellar {
+    from { opacity: 0; transform: rotate(-2.5deg) scale(1.25); }
+    to { opacity: 1; transform: rotate(-2.5deg) scale(1); }
+  }
+
+  .hoja-dia, .encabezado, .escalonado > * { animation: subir .5s cubic-bezier(.16, 1, .3, 1) both; }
+  .badge.sello { animation: sellar .35s cubic-bezier(.2, 1.4, .4, 1) .15s both; }
   .escalonado > *:nth-child(2) { animation-delay: .05s; }
   .escalonado > *:nth-child(3) { animation-delay: .1s; }
   .escalonado > *:nth-child(4) { animation-delay: .15s; }

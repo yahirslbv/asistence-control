@@ -4,11 +4,17 @@
 {% block titulo %}Panel de administración · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<section class="hero" aria-labelledby="saludo">
+{# La hoja del día del administrador: la fecha grande, el saludo y lo que espera su aprobación. #}
+<section class="hoja-dia" aria-labelledby="saludo">
+  <div class="fecha-grande" aria-hidden="true">
+    <span class="dia">{{ resumen.hoy|date:"j" }}</span>
+    <span class="mes">{{ resumen.hoy|date:"F" }}</span>
+    <span class="semana">{{ resumen.hoy|date:"l" }}</span>
+  </div>
   <div>
-    <span class="rol"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-escudo"/></svg>{{ user.get_rol_display }}</span>
+    <p class="formato"><span>{{ user.get_rol_display }}</span><span>{{ resumen.hoy|date:"d/m/Y" }}</span></p>
     <h1 id="saludo">{{ resumen.saludo }}, {{ user.first_name|default:user.email }}</h1>
-    <p>
+    <p class="lema-dia">
       {% if resumen.pendientes %}
         {{ resumen.pendientes }} cuenta{{ resumen.pendientes|pluralize }} espera{{ resumen.pendientes|pluralize:",n" }} tu aprobación.
       {% else %}
@@ -17,32 +23,23 @@
       {% if resumen.periodo %}El periodo activo es {{ resumen.periodo.clave }}.{% else %}No hay un periodo activo.{% endif %}
     </p>
   </div>
-  <div class="ficha-fecha" aria-hidden="true">
-    <span class="semana">{{ resumen.hoy|date:"l"|capfirst }}</span>
-    <span class="dia">{{ resumen.hoy|date:"j" }}</span>
-    <span class="mes">{{ resumen.hoy|date:"F"|capfirst }}</span>
-  </div>
 </section>
 
 <section class="seccion" aria-label="Resumen">
   <div class="indicadores escalonado">
     <div class="indicador{% if resumen.pendientes %} aviso{% endif %}">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-usuario-mas"/></svg></span>
       <span class="cifra">{{ resumen.pendientes }}</span>
       <span class="etiqueta-indicador">Cuenta{{ resumen.pendientes|pluralize }} por aprobar</span>
     </div>
     <div class="indicador">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
       <span class="cifra">{{ resumen.docentes }}</span>
       <span class="etiqueta-indicador">Docente{{ resumen.docentes|pluralize }} activo{{ resumen.docentes|pluralize }}</span>
     </div>
     <div class="indicador">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-escudo"/></svg></span>
       <span class="cifra">{{ resumen.administradores }}</span>
       <span class="etiqueta-indicador">Administrador{{ resumen.administradores|pluralize:",es" }}</span>
     </div>
     <div class="indicador{% if not resumen.periodo %} alerta{% endif %}">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
       <span class="cifra cifra-texto">{% if resumen.periodo %}{{ resumen.periodo.clave }}{% else %}Ninguno{% endif %}</span>
       <span class="etiqueta-indicador">Periodo activo</span>
     </div>
@@ -51,6 +48,7 @@
 
 <section class="seccion" id="cuentas" aria-labelledby="titulo-cuentas">
   <h2 id="titulo-cuentas">Cuentas por aprobar</h2>
+  {% if cuentas %}<div class="renglones">{% endif %}
   {% for cuenta in cuentas %}
     <article class="cuenta-pendiente">
       <span class="avatar avatar-suave" aria-hidden="true" data-texto="{{ cuenta.get_full_name|default:cuenta.email|iniciales }}"></span>
@@ -66,6 +64,7 @@
         <a class="btn btn-outline-danger btn-sm" href="{% url 'cuenta_rechazar' cuenta.pk %}">Rechazar</a>
       </div>
     </article>
+    {% if forloop.last %}</div>{% endif %}
   {% empty %}
     <div class="vacio">
       <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>
@@ -101,25 +100,22 @@
 
 <section class="seccion" aria-labelledby="titulo-accesos">
   <h2 id="titulo-accesos">Accesos</h2>
-  <div class="accesos escalonado">
+  <nav class="accesos" aria-labelledby="titulo-accesos">
     <a class="acceso" href="{% url 'admin:asistencia_usuario_changelist' %}">
-      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-alumno"/></svg></span>
       <strong>Usuarios</strong>
       <span class="detalle">Consulta, edita y da de baja a docentes y administradores ({{ resumen.desactivados }} desactivado{{ resumen.desactivados|pluralize }}).</span>
-      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+      <svg class="ico ir" aria-hidden="true"><use href="#i-flecha"/></svg>
     </a>
     <a class="acceso" href="{% url 'admin:asistencia_usuario_add' %}">
-      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-usuario-mas"/></svg></span>
       <strong>Agregar usuario</strong>
       <span class="detalle">Da de alta a alguien con su rol, sin que tenga que registrarse.</span>
-      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+      <svg class="ico ir" aria-hidden="true"><use href="#i-flecha"/></svg>
     </a>
     <a class="acceso" href="{% url 'admin:asistencia_periodo_changelist' %}">
-      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-calendario"/></svg></span>
       <strong>Periodos</strong>
       <span class="detalle">Crea, edita, activa y desactiva los periodos escolares ({{ resumen.periodos }} registrado{{ resumen.periodos|pluralize }}).</span>
-      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+      <svg class="ico ir" aria-hidden="true"><use href="#i-flecha"/></svg>
     </a>
-  </div>
+  </nav>
 </section>
 {% endblock %}

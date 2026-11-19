@@ -1,14 +1,19 @@
 {% extends 'asistencia/base.html' %}
-{% load diseno %}
 
 {% block titulo %}Inicio · Control de asistencia{% endblock %}
 
 {% block contenido %}
-<section class="hero" aria-labelledby="saludo">
+{# La hoja del día: la fecha grande, el saludo y lo que espera. La clase de hoy es la protagonista. #}
+<section class="hoja-dia" aria-labelledby="saludo">
+  <div class="fecha-grande" aria-hidden="true">
+    <span class="dia">{{ resumen.hoy|date:"j" }}</span>
+    <span class="mes">{{ resumen.hoy|date:"F" }}</span>
+    <span class="semana">{{ resumen.hoy|date:"l" }}</span>
+  </div>
   <div>
-    <span class="rol"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-alumno"/></svg>{{ user.get_rol_display }}</span>
+    <p class="formato"><span>{{ user.get_rol_display }}</span><span>{{ resumen.hoy|date:"d/m/Y" }}</span></p>
     <h1 id="saludo">{{ resumen.saludo }}, {{ user.first_name|default:user.email }}</h1>
-    <p>
+    <p class="lema-dia">
       {% with n=resumen.sesiones_de_hoy|length %}
         {% if n %}Hoy tienes {{ n }} clase{{ n|pluralize }} en tu calendario.{% else %}Hoy no tienes clases programadas.{% endif %}
       {% endwith %}
@@ -17,88 +22,78 @@
       {% endif %}
     </p>
   </div>
-  <div class="ficha-fecha" aria-hidden="true">
-    <span class="semana">{{ resumen.hoy|date:"l"|capfirst }}</span>
-    <span class="dia">{{ resumen.hoy|date:"j" }}</span>
-    <span class="mes">{{ resumen.hoy|date:"F"|capfirst }}</span>
-  </div>
 </section>
 
 <section class="seccion" aria-label="Resumen">
   <div class="indicadores escalonado">
     <div class="indicador">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-grupos"/></svg></span>
       <span class="cifra">{{ resumen.grupos }}</span>
       <span class="etiqueta-indicador">Grupo{{ resumen.grupos|pluralize }} activo{{ resumen.grupos|pluralize }}</span>
     </div>
     <div class="indicador">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
       <span class="cifra">{{ resumen.alumnos }}</span>
       <span class="etiqueta-indicador">Alumno{{ resumen.alumnos|pluralize }}</span>
     </div>
     <div class="indicador">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
       <span class="cifra">{{ resumen.sesiones_de_hoy|length }}</span>
       <span class="etiqueta-indicador">Clase{{ resumen.sesiones_de_hoy|length|pluralize }} hoy</span>
     </div>
     <div class="indicador{% if resumen.pendientes %} aviso{% endif %}">
-      <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
       <span class="cifra">{{ resumen.pendientes }}</span>
       <span class="etiqueta-indicador">Sin pase de lista</span>
     </div>
   </div>
 </section>
 
-<section class="seccion" aria-labelledby="clases-de-hoy">
-  <h2 id="clases-de-hoy">Clases de hoy</h2>
-  {% for sesion in resumen.sesiones_de_hoy %}
-    <article class="clase-de-hoy">
-      <div class="hora">{{ sesion.hora_inicio|time:"H:i" }}<small>a {{ sesion.hora_fin|time:"H:i" }}</small></div>
-      <div>
-        <div class="titulo">{{ sesion.grupo.clave }} · {{ sesion.grupo.materia }}</div>
-        <div class="detalle">Periodo {{ sesion.grupo.periodo }}</div>
+<div class="inicio-columnas">
+  <section class="seccion" aria-labelledby="clases-de-hoy">
+    <h2 id="clases-de-hoy">Clases de hoy</h2>
+    {% for sesion in resumen.sesiones_de_hoy %}
+      <article class="clase-de-hoy">
+        <div class="hora">{{ sesion.hora_inicio|time:"H:i" }}<small>a {{ sesion.hora_fin|time:"H:i" }}</small></div>
+        <div>
+          <div class="titulo">{{ sesion.grupo.clave }} · {{ sesion.grupo.materia }}</div>
+          <div class="detalle">Periodo {{ sesion.grupo.periodo }}</div>
+        </div>
+        <div class="acciones">
+          {% if sesion.hecha %}
+            <span class="badge text-bg-success">Realizada</span>
+            <a class="btn btn-outline-primary" href="{% url 'pase_de_lista' sesion.pk %}">Ver lista</a>
+          {% else %}
+            {% if sesion.pendiente %}<span class="badge text-bg-warning">Sin lista</span>{% else %}<span class="badge text-bg-primary">Programada</span>{% endif %}
+            <a class="btn btn-primary" href="{% url 'pase_de_lista' sesion.pk %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-pase"/></svg>Pasar lista</a>
+          {% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="vacio">
+        <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
+        <h2>Sin clases hoy</h2>
+        <p>Cuando programes sesiones para hoy, aparecerán aquí con su botón para pasar lista.</p>
+        <a class="btn btn-outline-primary" href="{% url 'grupos' %}">Ver mis grupos</a>
       </div>
-      <div class="acciones">
-        {% if sesion.hecha %}
-          <span class="badge text-bg-success">Realizada</span>
-          <a class="btn btn-outline-primary btn-sm" href="{% url 'pase_de_lista' sesion.pk %}">Ver lista</a>
-        {% else %}
-          {% if sesion.pendiente %}<span class="badge text-bg-warning">Sin lista</span>{% else %}<span class="badge text-bg-primary">Programada</span>{% endif %}
-          <a class="btn btn-primary btn-sm" href="{% url 'pase_de_lista' sesion.pk %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-pase"/></svg>Pasar lista</a>
-        {% endif %}
-      </div>
-    </article>
-  {% empty %}
-    <div class="vacio">
-      <span class="figura"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
-      <h2>Sin clases hoy</h2>
-      <p>Cuando programes sesiones para hoy, aparecerán aquí con su botón para pasar lista.</p>
-      <a class="btn btn-outline-primary" href="{% url 'grupos' %}">Ver mis grupos</a>
-    </div>
-  {% endfor %}
-</section>
+    {% endfor %}
+  </section>
 
-<section class="seccion" aria-labelledby="accesos">
-  <h2 id="accesos">Accesos</h2>
-  <div class="accesos escalonado">
-    <a class="acceso" href="{% url 'grupos' %}">
-      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-grupos"/></svg></span>
-      <strong>Grupos</strong>
-      <span class="detalle">Da de alta tus grupos, carga la lista de alumnos y programa las sesiones.</span>
-      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-    </a>
-    <a class="acceso" href="{% url 'pase_de_lista_inicio' %}">
-      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-pase"/></svg></span>
-      <strong>Pase de lista</strong>
-      <span class="detalle">Toma lista de hoy o corrige una anterior.</span>
-      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-    </a>
-    <a class="acceso" href="{% url 'reportes' %}">
-      <span class="icono" aria-hidden="true"><svg class="ico"><use href="#i-reportes"/></svg></span>
-      <strong>Reportes</strong>
-      <span class="detalle">Porcentajes y alumnos bajo el mínimo.</span>
-      <span class="ir">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-    </a>
-  </div>
-</section>
+  <section class="seccion" aria-labelledby="accesos">
+    <h2 id="accesos">Accesos</h2>
+    <nav class="accesos" aria-labelledby="accesos">
+      <a class="acceso" href="{% url 'grupos' %}">
+        <strong>Grupos</strong>
+        <span class="detalle">Da de alta tus grupos, carga la lista de alumnos y programa las sesiones.</span>
+        <svg class="ico ir" aria-hidden="true"><use href="#i-flecha"/></svg>
+      </a>
+      <a class="acceso" href="{% url 'pase_de_lista_inicio' %}">
+        <strong>Pase de lista</strong>
+        <span class="detalle">Toma lista de hoy o corrige una anterior.</span>
+        <svg class="ico ir" aria-hidden="true"><use href="#i-flecha"/></svg>
+      </a>
+      <a class="acceso" href="{% url 'reportes' %}">
+        <strong>Reportes</strong>
+        <span class="detalle">Porcentajes y alumnos bajo el mínimo.</span>
+        <svg class="ico ir" aria-hidden="true"><use href="#i-flecha"/></svg>
+      </a>
+    </nav>
+  </section>
+</div>
 {% endblock %}
