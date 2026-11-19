@@ -144,8 +144,9 @@ class BitacoraVisibleTests(CorreccionBase):
 
         historial = list(respuesta.context['historial'])
         self.assertEqual([c.valor_nuevo for c in historial], [AUSENTE, RETARDO])
-        self.assertContains(respuesta, 'Presente → Ausente')
-        self.assertContains(respuesta, 'Ausente → Retardo')
+        # El valor anterior se muestra tachado y el nuevo, al lado (CR-003).
+        self.assertContains(respuesta, '<del>Presente</del> → <ins>Ausente</ins>')
+        self.assertContains(respuesta, '<del>Ausente</del> → <ins>Retardo</ins>')
         self.assertContains(respuesta, self.alumnos[0].nombre)
         self.assertContains(respuesta, self.docente.email)   # sin nombre, se muestra el correo
         # La fecha mostrada es la del cambio (hora de la base de datos), en hora local.

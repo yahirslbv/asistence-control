@@ -11,7 +11,7 @@
 </header>
 
 <section aria-labelledby="hoy">
-  <h2 class="h5" id="hoy">Sesiones de hoy · {{ hoy|date:"l d/m/Y"|capfirst }}</h2>
+  <h2 class="seccion-titulo" id="hoy">Sesiones de hoy · {{ hoy|date:"l d/m/Y"|capfirst }}</h2>
   {% for sesion in sesiones_de_hoy %}
     <article class="clase-de-hoy">
       <div class="hora">{{ sesion.hora_inicio|time:"H:i" }}<small>a {{ sesion.hora_fin|time:"H:i" }}</small></div>
@@ -42,7 +42,8 @@
 </section>
 
 <section class="seccion" aria-labelledby="anteriores">
-  <h2 class="h5" id="anteriores">Pendientes de días anteriores</h2>
+  <h2 class="seccion-titulo" id="anteriores">Pendientes de días anteriores</h2>
+  {% if pendientes %}<div class="renglones">{% endif %}
   {% for sesion in pendientes %}
     <article class="clase-de-hoy">
       <div class="hora">{{ sesion.fecha|date:"d/m" }}<small>{{ sesion.fecha|date:"D"|capfirst }}</small></div>
@@ -59,6 +60,7 @@
         </a>
       </div>
     </article>
+    {% if forloop.last %}</div>{% endif %}
   {% empty %}
     <div class="alert alert-success mb-0" role="alert">No tienes sesiones pendientes de días anteriores.</div>
   {% endfor %}

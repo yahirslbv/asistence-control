@@ -66,7 +66,7 @@
   --sombra: 0 1px 0 rgba(11, 46, 38, .05);
   --sombra-alta: 0 1px 2px rgba(11, 46, 38, .06), 0 14px 34px -18px rgba(11, 46, 38, .32);
   --foco: 0 0 0 .22rem rgba(20, 82, 63, .3);
-  --alto-barra: 3.75rem;       /* barra superior: el encabezado del pase de lista se pega debajo */
+  --alto-barra: 4rem;          /* alto de la barra superior en una línea: el encabezado del pase de lista se pega debajo */
 
   /* Colores con significado: fondo suave y texto con contraste >= 4.5:1 */
   --verde-fondo: #e3f3ea;      --verde-texto: #17603a;      --verde-borde: #bfe0cc;
@@ -123,6 +123,7 @@ body {
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-weight: 650;
   font-variant-numeric: lining-nums;
   letter-spacing: -.01em;
@@ -172,6 +173,7 @@ main.container { padding-top: 1.75rem; padding-bottom: 3.5rem; }
 
 /* Corrección: el valor anterior queda tachado y el nuevo, escrito al lado (RF-11). */
 del {
+  margin-right: .2em;          /* que el tachado no se junte con la flecha que sigue */
   color: var(--tinta-suave);
   text-decoration-line: line-through;
   text-decoration-thickness: 2px;
@@ -228,6 +230,7 @@ ins { text-decoration: none; font-weight: 650; color: var(--tinta); }
   gap: .6rem;
   margin-right: 1.75rem;
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -.005em;
@@ -324,6 +327,17 @@ ins { text-decoration: none; font-weight: 650; color: var(--tinta); }
   .app-nav .nav-link { padding: .75rem .9rem; }
 }
 
+/* Entre 768 y 991 px la barra no debe partirse en dos líneas (taparía el encabezado fijo del
+   pase de lista): sin iconos en el menú y sin el nombre junto al avatar. */
+.app-nav .nav-link, .app-nav .navbar-text, .app-nav .btn-salir { white-space: nowrap; }
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .app-nav .navbar-brand { margin-right: 1rem; }
+  .app-nav .nav-link { padding-inline: .6rem; }
+  .app-nav .nav-link .ico { display: none; }
+  .app-nav .usuario-chip .navbar-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+
 /* ---------- 4. Encabezados de página ---------- */
 
 .breadcrumb { font-family: var(--mono); font-size: .76rem; letter-spacing: .01em; margin-bottom: 1rem; }
@@ -372,6 +386,7 @@ ins { text-decoration: none; font-weight: 650; color: var(--tinta); }
   padding: .95rem 1.1rem;
   border-bottom: 1px solid var(--renglon-fuerte);
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-size: 1.08rem;
   font-weight: 650;
   color: var(--pino-900);
@@ -476,6 +491,7 @@ pre.bg-body-secondary {
 .indicador .cifra {
   align-self: flex-start;
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-size: clamp(2rem, 1.6rem + 1.2vw, 2.6rem);
   font-weight: 650;
   font-variant-numeric: lining-nums tabular-nums;
@@ -737,6 +753,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
 .fecha-grande .dia {
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-size: clamp(3.25rem, 2.4rem + 3.2vw, 5.5rem);
   font-weight: 700;
   font-variant-numeric: lining-nums;
@@ -785,6 +802,10 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 
 .clase-de-hoy + .clase-de-hoy { margin-top: .6rem; }
 
+/* Varias sesiones seguidas (pendientes): una sola hoja de renglones, sin una tarjeta por sesión. */
+.renglones .clase-de-hoy { border: 0; border-radius: 0; box-shadow: none; }
+.renglones .clase-de-hoy + .clase-de-hoy { margin-top: 0; border-top: 1px solid var(--renglon); }
+
 .hora {
   display: grid;
   flex: none;
@@ -801,7 +822,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 }
 
 .hora small { display: block; margin-top: .15rem; font-size: .7rem; font-weight: 500; letter-spacing: 0; color: var(--tinta-suave); }
-.clase-de-hoy .titulo { font-family: var(--serif); font-size: 1.12rem; font-weight: 650; line-height: 1.3; color: var(--pino-900); }
+.clase-de-hoy .titulo { font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 1.12rem; font-weight: 650; line-height: 1.3; color: var(--pino-900); }
 .clase-de-hoy .detalle { font-size: .86rem; color: var(--tinta-suave); }
 .clase-de-hoy .acciones { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
 
@@ -887,7 +908,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
   color: var(--tinta-suave);
 }
 
-.acceso strong { font-family: var(--serif); font-size: 1.15rem; font-weight: 650; color: var(--pino-900); }
+.acceso strong { font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 1.15rem; font-weight: 650; color: var(--pino-900); }
 .acceso .detalle { grid-column: 2; color: var(--tinta-suave); font-size: .92rem; }
 .acceso .ir { grid-column: 3; grid-row: 1 / span 2; color: var(--pino-700); transition: transform .2s cubic-bezier(.16, 1, .3, 1); }
 .acceso:hover { color: var(--tinta); background: var(--pino-50); }
@@ -949,7 +970,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .grupo-tarjeta .clave { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; color: var(--pino-900); }
 .grupo-tarjeta .clave a { color: inherit; text-decoration: none; }
 .grupo-tarjeta .clave a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--ambar); }
-.grupo-tarjeta .materia { font-family: var(--serif); color: var(--tinta); font-size: 1.05rem; line-height: 1.3; }
+.grupo-tarjeta .materia { font-family: var(--serif); font-variant-numeric: lining-nums; color: var(--tinta); font-size: 1.05rem; line-height: 1.3; }
 .grupo-tarjeta .sellos { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
 .grupo-tarjeta .cifras { display: flex; gap: 1.5rem; font-variant-numeric: tabular-nums; }
 .grupo-tarjeta .cifras div { display: grid; color: var(--tinta-suave); font-size: .8rem; line-height: 1.2; }
@@ -1031,6 +1052,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .entrada-marca .titulo-marca {
   margin: 1rem 0 .7rem;
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-size: clamp(2.1rem, 1.4rem + 3vw, 3.6rem);
   font-weight: 700;
   font-variant-numeric: lining-nums;
@@ -1210,6 +1232,11 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 /* En el teléfono el número de lista va junto a la matrícula, para no quitarle ancho al nombre. */
 @media (max-width: 639.98px) {
   .dato-alumno .matricula::before { content: counter(fila, decimal-leading-zero) " · "; font-weight: 650; }
+}
+
+/* A 320 px el nombre tiene unos 80 px: sin el número, la matrícula cabe en una línea. */
+@media (max-width: 359.98px) {
+  .dato-alumno .matricula::before { content: none; }
 }
 
 @media (min-width: 640px) {

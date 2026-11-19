@@ -208,6 +208,14 @@ class PantallaConCasillasTests(RelojFijoMixin, TestCase):
 
         self.assertContains(respuesta, 'asistencia/pase_de_lista.js')
 
+    def test_el_pie_de_la_lista_trae_el_conteo_oculto_hasta_que_lo_llena_el_script(self):
+        # CR-003: sin JavaScript el conteo no se ve (queda oculto y vacío) y el formulario sigue igual.
+        respuesta = self.client.get(self.url)
+
+        self.assertContains(respuesta, '<p class="conteo" id="conteo" hidden></p>', count=1)
+        js = open(finders.find('asistencia/pase_de_lista.js'), encoding='utf-8').read()
+        self.assertIn("getElementById('conteo')", js)
+
     # --- Qué se guarda según las casillas ---
 
     def enviar(self, casillas_por_alumno, modo='captura'):
