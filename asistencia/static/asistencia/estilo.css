@@ -681,6 +681,18 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 /* Filtro de una lista (fechas, periodo): una fila de campos sobre la lista, sin tarjeta propia. */
 .filtro { margin-bottom: 1.25rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--renglon); }
 
+/* Formularios y confirmaciones: el título lleva la doble regla del encabezado de formato y la hoja
+   del formulario, la banda pino del membrete (como el acceso). */
+.titulo-hoja {
+  padding-bottom: .75rem;
+  margin-bottom: 1.25rem !important;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-weight: 700;
+  border-bottom: 3px double var(--renglon-fuerte);
+}
+
+.card:has(> .card-body > form) { border-top: 4px solid var(--pino-900); }
+
 /* ---------- 8. Avisos ---------- */
 
 .alert {
@@ -1037,6 +1049,7 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .vacio .figura .ico { width: 1.85rem; height: 1.85rem; }
 .vacio h2 { font-size: 1.3rem; margin-bottom: .4rem; }
 .vacio p { max-width: 42ch; margin-bottom: 1.1rem; color: var(--tinta-suave); }
+.vacio .display-4 { font-family: var(--mono); font-size: 3rem; letter-spacing: -.04em; }   /* código de error (403, 404) */
 
 /* ---------- 13. Inicio de sesión y registro ---------- */
 
