@@ -6,6 +6,28 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
+Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud de cambio [CR-003](docs/cambios/CR-003_rediseno_frontend.md)); entrará en la versión `1.1.0`. Solo cambian CSS, plantillas y el JavaScript de presentación: sin migraciones, sin cambios en servicios, vistas, URL ni exportaciones, y sin fuentes ni dependencias nuevas.
+
+### Added
+
+- Pase de lista: conteo en vivo en el pie fijo (presentes, retardos, ausentes, justificados y sin registrar) antes de guardar; solo informa, lo que se guarda lo decide el servidor.
+- Pase de lista: número de lista de cada alumno, dibujado con un contador de CSS.
+- Favicon de la aplicación en el admin de Django (faltaba y dejaba un 404 en la consola).
+
+### Changed
+
+- Tipografía del sistema con tres papeles: títulos en serif, datos en monoespaciada y texto en la sans del sistema.
+- Las listas son renglones con línea de margen ámbar; los estados, sellos; las cifras, un renglón con separadores en lugar de cuatro tarjetas; el inicio del docente y el panel del administrador abren con la «hoja del día» y sus accesos son un índice; la lista de grupos es una hoja de renglones; los formularios llevan la banda del membrete.
+- Pase de lista: «Presente» marcado se ve sin relleno sólido y las excepciones sí lo conservan; la línea de margen toma el color del estado; el encabezado de columnas es una banda de tinta.
+- El historial de correcciones muestra el valor anterior tachado y el nuevo al lado (`<del>` e `<ins>`).
+- Las tablas ya no muestran iniciales decorativas; «Dar de baja» va sin borde en cada renglón.
+- El tema del admin de Django usa la misma identidad, en claro y en oscuro.
+- La paleta «pino y ámbar» no cambia de valores, solo de proporciones.
+
+### Fixed
+
+- A 768 px la barra superior se partía en dos líneas y tapaba el encabezado fijo del pase de lista; ahora mide siempre 4 rem y el encabezado queda pegado justo debajo.
+
 ## [1.0.0] - 2026-11-17
 
 Primera versión en producción. Agrega a la 0.9.0 los manuales de usuario y de administrador (fase I) y la parte técnica de la fase J: despliegue con Docker, configuración de producción y respaldo diario con restauración probada (RNF-08). Sin migraciones nuevas: el esquema es el de la 0.9.0. Se entrega como demostración local con Docker (`http://localhost`); la misma pila sirve en un servidor con dominio y HTTPS, pero ese caso no se ha ejecutado.

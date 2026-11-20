@@ -628,6 +628,60 @@ ul.messagelist li.info { background: var(--azul-fondo); color: var(--azul-texto)
 #result_list td.field-acciones { text-align: right; white-space: nowrap; }
 #result_list th.column-acciones { width: 1%; }
 
+/* ---------- 9. Identidad de la lista (CR-003) ---------- */
+
+/* Mismo lenguaje que la aplicación: membrete pino con regla ámbar, títulos en serif del sistema,
+   datos y encabezados de columna en monoespaciada y esquinas cortas. Las fuentes son del sistema:
+   no se descarga nada. Los colores salen de las paletas de arriba, así que el tema oscuro sigue igual. */
+:root {
+  --serif: "Sitka Heading", "Sitka Text", Charter, "Bitstream Charter", "Iowan Old Style",
+    Cambria, "Noto Serif", Georgia, serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", "Segoe UI Mono", Menlo, Consolas,
+    "Roboto Mono", "Liberation Mono", monospace;
+}
+
+#header { border-bottom: 3px solid var(--marca-fondo); }
+#site-name a:link, #site-name a:visited { font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 1.15rem; font-weight: 700; }
+
+#content > h1,
+#content h1 {
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  padding-bottom: .75rem;
+  border-bottom: 3px double var(--linea-fuerte);
+}
+
+div.breadcrumbs { font-family: var(--mono); font-size: .76rem; }
+
+.module, #changelist .module, .inline-group, #toolbar { border-radius: .625rem; }
+
+.module h2, .module caption, .inline-group h2, #changelist-filter h2 {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .07em;
+}
+
+#result_list thead th {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--tinta);
+}
+
+/* Solo la etiqueta del campo; las opciones de un radio o una casilla conservan su texto normal. */
+.aligned .flex-container > label {
+  font-family: var(--mono);
+  font-size: .74rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.button, input[type="submit"], input[type="button"], a.button, .object-tools a:link, .object-tools a:visited { border-radius: .5rem; }
+
 @media (max-width: 767px) {
   #content { padding: 1rem; }
   #header, div.breadcrumbs { padding-left: 1rem; padding-right: 1rem; }

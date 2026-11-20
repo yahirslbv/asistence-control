@@ -1,4 +1,4 @@
-/* Pase de lista: reglas de las casillas (RF-18) y protección contra el doble clic.
+/* Pase de lista: reglas de las casillas (RF-18), conteo en vivo y protección contra el doble clic.
  *
  * Reglas, por alumno:
  *   - «Presente» o «Retardo» marcados bloquean «Ausente» (y con él, «Justificado»).
@@ -44,13 +44,62 @@
   function aplicarATodas() {
     var filas = formulario.querySelectorAll('.fila-lista');
     for (var i = 0; i < filas.length; i++) { aplicarReglas(filas[i]); }
+    contar();
+  }
+
+  /* Conteo en vivo en el pie de la lista (CR-003): cuántos presentes, retardos, ausentes,
+   * justificados y sin registrar lleva el docente antes de guardar. Solo informa: lo que se
+   * guarda lo decide el servidor con las mismas casillas. Misma correspondencia que el
+   * servidor (services/asistencia.py): «Retardo» manda sobre «Presente» y «Justificado»
+   * sobre «Ausente»; ninguna casilla es «sin registrar». */
+  var conteo = document.getElementById('conteo');
+  var NOMBRES = [
+    ['presente', 'presente', 'presentes'],
+    ['retardo', 'retardo', 'retardos'],
+    ['ausente', 'ausente', 'ausentes'],
+    ['justificado', 'justificado', 'justificados'],
+    ['sin', 'sin registrar', 'sin registrar']
+  ];
+
+  function estadoDe(fila) {
+    var c = casillasDe(fila);
+    if (!c.presente || !c.retardo || !c.ausente || !c.justificado) { return null; }
+    if (c.justificado.checked) { return 'justificado'; }
+    if (c.ausente.checked) { return 'ausente'; }
+    if (c.retardo.checked) { return 'retardo'; }
+    if (c.presente.checked) { return 'presente'; }
+    return 'sin';
+  }
+
+  function contar() {
+    if (!conteo) { return; }
+    var totales = { presente: 0, retardo: 0, ausente: 0, justificado: 0, sin: 0 };
+    var filas = formulario.querySelectorAll('.fila-lista');
+    for (var i = 0; i < filas.length; i++) {
+      var estado = estadoDe(filas[i]);
+      if (estado) { totales[estado] += 1; }
+    }
+    while (conteo.firstChild) { conteo.removeChild(conteo.firstChild); }
+    for (var j = 0; j < NOMBRES.length; j++) {
+      var clave = NOMBRES[j][0];
+      var n = totales[clave];
+      if (clave !== 'presente' && n === 0) { continue; }
+      var item = document.createElement('span');
+      item.className = 'c-' + clave;
+      var cifra = document.createElement('b');
+      cifra.textContent = n;
+      item.appendChild(cifra);
+      item.appendChild(document.createTextNode(' ' + (n === 1 ? NOMBRES[j][1] : NOMBRES[j][2])));
+      conteo.appendChild(item);
+    }
+    conteo.hidden = false;
   }
 
   // Consulta de un periodo inactivo: todo viene bloqueado desde el servidor y así debe quedarse.
   if (!formulario.classList.contains('solo-lectura')) {
     formulario.addEventListener('change', function (evento) {
       var fila = evento.target.closest ? evento.target.closest('.fila-lista') : null;
-      if (fila) { aplicarReglas(fila); }
+      if (fila) { aplicarReglas(fila); contar(); }
     });
     aplicarATodas();
     // Al volver con «Atrás» el navegador restaura las casillas: se vuelven a aplicar las reglas.

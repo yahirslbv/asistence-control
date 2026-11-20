@@ -18,21 +18,21 @@
 {% if grupos %}
   <div class="grupos-rejilla escalonado">
     {% for grupo in grupos %}
-      <article class="grupo-tarjeta">
+      {# Cada grupo es un renglón del cuaderno: clave y materia, sus sellos, sus cifras y las acciones. #}
+      <article class="grupo-tarjeta{% if grupo.solo_lectura %} congelado{% endif %}">
         <div class="cabeza">
-          <span class="ficha-grupo{% if grupo.solo_lectura %} congelado{% endif %}" aria-hidden="true" data-texto="{{ grupo.clave|slice:":3"|upper }}"></span>
           <div>
             <div class="clave">{{ grupo.clave }}</div>
             <div class="materia">{{ grupo.materia }}</div>
-          </div>
-          <div class="ms-auto text-end">
-            <span class="badge text-bg-secondary">{{ grupo.periodo }}</span>
-            {% if grupo.solo_lectura %}<div class="mt-1"><span class="badge text-bg-warning" title="Periodo inactivo: el grupo está en solo lectura"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-candado"/></svg> Solo lectura</span></div>{% endif %}
+            <div class="sellos">
+              <span class="badge text-bg-secondary">{{ grupo.periodo }}</span>
+              {% if grupo.solo_lectura %}<span class="badge text-bg-warning" title="Periodo inactivo: el grupo está en solo lectura"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-candado"/></svg> Solo lectura</span>{% endif %}
+            </div>
           </div>
         </div>
         <div class="cifras">
-          <div><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg><strong>{{ grupo.num_alumnos }}</strong> alumnos</div>
-          <div><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg><strong>{{ grupo.num_sesiones }}</strong> sesiones</div>
+          <div><strong>{{ grupo.num_alumnos }}</strong> alumnos</div>
+          <div><strong>{{ grupo.num_sesiones }}</strong> sesiones</div>
         </div>
         <div class="pie">
           <a class="btn btn-primary btn-sm" href="{% url 'grupo_detalle' grupo.pk %}">Abrir<svg class="ico ico-sm" aria-hidden="true"><use href="#i-flecha"/></svg></a>
