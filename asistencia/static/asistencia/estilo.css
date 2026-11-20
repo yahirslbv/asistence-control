@@ -844,7 +844,9 @@ progress.barra-pct.baja::-moz-progress-bar { background: var(--rojo-texto); }
 .hora small { display: block; margin-top: .15rem; font-size: .7rem; font-weight: 500; letter-spacing: 0; color: var(--tinta-suave); }
 .clase-de-hoy .titulo { font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 1.12rem; font-weight: 650; line-height: 1.3; color: var(--pino-900); }
 .clase-de-hoy .detalle { font-size: .86rem; color: var(--tinta-suave); }
-.clase-de-hoy .acciones { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
+.clase-de-hoy .acciones { margin-left: auto; display: flex; flex: none; align-items: center; gap: .6rem; }
+.clase-de-hoy > div:not(.hora):not(.acciones) { flex: 1 1 auto; min-width: 0; }   /* el nombre largo de la materia se parte; el botón no */
+.clase-de-hoy .acciones .btn { white-space: nowrap; }
 
 @media (max-width: 575.98px) {
   .clase-de-hoy { flex-wrap: wrap; gap: .6rem 1rem; }
