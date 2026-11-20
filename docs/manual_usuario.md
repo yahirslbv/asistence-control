@@ -98,7 +98,7 @@ Al entrar llegas al inicio. Arriba ves un saludo, la fecha y cuántas clases tie
 
 ![Pantalla de inicio del docente](img/manual_usuario/03-inicio.png)
 
-- **Los cuatro recuadros** resumen tus grupos activos, tus alumnos, las clases de hoy y las sesiones sin pase de lista.
+- **La franja de cuatro cifras** resume tus grupos activos, tus alumnos, las clases de hoy y las sesiones sin pase de lista.
 - **Clases de hoy** muestra cada clase con su botón para pasar lista. Si no tienes clases, lo dice.
 - **Accesos** lleva a Grupos, Pase de lista y Reportes.
 
@@ -251,7 +251,7 @@ Solo se puede pasar lista a una sesión de **hoy o de un día anterior**. Si abr
 
 ### 8.2. Marcar la asistencia
 
-Al abrir la lista, **todos los alumnos empiezan en «Presente»**. Tú solo marcas las excepciones. Cada alumno tiene una fila: su nombre y matrícula a la izquierda y cuatro casillas a la derecha, una por estado. Los nombres de las columnas están arriba y se quedan visibles mientras recorres la lista.
+Al abrir la lista, **todos los alumnos empiezan en «Presente»**. Tú solo marcas las excepciones. Cada alumno tiene una fila: su número de lista, su nombre y su matrícula a la izquierda y cuatro casillas a la derecha, una por estado. «Presente» marcado se ve con su palomita sobre fondo claro; las demás casillas marcadas se ven rellenas de color, para que las excepciones resalten. Los nombres de las columnas están arriba y se quedan visibles mientras recorres la lista.
 
 ![Pase de lista en la computadora](img/manual_usuario/12-pase-de-lista.png)
 
@@ -278,7 +278,7 @@ Para que no te equivoques, algunas casillas se **bloquean** según lo que marque
 
 Por eso, para marcar una falta tienes que quitar primero «Presente»: al hacerlo se habilitan las demás casillas.
 
-En el ejemplo, cada fila muestra uno de los casos: el primer alumno está presente, el segundo ausente, el tercero con retardo y el cuarto ausente con justificación. Observa las casillas rayadas y la franja de color a la izquierda de cada fila que no está presente:
+En el ejemplo, cada fila muestra uno de los casos: el primer alumno está presente, el segundo ausente, el tercero con retardo y el cuarto ausente con justificación. Observa las casillas rayadas y, en cada fila que no está presente, la franja de color a la izquierda y el fondo teñido:
 
 ![Ejemplos de cada caso en la lista](img/manual_usuario/14-casillas-ejemplos.png)
 
@@ -286,7 +286,7 @@ Si quitas todas las casillas de un alumno, la fila muestra **Sin registrar** y e
 
 ### 8.3. Guardar el pase de lista
 
-Pulsa **Guardar pase de lista**, el botón fijo en la parte baja de la pantalla. Verás «Pase de lista guardado: N registros.» y la sesión pasa a **Realizada**.
+Junto al botón fijo de la parte baja de la pantalla, un conteo te dice cuántos presentes, retardos, ausentes, justificados y sin registrar llevas; revísalo antes de guardar. Pulsa **Guardar pase de lista**. Verás «Pase de lista guardado: N registros.» y la sesión pasa a **Realizada**.
 
 Cosas que debes saber:
 
@@ -312,7 +312,7 @@ Abre una sesión que ya está **Realizada** (desde **Sesiones**, con **Ver asist
 
 Cambia las casillas del alumno que quieras corregir, con las mismas reglas de la sección 8.2, y pulsa **Guardar correcciones**. Verás «Corrección guardada: N cambios.» o, si no cambiaste nada, «No había cambios que guardar.»
 
-Cada corrección queda en el **Historial de correcciones**, al final de la pantalla, con la **Fecha**, el **Alumno**, el **Cambio** (de qué estado a cuál) y **Quién** lo hizo. Ese historial **no se puede editar ni borrar**.
+Cada corrección queda en el **Historial de correcciones**, al final de la pantalla, con la **Fecha**, el **Alumno**, el **Cambio** (el estado anterior tachado y el nuevo al lado) y **Quién** lo hizo. Ese historial **no se puede editar ni borrar**.
 
 Si un alumno aparece como «Sin registrar» (porque no se le marcó o se inscribió antes de esa clase pero no se le registró), marca su casilla y guarda para registrarlo.
 
