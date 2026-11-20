@@ -231,4 +231,4 @@ Una marca de plantilla de IA es meter todo en tarjetas. Se contaron con el mismo
 ### 10.4 Pendiente
 
 - **Capturas de los manuales.** Las 31 quedan desactualizadas y se regeneran en un paso aparte con el mismo guion de capturas: `docs/img/manual_usuario/` (01-acceso a 21-cuenta-pendiente, las 21) y `docs/img/manual_administrador/` (01-panel a 10-periodo-edicion, las 10). Los textos de los manuales no citan colores ni formas; el único texto de pantalla que cambió de marcado es el del historial, y el manual no lo cita.
-- **Decisiones de Victo:** la versión ya está decidida (`1.1.0`, 20/11/2026). Siguen abiertas la serif de los títulos (Sitka Heading y equivalentes del sistema) y si se queda el conteo en vivo.
+- **Decisiones de Victo:** el 20/11/2026 decidió la versión (`1.1.0`) y que **la serif de los títulos se queda** (Sitka Heading y equivalentes del sistema). Sigue abierta una: si se queda el conteo en vivo.

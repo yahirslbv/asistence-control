@@ -293,7 +293,7 @@ Despliegue, respaldo diario (RNF-08), capacitación y acta de aceptación.
 
 ### Decisiones abiertas
 
-- **CR-003, decisiones de Victo.** La versión ya está decidida: **`1.1.0`** (Victo, 20/11/2026; se etiqueta al fusionar). Siguen abiertas la serif de los títulos (Sitka Heading y equivalentes del sistema; no se descarga nada) y el conteo en vivo del pase de lista (lo único que agrega comportamiento; se quita con un bloque de `pase_de_lista.js`). Regenerar las capturas de los manuales es un paso aparte.
+- **CR-003, decisiones de Victo.** La versión ya está decidida: **`1.1.0`** (Victo, 20/11/2026; se etiqueta al fusionar). También decidió que **la serif de los títulos se queda** (Sitka Heading y equivalentes del sistema; no se descarga nada). Sigue abierto el conteo en vivo del pase de lista (lo único que agrega comportamiento; se quita con un bloque de `pase_de_lista.js`). Regenerar las capturas de los manuales es un paso aparte.
 
 - **Hallazgo H-03.** El plan de liberación (`docs/plan_liberacion.md`) lo deja como opcional. El H-01 y el H-02 ya se corrigieron (el H-02 con CR-001).
 - **Errores del servidor sin registro.** Con `DEBUG=0`, la configuración de registro por defecto de Django no escribe los errores 500 en la salida del contenedor: en los registros de `web` solo se ve la línea de acceso con el código 500. Agregar un `LOGGING` propio sería un cambio de código (con su solicitud de cambio).
