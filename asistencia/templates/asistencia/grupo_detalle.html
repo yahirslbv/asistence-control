@@ -1,5 +1,4 @@
 {% extends 'asistencia/base.html' %}
-{% load diseno %}
 
 {% block titulo %}{{ grupo.clave }} · Control de asistencia{% endblock %}
 
@@ -12,12 +11,9 @@
 </nav>
 
 <header class="encabezado">
-  <div class="d-flex align-items-center gap-3">
-    <span class="ficha-grupo grande{% if solo_lectura %} congelado{% endif %}" aria-hidden="true" data-texto="{{ grupo.clave|slice:":3"|upper }}"></span>
-    <div>
-      <h1>{{ grupo.clave }} · {{ grupo.materia }}</h1>
-      <p class="encabezado-sub">Periodo {{ grupo.periodo }}</p>
-    </div>
+  <div>
+    <p class="formato"><span>Grupo</span><span>Periodo {{ grupo.periodo }}</span></p>
+    <h1>{{ grupo.clave }}<span class="sub">{{ grupo.materia }}</span></h1>
   </div>
   <div class="encabezado-acciones">
     <a class="btn btn-primary" href="{% url 'sesiones' grupo.pk %}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-calendario"/></svg>Sesiones</a>
@@ -34,22 +30,18 @@
 
 <div class="indicadores mb-4 escalonado" aria-label="Resumen del grupo">
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
     <span class="cifra">{{ inscripciones|length }}</span>
     <span class="etiqueta-indicador">Alumno{{ inscripciones|length|pluralize }} inscrito{{ inscripciones|length|pluralize }}</span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-libro"/></svg></span>
     <span class="cifra">{{ grupo.periodo }}</span>
     <span class="etiqueta-indicador">Periodo</span>
   </div>
   <div class="indicador{% if pendientes %} aviso{% endif %}">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
     <span class="cifra">{{ pendientes|length }}</span>
     <span class="etiqueta-indicador">Sesi{{ pendientes|length|pluralize:"ón,ones" }} por atender</span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="{% if solo_lectura %}#i-candado{% else %}#i-check{% endif %}"/></svg></span>
     <span class="cifra cifra-texto">{% if solo_lectura %}Solo lectura{% else %}Activo{% endif %}</span>
     <span class="etiqueta-indicador">Estado del grupo</span>
   </div>
@@ -67,7 +59,7 @@
   </div>
   {% if inscripciones %}
     <div class="table-responsive">
-      <table class="table table-sm align-middle mb-0">
+      <table class="table table-sm align-middle mb-0 tabla-inscritos">
         <thead>
           <tr><th class="d-none d-sm-table-cell">Matrícula</th><th>Nombre</th><th class="d-none d-md-table-cell">Correo</th><th></th></tr>
         </thead>
@@ -77,7 +69,6 @@
               <td class="d-none d-sm-table-cell">{{ inscripcion.alumno.matricula }}</td>
               <td>
                 <div class="celda-alumno">
-                  <span class="avatar avatar-sm avatar-suave" aria-hidden="true" data-texto="{{ inscripcion.alumno.nombre|iniciales }}"></span>
                   <span>{{ inscripcion.alumno.nombre }}<small class="d-sm-none text-secondary d-block">{{ inscripcion.alumno.matricula }}</small></span>
                 </div>
               </td>

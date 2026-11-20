@@ -1,5 +1,4 @@
 {% extends 'asistencia/base.html' %}
-{% load diseno %}
 
 {% block titulo %}Reporte · {{ grupo.clave }} · Control de asistencia{% endblock %}
 
@@ -25,22 +24,18 @@
 
 <div class="indicadores mb-4 escalonado">
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-reportes"/></svg></span>
     <span class="cifra">{{ reporte.porcentaje_texto }}</span>
     <span class="etiqueta-indicador">Porcentaje del grupo</span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
     <span class="cifra">{{ reporte.filas|length }}</span>
     <span class="etiqueta-indicador">Alumnos</span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-calendario"/></svg></span>
     <span class="cifra">{{ reporte.sesiones_realizadas }}</span>
     <span class="etiqueta-indicador">Sesiones realizadas</span>
   </div>
   <div class="indicador{% if reporte.alumnos_bajo_el_minimo %} alerta{% endif %}">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
     <span class="cifra">{{ reporte.alumnos_bajo_el_minimo }}</span>
     <span class="etiqueta-indicador">Bajo el mínimo ({{ reporte.minimo }} %)</span>
   </div>
@@ -75,7 +70,7 @@
           {% for fila in reporte.filas %}
             <tr {% if fila.bajo_el_minimo %}class="table-danger"{% endif %}>
               <td class="d-none d-md-table-cell">{{ fila.alumno.matricula }}</td>
-              <td><span class="avatar avatar-sm avatar-suave me-2" aria-hidden="true" data-texto="{{ fila.alumno.nombre|iniciales }}"></span><a href="{% url 'reporte_alumno' grupo.pk fila.alumno.pk %}">{{ fila.alumno.nombre }}</a></td>
+              <td><a href="{% url 'reporte_alumno' grupo.pk fila.alumno.pk %}">{{ fila.alumno.nombre }}</a></td>
               <td class="d-none d-sm-table-cell text-end">{{ fila.registros }}</td>
               <td class="d-none d-md-table-cell text-end">{{ fila.presentes }}</td>
               <td class="d-none d-md-table-cell text-end">{{ fila.retardos }}</td>

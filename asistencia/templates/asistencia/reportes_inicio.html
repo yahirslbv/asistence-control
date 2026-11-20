@@ -15,7 +15,7 @@
     Todavía no tienes grupos. Crea uno desde <a href="{% url 'grupos' %}">Grupos</a> para ver sus reportes.
   </div>
 {% else %}
-  <form method="get" class="card card-body shadow-sm mb-3">
+  <form method="get" class="filtro">
     <div class="row g-2 align-items-end">
       <div class="col-8 col-sm-4 col-md-3">
         <label class="form-label mb-1" for="periodo">Periodo</label>
@@ -51,7 +51,7 @@
         <tbody>
           {% for resumen in reporte.resumenes %}
             <tr>
-              <td class="fw-semibold"><span class="ficha-grupo mini me-2" aria-hidden="true" data-texto="{{ resumen.grupo.clave|slice:":3"|upper }}"></span>{{ resumen.grupo.clave }}</td>
+              <td class="fw-semibold dato">{{ resumen.grupo.clave }}</td>
               <td class="d-none d-sm-table-cell">{{ resumen.grupo.materia }}</td>
               <td class="d-none d-sm-table-cell text-end">{{ resumen.alumnos }}</td>
               <td class="text-end text-nowrap">{% if resumen.porcentaje is not None %}<progress class="barra-pct" value="{{ resumen.porcentaje|stringformat:'s' }}" max="100" aria-hidden="true"></progress>{% endif %}{{ resumen.porcentaje_texto }}</td>

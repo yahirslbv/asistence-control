@@ -24,7 +24,6 @@
 
 <div class="indicadores mb-4 escalonado">
   <div class="indicador{% if reporte.fila.bajo_el_minimo %} alerta{% endif %}">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-reportes"/></svg></span>
     <span class="cifra">{{ reporte.fila.porcentaje_texto }}</span>
     <span class="etiqueta-indicador">Porcentaje
       {% if reporte.fila.registros %}
@@ -34,17 +33,14 @@
     </span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>
     <span class="cifra">{{ reporte.fila.asistencias }} <span class="fs-6 fw-normal text-secondary">de {{ reporte.fila.registros }}</span></span>
     <span class="etiqueta-indicador">Asistencias</span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alumno"/></svg></span>
     <span class="cifra">{{ reporte.fila.presentes }} · {{ reporte.fila.retardos }}</span>
     <span class="etiqueta-indicador">Presentes · Retardos</span>
   </div>
   <div class="indicador">
-    <span class="ico-caja"><svg class="ico" aria-hidden="true"><use href="#i-alerta"/></svg></span>
     <span class="cifra">{{ reporte.fila.ausentes }} · {{ reporte.fila.justificados }}</span>
     <span class="etiqueta-indicador">Ausentes · Justificados</span>
   </div>
@@ -65,8 +61,8 @@
         <tbody>
           {% for item in reporte.sesiones %}
             <tr>
-              <td>{{ item.sesion.fecha|date:"d/m/Y" }}</td>
-              <td>{{ item.sesion.hora_inicio|time:"H:i" }} – {{ item.sesion.hora_fin|time:"H:i" }}</td>
+              <td class="dato">{{ item.sesion.fecha|date:"d/m/Y" }}</td>
+              <td class="dato text-nowrap">{{ item.sesion.hora_inicio|time:"H:i" }} – {{ item.sesion.hora_fin|time:"H:i" }}</td>
               <td>
                 {% if item.estado == 'ausente' %}<span class="badge text-bg-danger">{{ item.estado_texto }}</span>
                 {% elif item.estado == 'retardo' %}<span class="badge text-bg-warning">{{ item.estado_texto }}</span>
