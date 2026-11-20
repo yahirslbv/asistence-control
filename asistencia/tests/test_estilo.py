@@ -51,6 +51,15 @@ class HojaDeEstilosTests(SimpleTestCase):
         }
         for color in ('verde', 'ambar', 'rojo', 'azul', 'turquesa', 'gris'):
             pares[f'etiqueta {color}'] = (t[f'{color}-texto'], t[f'{color}-fondo'])
+        # CR-003: los títulos y las etiquetas de formato van en tinta pino; el encabezado del pase
+        # de lista es una banda pino con texto blanco, y el sello del encabezado no tiene relleno.
+        pino = dict(re.findall(r'--(pino-\d+):\s*(#[0-9a-fA-F]{6})', self.css))
+        pares['título / lienzo'] = (pino['pino-900'], t['lienzo'])
+        pares['título / tarjeta'] = (pino['pino-900'], t['superficie'])
+        pares['etiqueta de formato / tarjeta'] = (pino['pino-800'], t['superficie'])
+        pares['encabezado de la lista'] = ('#ffffff', pino['pino-900'])
+        for color in ('verde', 'azul', 'gris'):
+            pares[f'sello {color} sin relleno / lienzo'] = (t[f'{color}-texto'], t['lienzo'])
         for nombre, (texto, fondo) in pares.items():
             with self.subTest(nombre):
                 self.assertGreaterEqual(_contraste(texto, fondo), MINIMO_TEXTO_NORMAL)
