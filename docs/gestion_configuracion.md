@@ -121,6 +121,7 @@ Todo cambio a un elemento que ya pertenece a una línea base (ECS-01 a ECS-03 si
 |---|---|---|---|---|---|
 | [CR-001](cambios/CR-001_pagina_500.md) | Página 500 propia (hallazgo H-02) | 2026-11-11 | Aprobada | `cambio/cr-001-pagina-500` | 0.9.0 |
 | [CR-002](cambios/CR-002_versiones_exactas.md) | Versiones exactas de las dependencias, con `gunicorn` y `whitenoise` (riesgo R13) | 2026-11-16 | Aprobada | `cambio/cr-002-versiones-exactas` | 1.0.0 |
+| [CR-003](cambios/CR-003_rediseno_frontend.md) | Rediseño de la interfaz: identidad «lista de asistencia» | 2026-11-19 | Aprobada para implementarse en su rama; fusión pendiente de Victo | `cambio/cr-003-rediseno-frontend` | Por decidir (`1.1.0` propuesta) |
 
 ## 8. Auditoría de configuración
 
