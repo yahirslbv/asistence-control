@@ -6,7 +6,7 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
-Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud de cambio [CR-003](docs/cambios/CR-003_rediseno_frontend.md)). Solo cambian CSS, plantillas y el JavaScript de presentación: sin migraciones, sin cambios en servicios, vistas, URL ni exportaciones, y sin fuentes ni dependencias nuevas.
+Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud de cambio [CR-003](docs/cambios/CR-003_rediseno_frontend.md)); entrará en la versión `1.1.0`. Solo cambian CSS, plantillas y el JavaScript de presentación: sin migraciones, sin cambios en servicios, vistas, URL ni exportaciones, y sin fuentes ni dependencias nuevas.
 
 ### Added
 

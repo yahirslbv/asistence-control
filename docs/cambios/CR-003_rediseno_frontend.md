@@ -146,7 +146,7 @@ Muestra de las fuentes candidatas en este equipo (Windows 11); se eligen Sitka H
 | **Fecha** | 2026-11-19 |
 | **Responsable de la decisión** | Líder de proyecto (comité unipersonal, `gestion_configuracion.md` sección 1) |
 | **Razón** | Riesgo medio-bajo, solo interfaz, reversible por rama y con pruebas que protegen contraste, casillas y marcado |
-| **Condiciones** | No cambiar los tonos de marca sin una comparación visual y la respuesta de Victo. Sin fuentes, ilustraciones ni dependencias nuevas. Suite completa en verde antes de fusionar. Quedan abiertas para Victo: la paleta (se propone no tocarla), una fuente autoalojada (se propone no usarla) y el número de versión (se propone `1.1.0`: cambio visible en todas las pantallas sin corrección de defecto, ver sección 9) |
+| **Condiciones** | No cambiar los tonos de marca sin una comparación visual y la respuesta de Victo. Sin fuentes, ilustraciones ni dependencias nuevas. Suite completa en verde antes de fusionar. Quedan abiertas para Victo: la paleta (se propone no tocarla), una fuente autoalojada (se propone no usarla) y el número de versión (se propuso `1.1.0`; **Victo eligió `1.1.0` el 20/11/2026**, ver sección 9) |
 
 ## 9. Implementación y verificación
 
@@ -154,7 +154,7 @@ Muestra de las fuentes candidatas en este equipo (Windows 11); se eligen Sitka H
 |---|---|
 | **Rama** | `cambio/cr-003-rediseno-frontend` |
 | **Pull request** | [Comparación con `main`](https://github.com/yahirslbv/asistence-control/compare/main...cambio/cr-003-rediseno-frontend?expand=1) (se abre desde ese enlace; `gh` no tiene sesión en este equipo) |
-| **Versión en la que entra** | Por decidir: `1.1.0` propuesta (un rediseño no es una corrección, así que no corresponde a PATCH) |
+| **Versión en la que entra** | `1.1.0`, decidida por Victo el 20/11/2026 (un rediseño visible en todas las pantallas no es una corrección, así que no corresponde a PATCH). La etiqueta se pone al fusionar, no en esta rama |
 | **Pruebas** | Ver la sección 10.3 |
 
 ## 10. Resultado
@@ -231,4 +231,4 @@ Una marca de plantilla de IA es meter todo en tarjetas. Se contaron con el mismo
 ### 10.4 Pendiente
 
 - **Capturas de los manuales.** Las 31 quedan desactualizadas y se regeneran en un paso aparte con el mismo guion de capturas: `docs/img/manual_usuario/` (01-acceso a 21-cuenta-pendiente, las 21) y `docs/img/manual_administrador/` (01-panel a 10-periodo-edicion, las 10). Los textos de los manuales no citan colores ni formas; el único texto de pantalla que cambió de marcado es el del historial, y el manual no lo cita.
-- **Decisiones de Victo:** el número de versión (`1.1.0` propuesta), la serif de los títulos (Sitka Heading y equivalentes del sistema) y si se queda el conteo en vivo.
+- **Decisiones de Victo:** la versión ya está decidida (`1.1.0`, 20/11/2026). Siguen abiertas la serif de los títulos (Sitka Heading y equivalentes del sistema) y si se queda el conteo en vivo.
