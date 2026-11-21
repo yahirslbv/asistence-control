@@ -5,8 +5,8 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | | |
 |---|---|
 | **Para quién es** | Quien administra el sistema: aprueba cuentas, da de alta usuarios y maneja los periodos escolares |
-| **Versión del sistema** | 0.9.0 |
-| **Última revisión** | 16/11/2026 |
+| **Versión del sistema** | 1.1.0 |
+| **Última revisión** | 21/11/2026 |
 | **Manual del docente** | [manual_usuario.md](manual_usuario.md) |
 
 Este manual explica cómo aprobar o rechazar las cuentas de los docentes, dar de alta y dar de baja usuarios, cambiar una contraseña y abrir o cerrar un periodo escolar. Las pantallas de ejemplo usan datos de demostración, no datos reales.

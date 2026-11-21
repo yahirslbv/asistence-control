@@ -390,9 +390,35 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 **Pasos para liberar, en orden:** (1) fusionar `release/v1.0.0` a `main` (**hecho el 17/11/2026**, pull request #10; si la fecha de la versión cambia, corregir el encabezado del `CHANGELOG` con un pull request); (2) correr los comandos de arriba sobre `main` y llenar la columna «Resultado» (**hecho el 17/11**); (3) dictamen go/no-go del líder (**go el 17/11**); (4) con go, `git tag -a v1.0.0 <commit auditado> -m "Versión 1.0.0"` y `git push origin v1.0.0` (**hecho el 17/11**, sobre `60e1f01`); (5) correr las comprobaciones 8 y 9 (**pasan**); (6) publicar la versión en GitHub con las notas de la sección 9 (**hecho el 17/11**: https://github.com/yahirslbv/asistence-control/releases/tag/v1.0.0); (7) marcar la fase J en `CLAUDE.md` (sección 12) y mover la tarjeta J de Trello a «Hecho» (**hecho el 17/11**, a petición del líder, antes de la entrega en clase del 27/11). Una etiqueta publicada no se mueve: un error se corrige con `1.0.1`.
 
 
+### Registro de la auditoría de `v1.1.0` (21/11/2026)
+
+**Qué se audita.** El árbol de la rama `release/v1.1.0`: `main` (`56bc4b3`, con el rediseño CR-003 fusionado en los pull requests #13 y #14) más la corrección de la versión de los manuales (`47ac517`) y los ajustes de documentación de esta liberación (`CHANGELOG`, `CLAUDE.md` y este registro). La suite completa se corrió sobre `47ac517`; lo que viene después solo cambia documentación. La etiqueta se pone sobre la punta de `main` después de fusionar este pull request; si esa punta cambia en algo que no sea documentación, la auditoría se repite.
+
+Las comprobaciones son las de la auditoría de `v1.0.0` (misma lista, mismos comandos) con dos ajustes: la comprobación 0 compara contra `v1.0.0` y exige que no cambie nada fuera del front y la documentación, y la 11 (imagen de producción) no se hizo en esta etiqueta.
+
+| # | Comprobación | Tipo | Resultado esperado | Resultado |
+|---|---|---|---|---|
+| 0 | Desde `v1.0.0` solo cambian el front y la documentación | Física | Ningún archivo de modelo, migraciones, servicios, vistas, URL, configuración, dependencias, imagen ni scripts | **Pasa.** Ninguno. Cambian 19 plantillas de la aplicación, 1 del admin y 1 plantilla base, 3 archivos de estilo y script, 3 de pruebas y documentación |
+| 1 | La suite completa pasa en una base MySQL 8 limpia | Funcional | `Ran N tests … OK`, con N mayor o igual que 683 | **Pasa.** `Ran 684 tests in 885.516s`, `OK`, código de salida 0, sobre `47ac517` (árbol `f3ceffb7e931fad7c916532aeae81cc5dc1fbc11`) |
+| 2 | Cada requisito de prioridad Alta tiene prueba | Funcional | Ningún requisito con 0 archivos | **Pasa.** RF-09, 10, 11 y 14 con 2 archivos; RF-01, 02, 03, 04, 06, 08 y 13 con 1. Es trazabilidad por nombre, no cobertura |
+| 3 | Los hallazgos abiertos están revisados | Funcional | Solo el H-03 abierto, opcional | **Pasa.** El H-03 (importar un CSV de 500 filas tarda unos 3.8 s) sigue abierto y es opcional |
+| 4 | `git status` sin cambios | Física | Salida vacía | **Pasa.** 0 líneas |
+| 5 | Lo documentado en `CLAUDE.md`, sección 4, está versionado | Física | Solo `fin`, sin ninguna línea `falta:` | **Pasa.** Solo `fin` |
+| 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | Física | Las cinco rutas ignoradas; versionados solo `.env.example` y `.env.prod.example` | **Pasa.** Las cinco ignoradas (líneas 3, 4, 14, 15 y 17 de `.gitignore`) y solo los dos ejemplos versionados |
+| 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.1.0] - 2026-11-21` | **Pasa.** `## [1.1.0] - 2026-11-21`. Si la etiqueta se pone otro día, se corrige el encabezado con un pull request, como en `1.0.0` |
+| 8 | La etiqueta apunta al commit auditado | Física | `v1.1.0^{commit}` igual a `HEAD` de `main` | Se comprueba al etiquetar |
+| 9 | El árbol etiquetado es el auditado | Física | `v1.1.0^{tree}` igual a `HEAD^{tree}` | Se comprueba al etiquetar |
+| 10 | Versiones exactas | Física | `0` | **Pasa.** `0` |
+| 11 | La imagen lleva el código verificado | Física | Solo `fin`, sin líneas `difiere:` | **No se hizo en esta etiqueta.** La demostración local sigue con la imagen de `1.0.0`; el rediseño llega a ella cuando se reconstruya con `scripts/demo.ps1` |
+
+**Lo que esta auditoría no cubre.** La ejecutó el asistente de IA en el equipo del proyecto; la decisión de etiquetar es del líder. Las capturas de los manuales se regeneraron con el nuevo aspecto (revisión del 21/11/2026), pero la imagen de producción de la demostración no se reconstruyó ni se verificó contra esta etiqueta. El despliegue con dominio y HTTPS y la tarea programada del respaldo siguen sin ejecutarse, como en los registros anteriores.
+
+**Pasos para liberar, en orden:** (1) fusionar `release/v1.1.0` a `main`; (2) con la punta de `main` ya fusionada, `git tag -a v1.1.0 <esa punta> -m "…"` y publicarla; (3) comprobar 8 y 9 (`git rev-parse 'v1.1.0^{commit}' 'v1.1.0^{tree}' HEAD 'HEAD^{tree}'`) y anotar el resultado; (4) reconstruir la demostración local con `scripts/demo.ps1` si se quiere ver el rediseño en `http://localhost`.
+
+
 ## 11. Dictamen go/no-go
 
-**Fecha del dictamen:** 11/11/2026, actualizado el 17/11/2026 con la candidata `rc.2`. **Decide:** líder de proyecto (CCB).
+**Fecha del dictamen:** 11/11/2026, actualizado el 21/11/2026 con la versión `1.1.0`. **Decide:** líder de proyecto (CCB).
 
 | Decisión | Dictamen | Razón |
 |---|---|---|
@@ -400,6 +426,7 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 | Etiquetar la candidata `v1.0.0-rc.1` (16/11/2026) | **Go** | Los puntos técnicos pasaron en la pila real (sección 10) y el líder aprobó la etiqueta. La observación sobre `check --deploy` (S4) quedó resuelta ese mismo día: se aceptan `W005`, `W008` y `W021` |
 | Etiquetar la candidata `v1.0.0-rc.2` (17/11/2026) | **Go** (visto bueno del líder el mismo día) | Mismo código e imagen que `rc.1` más los dos manuales; la prueba de humo de los puntos 1, 2, 4 y 6 pasó en la pila real y S6 queda cumplido (sección 10) |
 | Liberar `v1.0.0` | **Go** (17/11/2026, decisión del líder) | Al 11/11/2026 no se cumplían E5 ni E6 y no existían la fase J ni los manuales. Al 17/11/2026 la auditoría (S8) pasó sobre `5548a56` y todos los criterios de salida están cumplidos (S7 simulado). El líder adelantó la liberación del 27/11 al 17/11/2026 «para ya terminar»; la entrega a la profesora sigue siendo el 27/11 |
+| Liberar `v1.1.0` | **Go** (21/11/2026, decisión del líder) | Rediseño de la interfaz (CR-003) fusionado en `main` y auditado: la suite completa pasa, no cambia el modelo, las migraciones, los servicios ni las vistas, y los dos manuales ya describen el aspecto nuevo. El líder pidió etiquetarla el 21/11/2026 |
 
 **Condiciones para pasar a go** (previsto para el 26/11/2026; la auditoría se adelantó al 17/11): los diez criterios de salida (S1 a S10) cumplidos y ninguna condición de no-go inmediato. Mientras tanto, el dictamen se actualiza en cada candidata (`rc.N`).
 
