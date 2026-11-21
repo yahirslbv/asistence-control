@@ -5,8 +5,8 @@ Sistema de Control de Asistencia · UABC, FCITEC · Administración de Proyectos
 | | |
 |---|---|
 | **Para quién es** | Docentes que pasan lista con el sistema |
-| **Versión del sistema** | 0.9.0 |
-| **Última revisión** | 16/11/2026 |
+| **Versión del sistema** | 1.1.0 |
+| **Última revisión** | 21/11/2026 |
 | **Manual del administrador** | [manual_administrador.md](manual_administrador.md) |
 
 Este manual explica, paso a paso, cómo usar el sistema para dar de alta tus grupos, cargar a tus alumnos, programar las clases, pasar lista, corregir un registro, adjuntar un justificante y sacar los reportes. Las pantallas de ejemplo usan datos de demostración, no datos reales.
