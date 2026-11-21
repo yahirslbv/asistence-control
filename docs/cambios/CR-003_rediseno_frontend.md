@@ -172,7 +172,10 @@ Muestra de las fuentes candidatas en este equipo (Windows 11); se eligen Sitka H
 | `85ad4f9` | Tema del admin de Django y su favicon |
 | `cec94e0` | Pruebas de contraste de los tonos nuevos |
 | `ca9039c` | Capturas del admin actualizadas (también en claro) y del pase de lista con excepciones |
-| (siguiente) | Cierre: `CHANGELOG`, `CLAUDE.md`, registro de decisiones y esta sección |
+| `e3f0179` | Cierre: `CHANGELOG`, `CLAUDE.md`, registro de decisiones y esta sección |
+| `a694def`, `f3cb0a8`, `48b0cf3` | Decisiones de Victo: versión `1.1.0`, la serif se queda y el conteo en vivo se queda |
+| `591b640` | El botón «Pasar lista» ya no se parte con materias largas |
+| `055a40c` | Capturas de los manuales regeneradas y textos de los manuales al día |
 
 Las capturas «después» están en `docs/cambios/img/cr-003/despues/`, con los mismos nombres que las de `antes/`, más las pantallas que no estaban (formularios, confirmaciones, página 500 y el admin en claro, con el sufijo `-claro`). En las 26 pantallas fotografiadas a 375 y a 1180 px (52 capturas) no hay desbordamiento horizontal (la 404 no se fotografió: con `DEBUG` encendido Django muestra su página técnica, no la del proyecto). El pase de lista se midió además desplazado a 320, 375, 768 y 1180 px: la barra superior mide 64 px y el encabezado de columnas queda pegado a 64 px en los cuatro anchos; las casillas miden 44×44 px en el teléfono y 56×44 desde 640 px; el nombre dispone de 86 px a 320, 141 px a 375, 324 px a 768 y 476 px a 1180.
 
@@ -228,7 +231,7 @@ Una marca de plantilla de IA es meter todo en tarjetas. Se contaron con el mismo
 - **Conteo en vivo, en el navegador:** marcando casillas sin guardar, el conteo pasa de «32 presentes» a «31 presentes · 1 sin registrar», «31 presentes · 1 ausente», «31 presentes · 1 justificado», «30 presentes · 1 retardo · 1 justificado» y «29 presentes · 1 retardo · 1 justificado · 1 sin registrar», que es la misma correspondencia del servidor.
 - **Suite completa** (MySQL 8.0, base `analisis_front`, sobre `85ad4f9`): 684 pruebas, todas correctas, en 798.8 s; código de salida 0. Las tres pruebas de contraste agregadas después en `cec94e0` se corrieron aparte con todo `test_estilo.py` (19 pruebas, correctas).
 
-### 10.4 Pendiente
+### 10.4 Cierre
 
-- **Capturas de los manuales.** Las 31 quedan desactualizadas y se regeneran en un paso aparte con el mismo guion de capturas: `docs/img/manual_usuario/` (01-acceso a 21-cuenta-pendiente, las 21) y `docs/img/manual_administrador/` (01-panel a 10-periodo-edicion, las 10). Los textos de los manuales no citan colores ni formas; el único texto de pantalla que cambió de marcado es el del historial, y el manual no lo cita.
+- **Capturas de los manuales: hechas el 20/11/2026** (`055a40c`). Se regeneraron las 31 (`docs/img/manual_usuario/`, 21, y `docs/img/manual_administrador/`, 10) con el mismo tamaño de ventana que las originales, el admin en tema claro y sin desbordes ni errores de consola. Dos composiciones: en `21-cuenta-pendiente` el aviso se insertó con el texto exacto de `forms.py`, porque no se conoce la contraseña de la cuenta pendiente de demostración, y en `06-usuario-edicion` se ocultó el resumen parcial del hash de la contraseña. Los manuales corrigen los textos que el rediseño dejó viejos («los cuatro recuadros», el «Abrir» de los accesos del panel, el cambio del historial) y documentan el número de lista, el aspecto de «Presente» y el conteo en vivo. Al capturar apareció un defecto: con una materia larga, el botón «Pasar lista» de la clase de hoy se partía en dos líneas; se corrigió en `591b640` (68 pruebas de estilo, inicio y panel, correctas).
 - **Decisiones de Victo (20/11/2026), todas tomadas:** la versión es `1.1.0`; **la serif de los títulos se queda** (Sitka Heading y equivalentes del sistema); **el conteo en vivo del pase de lista se queda**.
