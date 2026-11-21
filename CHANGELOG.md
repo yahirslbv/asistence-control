@@ -6,7 +6,9 @@ El formato se basa en [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/
 
 ## [Unreleased]
 
-Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud de cambio [CR-003](docs/cambios/CR-003_rediseno_frontend.md)); entrará en la versión `1.1.0`. Solo cambian CSS, plantillas y el JavaScript de presentación: sin migraciones, sin cambios en servicios, vistas, URL ni exportaciones, y sin fuentes ni dependencias nuevas.
+## [1.1.0] - 2026-11-21
+
+Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud de cambio [CR-003](docs/cambios/CR-003_rediseno_frontend.md)). Solo cambian CSS, plantillas y el JavaScript de presentación: sin migraciones, sin cambios en servicios, vistas, URL ni exportaciones, y sin fuentes ni dependencias nuevas.
 
 ### Added
 
@@ -29,6 +31,7 @@ Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud d
 
 - Con una materia de nombre largo, el botón «Pasar lista» de la clase de hoy se partía en dos líneas.
 - A 768 px la barra superior se partía en dos líneas y tapaba el encabezado fijo del pase de lista; ahora mide siempre 4 rem y el encabezado queda pegado justo debajo.
+- Los encabezados de los manuales de usuario y de administrador decían versión 0.9.0 y revisión del 16/11/2026; ahora dicen 1.1.0 y 21/11/2026.
 
 ## [1.0.0] - 2026-11-17
 
@@ -91,6 +94,7 @@ Primera versión etiquetada. Fija como línea base lo construido del 13/10 al 11
 - Contraseñas con el cifrado de Django (RNF-03); justificantes con nombre aleatorio, validados por extensión y firma del archivo, y servidos solo por una vista del docente dueño del grupo.
 - `.gitignore` cubre `.env.*`, `media/`, `respaldos/` y `*.sql.gz` para que ningún secreto ni dato de alumnos llegue al repositorio.
 
-[Unreleased]: https://github.com/yahirslbv/asistence-control/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/yahirslbv/asistence-control/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/yahirslbv/asistence-control/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/yahirslbv/asistence-control/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/yahirslbv/asistence-control/releases/tag/v0.9.0
