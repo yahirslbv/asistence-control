@@ -66,7 +66,7 @@ El Panel es tu pantalla de inicio. De arriba abajo muestra:
 - **Cuatro cifras:** *Cuentas por aprobar*, *Docentes activos*, *Administrador* (o *Administradores*) y *Periodo activo*.
 - **Cuentas por aprobar:** una fila por cada persona que se registró y espera respuesta, con sus botones **Aprobar** y **Rechazar** (sección 4).
 - **Periodo activo:** su clave, sus fechas y cuántos grupos tiene, con el botón **Administrar periodos**. Si no hay periodo activo, el Panel avisa «No hay un periodo activo: los docentes no pueden crear grupos nuevos.»
-- **Accesos:** *Usuarios* (consultar, editar y dar de baja), *Agregar usuario* (dar de alta a alguien sin que tenga que registrarse) y *Periodos*. Cada uno se abre con **Abrir**.
+- **Accesos:** *Usuarios* (consultar, editar y dar de baja), *Agregar usuario* (dar de alta a alguien sin que tenga que registrarse) y *Periodos*. Cada uno se abre al pulsarlo.
 
 El Panel solo cuenta los grupos del periodo activo; no muestra cuáles son ni de quién.
 
@@ -104,7 +104,7 @@ Si otra persona administradora ya atendió la cuenta, el Panel te avisa («Esa c
 
 ### 5.1. La lista de usuarios
 
-Pulsa **Usuarios** en la barra superior (o **Abrir** en el acceso del Panel).
+Pulsa **Usuarios** en la barra superior (o el acceso **Usuarios** del Panel).
 
 ![Lista de usuarios](img/manual_administrador/04-usuarios-lista.png)
 

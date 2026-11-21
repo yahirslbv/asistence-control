@@ -23,9 +23,11 @@ Rediseño de la interfaz con la identidad de la lista de asistencia (solicitud d
 - Las tablas ya no muestran iniciales decorativas; «Dar de baja» va sin borde en cada renglón.
 - El tema del admin de Django usa la misma identidad, en claro y en oscuro.
 - La paleta «pino y ámbar» no cambia de valores, solo de proporciones.
+- Las 31 capturas de los manuales de usuario y de administrador se regeneraron con el nuevo aspecto; los manuales describen el número de lista, el aspecto de «Presente», el conteo en vivo y el historial tachado.
 
 ### Fixed
 
+- Con una materia de nombre largo, el botón «Pasar lista» de la clase de hoy se partía en dos líneas.
 - A 768 px la barra superior se partía en dos líneas y tapaba el encabezado fijo del pase de lista; ahora mide siempre 4 rem y el encabezado queda pegado justo debajo.
 
 ## [1.0.0] - 2026-11-17
