@@ -394,7 +394,7 @@ git rev-parse 'v1.0.0^{commit}' 'v1.0.0^{tree}' HEAD 'HEAD^{tree}'
 
 **Qué se audita.** El árbol de la rama `release/v1.1.0`: `main` (`56bc4b3`, con el rediseño CR-003 fusionado en los pull requests #13 y #14) más la corrección de la versión de los manuales (`47ac517`) y los ajustes de documentación de esta liberación (`CHANGELOG`, `CLAUDE.md` y este registro). La suite completa se corrió sobre `47ac517`; lo que viene después solo cambia documentación. La etiqueta se pone sobre la punta de `main` después de fusionar este pull request; si esa punta cambia en algo que no sea documentación, la auditoría se repite.
 
-Las comprobaciones son las de la auditoría de `v1.0.0` (misma lista, mismos comandos) con dos ajustes: la comprobación 0 compara contra `v1.0.0` y exige que no cambie nada fuera del front y la documentación, y la 11 (imagen de producción) no se hizo en esta etiqueta.
+Las comprobaciones son las de la auditoría de `v1.0.0` (misma lista, mismos comandos) con dos ajustes: la comprobación 0 compara contra `v1.0.0` y exige que no cambie nada fuera del front y la documentación, y la 11 (imagen de producción) se corrió después de etiquetar, al reconstruir la demostración local, y compara los archivos de la imagen contra `v1.1.0`.
 
 | # | Comprobación | Tipo | Resultado esperado | Resultado |
 |---|---|---|---|---|
@@ -406,14 +406,14 @@ Las comprobaciones son las de la auditoría de `v1.0.0` (misma lista, mismos com
 | 5 | Lo documentado en `CLAUDE.md`, sección 4, está versionado | Física | Solo `fin`, sin ninguna línea `falta:` | **Pasa.** Solo `fin` |
 | 6 | Ningún `.env*`, `media/`, `respaldos/` ni `*.sql.gz` versionado | Física | Las cinco rutas ignoradas; versionados solo `.env.example` y `.env.prod.example` | **Pasa.** Las cinco ignoradas (líneas 3, 4, 14, 15 y 17 de `.gitignore`) y solo los dos ejemplos versionados |
 | 7 | El número de la etiqueta coincide con el del `CHANGELOG` | Física | `## [1.1.0] - 2026-11-21` | **Pasa.** `## [1.1.0] - 2026-11-21`. Si la etiqueta se pone otro día, se corrige el encabezado con un pull request, como en `1.0.0` |
-| 8 | La etiqueta apunta al commit auditado | Física | `v1.1.0^{commit}` igual a `HEAD` de `main` | Se comprueba al etiquetar |
-| 9 | El árbol etiquetado es el auditado | Física | `v1.1.0^{tree}` igual a `HEAD^{tree}` | Se comprueba al etiquetar |
+| 8 | La etiqueta apunta al commit auditado | Física | `v1.1.0^{commit}` igual a `HEAD` de `main` | **Pasa.** `v1.1.0^{commit}`, `origin/main` y `HEAD` dan `97b4a57`: la punta de `main` después de fusionar el pull request #15. Respecto a `47ac517`, donde corrió la suite, solo cambiaron `CHANGELOG.md`, `CLAUDE.md` y `docs/plan_liberacion.md` |
+| 9 | El árbol etiquetado es el auditado | Física | `v1.1.0^{tree}` igual a `HEAD^{tree}` | **Pasa.** Los dos dan `92db63d77d4e0e35a371bf2b124f9abbed6f3510` |
 | 10 | Versiones exactas | Física | `0` | **Pasa.** `0` |
-| 11 | La imagen lleva el código verificado | Física | Solo `fin`, sin líneas `difiere:` | **No se hizo en esta etiqueta.** La demostración local sigue con la imagen de `1.0.0`; el rediseño llega a ella cuando se reconstruya con `scripts/demo.ps1` |
+| 11 | La imagen lleva el código verificado | Física | Solo `fin`, sin líneas `difiere:` | **Pasa.** El 21/11/2026 se reconstruyó la demostración con `scripts/demo.ps1` desde una copia de trabajo con el mismo árbol que `v1.1.0` (`92db63d…`). Los 126 archivos del repositorio que lleva la imagen son iguales a los de `v1.1.0` sin contar los saltos de línea; ninguna línea `difiere:`. Los estáticos tienen nombres con huella nuevos (`estilo.68843491948a.css`) y la hoja que sirve `http://localhost` ya trae la tipografía del rediseño (la de `1.0.0` no) |
 
-**Lo que esta auditoría no cubre.** La ejecutó el asistente de IA en el equipo del proyecto; la decisión de etiquetar es del líder. Las capturas de los manuales se regeneraron con el nuevo aspecto (revisión del 21/11/2026), pero la imagen de producción de la demostración no se reconstruyó ni se verificó contra esta etiqueta. El despliegue con dominio y HTTPS y la tarea programada del respaldo siguen sin ejecutarse, como en los registros anteriores.
+**Lo que esta auditoría no cubre.** La ejecutó el asistente de IA en el equipo del proyecto; la decisión de etiquetar es del líder. Las capturas de los manuales se regeneraron con el nuevo aspecto (revisión del 21/11/2026). La comprobación 11 compara archivos de la imagen, no su construcción desde cero en otro equipo (ver la observación sobre la comprobación 11 de `v1.0.0`). El despliegue con dominio y HTTPS y la tarea programada del respaldo siguen sin ejecutarse, como en los registros anteriores.
 
-**Pasos para liberar, en orden:** (1) fusionar `release/v1.1.0` a `main`; (2) con la punta de `main` ya fusionada, `git tag -a v1.1.0 <esa punta> -m "…"` y publicarla; (3) comprobar 8 y 9 (`git rev-parse 'v1.1.0^{commit}' 'v1.1.0^{tree}' HEAD 'HEAD^{tree}'`) y anotar el resultado; (4) reconstruir la demostración local con `scripts/demo.ps1` si se quiere ver el rediseño en `http://localhost`.
+**Pasos para liberar, en orden:** (1) fusionar `release/v1.1.0` a `main` (**hecho el 21/11/2026**, pull request #15); (2) con la punta de `main` ya fusionada, `git tag -a v1.1.0 <esa punta> -m "…"` y publicarla (**hecho el 21/11**, sobre `97b4a57`); (3) comprobar 8 y 9 (`git rev-parse 'v1.1.0^{commit}' 'v1.1.0^{tree}' HEAD 'HEAD^{tree}'`) y anotar el resultado (**hecho el 21/11**, las dos pasan); (4) reconstruir la demostración local con `scripts/demo.ps1` y correr la comprobación 11 (**hecho el 21/11**, pasa). Una etiqueta publicada no se mueve: un error se corrige con `1.1.1`.
 
 
 ## 11. Dictamen go/no-go
